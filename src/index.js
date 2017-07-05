@@ -1,10 +1,11 @@
 
+import './stylesheets/style.scss';
+
 import Maze from './shared/Maze';
 import Tile from './shared/Tile';
 
 function displayMaze() {
     var maze = new Maze(0);
-    maze.generate();
 
     var element = document.getElementById('maze_container');
 
