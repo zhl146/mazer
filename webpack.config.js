@@ -7,6 +7,21 @@ module.exports = {
         path: path.resolve(__dirname, 'public'),
     },
 
+    module: {
+        rules: [
+        {
+            test: /\.scss$/,
+            use: [{
+                loader: 'style-loader'
+            }, {
+                loader: 'css-loader'
+            }, {
+                loader: 'sass-loader'
+            }]
+        }
+        ]
+    },
+
     devServer: {
         contentBase: path.join(__dirname, 'public')
     }
