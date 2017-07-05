@@ -1,6 +1,3 @@
-
-import _ from 'lodash';
-
 export default function Tile(type) {
     this.type = type;
 }

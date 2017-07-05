@@ -1,4 +1,3 @@
-
 import seedrandom from 'seedrandom';
 import Tile from './Tile';
 
