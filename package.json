@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "start-dev": "webpack-dev-server"
   },
   "dependencies": {
     "body-parser": "^1.17.2",
@@ -14,10 +15,12 @@
     "jade": "^1.11.0",
     "morgan": "^1.8.2",
     "node-sass-middleware": "^0.9.8",
+    "seedrandom": "^2.4.3",
     "serve-favicon": "^2.4.3"
   },
   "devDependencies": {
     "install": "^0.10.1",
-    "webpack": "^3.0.0"
+    "webpack": "^3.0.0",
+    "webpack-dev-server": "^2.5.0"
   }
 }
