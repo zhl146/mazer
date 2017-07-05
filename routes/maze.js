@@ -1,12 +1,11 @@
-/**
- * Created by developer on 7/5/17.
- */
-
 var express = require('express');
 var router = express.Router();
 
+var seed = require('./maze-functions/generate-seed');
+
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
+    seed.generateSeedFromDate();
     res.send('this should return the daily maze')
 });
 
