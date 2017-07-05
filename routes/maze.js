@@ -11,7 +11,7 @@ router.get('/check', function(req, res, next) {
 
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
-    res.send(seed.generateSeedFromDate())
+    res.send(seed.generate())
 });
 
 module.exports = router;
