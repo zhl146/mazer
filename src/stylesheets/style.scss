@@ -1,3 +1,6 @@
+$groundColor: sandybrown;
+$blockerColor: darkred;
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -8,11 +11,11 @@ a {
 }
 
 .tile_walkable {
-    background-color: #4C9DB8;
+    background-color: $groundColor;
 }
 
 .tile_unwalkable {
-    background: red;
+    background: darkred;
     position: relative;
 }
 
@@ -21,9 +24,9 @@ a {
     position: absolute;
     top: 0;
     left: 0;
-    border-bottom: 10px solid red;
-    border-left: 10px solid #4C9DB8;
-    border-right: 10px solid #4C9DB8;
+    border-bottom: 10px solid $blockerColor;
+    border-left: 10px solid $groundColor;
+    border-right: 10px solid $groundColor;
     width: 20px;
     height: 0;
 }
@@ -33,9 +36,9 @@ a {
     position: absolute;
     bottom: 0;
     left: 0;
-    border-top: 10px solid red;
-    border-left: 10px solid #4C9DB8;
-    border-right: 10px solid #4C9DB8;
+    border-top: 10px solid $blockerColor;
+    border-left: 10px solid $groundColor;
+    border-right: 10px solid $groundColor;
     width: 20px;
     height: 0;
 }
@@ -48,7 +51,6 @@ a {
     position: relative;
     max-width: 40px;
     flex: 1;
-    margin: 0;
 }
 
 .tile_container {

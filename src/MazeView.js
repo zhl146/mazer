@@ -1,4 +1,3 @@
-import Path from 'svg-path-generator';
 import anime from 'animejs';
 
 import Maze from './shared/Maze';
