@@ -1,41 +1,115 @@
-
-import Maze from './';
-import queue from 'queuejs'
+import Maze from './Maze';
+import Point from './Point';
+import BinaryHeap from './BinaryHeap';
 
 function PointSet()
 {
+    // this is a set of x, y pairs
+    // looks like { 'x coord': ('y coord' : true) }
+    // if the point is in the set, it's value is true
     this.set = {};
 }
 
-PointSet.prototype.add(point) {
-    if (!set[point.x]) set[point.x] = {};
-    set[point.x][point.y] = true;
-}
+PointSet.prototype.add = function(point) {
+    // checks if the x value exists, otherwise set it to an empty object
+    if (!this.set[point.x]) this.set[point.x] = {};
+    // sets the point to true;
+    this.set[point.x][point.y] = true;
+};
 
-PointSet.prototype.has(x, y) {
-    return (set[point.x] && set[point.x][point.y]);
-}
+// checks if the pointset contains a point
+PointSet.prototype.has = function(point) {
+    // doesn't the second condition imply the first?
+    return (this.set[point.x] && this.set[point.x][point.y]);
+};
 
-PointSet.prototype.del(point.x, point.y) {
-    if (!set[point.x]) return;
-    delete set[point.x][point.y];
-}
+PointSet.prototype.del = function(point) {
+    if (!this.set[point.x]) return;
+    delete this.set[point.x][point.y];
+};
 
 export default function Pathfinder(maze)
 {
     this.maze = maze;
 }
 
-Pathfinder.prototype.FindPath = function(start, end) {
-    if (!maze.contains(start)) {
+// takes a start point and end point
+// returns an array of points as an ending path
+// return empty array if fails to find solution
+Pathfinder.prototype.findPath = function(start, end) {
+    if (!this.maze.contains(start)) {
         console.log("Maze does not contain start point", start);
         return null;
     }
 
-    if (!maze.contains(end)) {
+    if (!this.maze.contains(end)) {
         console.log("Maze does not contain end point", end);
         return null;
     }
 
-    return null;
-}
+    console.log(start);
+    console.log(end);
+
+    // list of tiles that have been explored
+    var closedSet = new PointSet();
+
+    // list of tiles to explore
+    var openSet = new BinaryHeap( function(point) {
+        return point.f;
+    });
+
+    var gTracker = new Array(this.maze.ysize);
+
+    for ( var i = 0; i < this.maze.ysize; i++ ) {
+        gTracker[i] = new Array(this.maze.xsize);
+        for (var j = 0; j < this.maze.xsize; j++) {
+            gTracker[i][j] = -1;
+        }
+    }
+
+    // add the ending point
+    openSet.push(start);
+    gTracker[start.y][start.x] = 0;
+
+    var counter = 0;
+    while ( openSet.size() ) {
+
+        var currentPoint = openSet.pop();
+        console.log(currentPoint);
+        if ( counter >=1000) { break;}
+        counter ++;
+
+        if ( currentPoint.x === end.x && currentPoint.y === end.y ) {
+            var path = [];
+            var node = currentPoint;
+            while (node.parent) {
+                path.push(node.parent);
+                node = node.parent;
+            }
+            return path;
+        }
+
+        closedSet.add(currentPoint);
+
+        for ( var neighbor of currentPoint.getAdjacent( this.maze ) ) {
+            if (closedSet.has(neighbor)) {
+                continue;
+            }
+
+            var neighborG = gTracker[neighbor.y][neighbor.x];
+            var currentG = gTracker[currentPoint.y][currentPoint.x];
+
+            if (neighborG < 0) {
+                openSet.push(neighbor);
+                gTracker[neighbor.y][neighbor.x] = currentG + 1;
+            }
+            else if (neighbor.g < neighborG) {
+                openSet.push(neighbor);
+                gTracker[neighbor.y][neighbor.x] = currentG+ 1;
+            }
+        }
+    }
+
+    return [];
+};
+

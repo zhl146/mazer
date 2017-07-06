@@ -1,11 +1,14 @@
-
 import './stylesheets/style.scss';
 
 import Maze from './shared/Maze';
 import Tile from './shared/Tile';
+import Pathfinder from './shared/Pathfinder';
 
 function displayMaze() {
     var maze = new Maze(0);
+    var path = new Pathfinder(maze);
+
+    console.log(path.findPath(maze.start, maze.end));
 
     var element = document.getElementById('maze_container');
 
