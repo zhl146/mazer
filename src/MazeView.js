@@ -6,7 +6,7 @@ import Tile from './shared/Tile';
 import Point from './shared/Point';
 
 export default function MazeView(id) {
-    var seed = Math.random();
+    var seed = 0.6195641405638261 //Math.random();
     console.log("SEED: " + seed);
 
     this.maze = new Maze(Math.random());
@@ -87,17 +87,15 @@ function PathSvgView(containerBoundingRect) {
 }
 
 PathSvgView.prototype.drawPath = function(path) {
-    var svgPath = Path();
+    var svgPath = [];
 
     for (var i = 0; i < path.length; i++) {
-        if (i == 0) {
-            svgPath.moveTo(path[i].x, path[i].y);
-        } else {
-            svgPath.lineTo(path[i].x, path[i].y);
-        }
+        svgPath.push(path[i].x + " " + path[i].y);
     }
 
-    var pathString = svgPath.end();
+    var pathString = svgPath.join(" L");
+    pathString = "M" + pathString
+
     this.animateSvg(pathString);
 }
 

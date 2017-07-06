@@ -22,7 +22,6 @@
     "seedrandom": "^2.4.3",
     "serve-favicon": "^2.4.3",
     "style-loader": "^0.18.2",
-    "svg-path-generator": "^1.1.0"
   },
   "devDependencies": {
     "css-loader": "^0.28.4",
