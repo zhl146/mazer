@@ -1,35 +1,26 @@
 
 import './stylesheets/style.scss';
 
-import Maze from './shared/Maze';
-import Tile from './shared/Tile';
+import Point from './shared/Point';
 
-function displayMaze() {
-    var maze = new Maze(0);
+import MazeView from './MazeView';
 
-    var element = document.getElementById('maze_container');
+var view = new MazeView('maze_container');
 
-    for (var y = 0; y < maze.maze.length; y++) {
-        var rowContainer = document.createElement('div');
-        rowContainer.className = "tile_container";
-        for (var x = 0; x < maze.maze.length; x++) {
-            var tileWrapper = document.createElement('div');
-            tileWrapper.className = "tile_wrapper";
+view.displaySvgPathForTilePath([new Point(0,0),
+        new Point(2,1),
+        new Point(3,4),
+        new Point(0,5),
+        new Point(10,6),
+        new Point(5,16),
+        new Point(19,19)]);
 
-            var tileElement = document.createElement('div');
-            if (maze.maze[y][x].type == Tile.Type.Walkable) {
-                tileElement.className = "tile tile_walkable";
-            } else {
-                tileElement.className = "tile tile_unwalkable";
-            }
-
-            tileWrapper.appendChild(tileElement);
-            rowContainer.appendChild(tileWrapper);
-        }
-
-        element.appendChild(rowContainer);
-    }
-}
-
-displayMaze();
-
+window.setTimeout(function() {
+    view.displaySvgPathForTilePath([new Point(0,0),
+            new Point(2,1),
+            new Point(3,4),
+            new Point(0,5),
+            new Point(1,18),
+            new Point(5,16),
+            new Point(19,19)]);
+}, 2000);

@@ -8,6 +8,7 @@
     "start-dev": "webpack-dev-server"
   },
   "dependencies": {
+    "animejs": "^2.0.2",
     "body-parser": "^1.17.2",
     "cookie-parser": "^1.4.3",
     "debug": "^2.6.8",
@@ -19,7 +20,8 @@
     "node-sass-middleware": "^0.9.8",
     "seedrandom": "^2.4.3",
     "serve-favicon": "^2.4.3",
-    "style-loader": "^0.18.2"
+    "style-loader": "^0.18.2",
+    "svg-path-generator": "^1.1.0"
   },
   "devDependencies": {
     "css-loader": "^0.28.4",
