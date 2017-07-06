@@ -15,13 +15,13 @@
     "express": "^4.15.3",
     "jade": "^1.11.0",
     "mongodb": "^2.2.29",
-    "mongoose": "^4.11.1",
+    "mongoose": "4.10.8",
     "morgan": "^1.8.2",
     "node-sass-middleware": "^0.9.8",
     "sass": "^1.0.0-beta.1",
     "seedrandom": "^2.4.3",
     "serve-favicon": "^2.4.3",
-    "style-loader": "^0.18.2",
+    "style-loader": "^0.18.2"
   },
   "devDependencies": {
     "css-loader": "^0.28.4",
