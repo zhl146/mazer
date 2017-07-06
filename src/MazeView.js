@@ -59,10 +59,10 @@ MazeView.prototype.displaySvgPathForTilePath = function(path) {
         var tileElement = this.tileElements[point.y][point.x];
         var boundingRect = tileElement.getBoundingClientRect();
 
-        var center = new Point(boundingRect.x + boundingRect.width / 2.0,
-                                boundingRect.y + boundingRect.height / 2.0);
-        center.x -= containerBoundingRect.x;
-        center.y -= containerBoundingRect.y;
+        var center = new Point(boundingRect.left + boundingRect.width / 2.0,
+                                boundingRect.top + boundingRect.height / 2.0);
+        center.x -= containerBoundingRect.left;
+        center.y -= containerBoundingRect.top;
 
         svgPath.push(center);
     }
