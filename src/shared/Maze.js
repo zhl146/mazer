@@ -15,8 +15,8 @@ export default function Maze(seed) {
 
     // holds the waypoints (points between start and end) that
     // need to be traveled to in order
-    var numWaypoints = 2;
-    var numPathVertexes = numWaypoints*10;
+    const numWaypoints = 2;
+    const numPathVertexes = 20;
 
     var maze = [];
     this.generateEmptyMaze();
@@ -41,19 +41,22 @@ export default function Maze(seed) {
     for (var i = 0; i < numPathVertexes - 1; i++) {
         var pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
         if (i !== 0) {
+            // Shift so that the path so that it's continuous (end of previous equals
+            // start of next)
             pathSegment.shift();
         }
         protectedPath.push(...pathSegment);
     }
 
-    this.start = pathVertices.shift().copy();
+    this.start = pathVertices[0].copy();
     this.start.f = 0;
     this.start.g = 0;
 
-    this.end = pathVertices.pop().copy();
+    this.end = pathVertices[pathVertices.length-1].copy();
 
-    while (pathVertices.length > numWaypoints) {
-        var index = Math.floor(Math.random() * pathVertices.length);
+    // Select random vertices to delete, excluding start and end
+    while (pathVertices.length > numWaypoints + 2) {
+        var index = Math.floor(1.0 + Math.random() * (pathVertices.length - 2.0));
         pathVertices.splice(index, 1);
     }
 
@@ -103,20 +106,11 @@ Maze.prototype.generateEmptyMaze = function() {
     this.maze = maze
 };
 
-Maze.prototype.getPathingPoints = function() {
-    var points = [this.start];
-    points.push(...this.waypoints);
-    points.push(this.end);
-
-    return points;
-}
-
 Maze.prototype.findPath = function() {
-    var pathingPoints = this.getPathingPoints();
     var path = [];
 
-    for (var i = 0; i < pathingPoints.length - 1; i++) {
-        var segment = this.pathfinder.findPath(pathingPoints[i], pathingPoints[i+1]);
+    for (var i = 0; i < this.waypoints.length - 1; i++) {
+        var segment = this.pathfinder.findPath(this.waypoints[i], this.waypoints[i+1]);
         path.push(segment);
     }
     return path;

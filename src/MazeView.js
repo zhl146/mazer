@@ -16,7 +16,7 @@ export default function MazeView(id) {
 
     this.displayMaze();
 
-    this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.getPathingPoints().length - 1);
+    this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
 }
 
