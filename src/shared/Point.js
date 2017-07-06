@@ -11,14 +11,14 @@ Point.prototype.setParent = function(parentPoint) {
     this.parent = parentPoint;
 };
 
-Point.prototype.setG = function() {
-    this.g = this.parent.g + 1;
+Point.prototype.setG = function(cost) {
+    this.g = this.parent.g + cost;
 };
 
 Point.prototype.setH = function(endPoint) {
-    var xDiff = Math.abs( this.x - endPoint.x );
-    var yDiff = Math.abs( this.y - endPoint.y );
-    this.h = xDiff + yDiff;
+    var xDiff = Math.abs( endPoint.x - this.x );
+    var yDiff = Math.abs( endPoint.y - this.y );
+    this.h = xDiff*xDiff + yDiff*yDiff;
 };
 
 Point.prototype.setF = function() {
@@ -30,10 +30,10 @@ Point.prototype.getAdjacent = function(maze, endpoint) {
     var newPoint;
     var self = this;
 
-    var addPoint = function(newPoint) {
+    var addPoint = function(newPoint, isDiagonal) {
         if ( maze.isPassable(newPoint) ) {
             newPoint.setParent(self);
-            newPoint.setG();
+            newPoint.setG(isDiagonal ? 14 : 10);
             newPoint.setH(endpoint);
             newPoint.setF();
             pointArray.push(newPoint)
@@ -41,21 +41,21 @@ Point.prototype.getAdjacent = function(maze, endpoint) {
     };
 
     newPoint = new Point( this.x, this.y + 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, false);
     newPoint = new Point( this.x + 1, this.y + 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, true);
     newPoint = new Point( this.x + 1, this.y );
-    addPoint(newPoint);
+    addPoint(newPoint, false);
     newPoint = new Point( this.x + 1, this.y - 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, true);
     newPoint = new Point( this.x, this.y - 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, false);
     newPoint = new Point( this.x - 1, this.y - 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, true);
     newPoint = new Point( this.x - 1, this.y );
-    addPoint(newPoint);
+    addPoint(newPoint, false);
     newPoint = new Point( this.x - 1, this.y + 1 );
-    addPoint(newPoint);
+    addPoint(newPoint, true);
 
     return pointArray;
 };
