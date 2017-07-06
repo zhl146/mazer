@@ -31,11 +31,30 @@ MazeView.prototype.displayMaze = function() {
             var tileWrapper = document.createElement('div');
             tileWrapper.className = "tile_wrapper";
 
+            var waypointIndex = this.maze.waypoints.indexOfPoint(new Point(x, y));
+            if (waypointIndex >= 0) {
+                var tileTextElement = document.createElement('div');
+                tileTextElement.className = "tile_text absolute_center";
+                tileTextElement.style.color = colors[waypointIndex%colors.length];
+
+                var text = "";
+                if (waypointIndex == 0) {
+                    text = "S";
+                } else if (waypointIndex == this.maze.waypoints.length - 1) {
+                    text = "E";
+                } else {
+                    text = "" + waypointIndex;
+                }
+
+                tileTextElement.innerHTML = text;
+                tileWrapper.appendChild(tileTextElement);
+            }
+
             var tileElement = document.createElement('div');
-            if (this.maze.maze[y][x].type == Tile.Type.Walkable) {
-                tileElement.className = "tile tile_walkable";
-            } else {
-                tileElement.className = "tile tile_unwalkable";
+            if (waypointIndex >= 0) {
+                tileElement.className = "tile_waypoint";
+            } else if (!this.maze.maze[y][x].isPassable()) {
+                tileElement.className = "tile_unwalkable";
             }
 
             tileWrapper.appendChild(tileElement);
@@ -51,7 +70,7 @@ MazeView.prototype.displayMaze = function() {
 MazeView.prototype.drawPath = function() {
     var path = this.maze.findPath();
 
-    // Translate the tile path into relative coords
+    // Translate the tile path into relative screen coords
     var svgPath = [];
 
     var containerBoundingRect = this.element.getBoundingClientRect();

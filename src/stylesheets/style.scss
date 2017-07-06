@@ -1,5 +1,8 @@
 $groundColor: sandybrown;
 $blockerColor: darkred;
+$waypointColor: coral;
+
+$tileSize: 40px;
 
 body {
   padding: 50px;
@@ -10,12 +13,10 @@ a {
   color: #00B7FF;
 }
 
-.tile_walkable {
-    background-color: $groundColor;
-}
-
 .tile_unwalkable {
-    background: darkred;
+    height: $tileSize;
+    width: $tileSize;
+    background-color: $blockerColor;
     position: relative;
 }
 
@@ -43,19 +44,52 @@ a {
     height: 0;
 }
 
-.tile {
-    height: 40px;
+.tile_waypoint {
+    width: 0;
+    height: 0;
+    border: $tileSize/3 solid transparent;
+    border-bottom-color: $waypointColor;
+    top: -$tileSize/3;
+    //left: $tileSize/2;
+    position: relative;
+    z-index: 500;
+}
+
+.tile_waypoint:after {
+    content: '';
+    left: -$tileSize/3;
+    top: $tileSize/3;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: $tileSize/3 solid transparent;
+    border-top-color: $waypointColor;
 }
 
 .tile_wrapper {
+    height: $tileSize;
+    width: $tileSize;
+    background-color: $groundColor;
     position: relative;
-    max-width: 40px;
-    flex: 1;
+    display: inline-block;
 }
 
 .tile_container {
-    display: flex;
-    flex-direction: row;
+}
+
+.tile_text {
+    font-size: $tileSize/2;
+    font-family: 'Playfair Display SC', serif;
+    font-weight: 600;
+
+    z-index: 1000;
+}
+
+.absolute_center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
 }
 
 #maze_container {
@@ -71,8 +105,9 @@ a {
 .svg-paths {
     fill: none;
     fill-rule: evenodd;
+    stroke-opacity: 0.8;
     stroke: #4E8D00;
-    stroke-width: 8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    stroke-width: 4;
+    stroke-linecap: butt;
+    stroke-linejoin: bevel;
 }

@@ -33,7 +33,7 @@ export default function Maze(seed) {
     // generate start/end/waypoints
     while ( pathVertices.length < numPathVertexes ) {
         newPoint = this.generateNewPoint(random);
-        if (!pathVertices.contains(newPoint)) {
+        if (pathVertices.indexOfPoint(newPoint) < 0) {
             pathVertices.push(newPoint);
         }
     }
@@ -67,7 +67,7 @@ export default function Maze(seed) {
         for (var x = 0; x < this.xsize; x++) {
             newPoint = new Point(x, y);
             var tileTypeNumber;
-            if (!protectedPath.contains(newPoint)) {
+            if (protectedPath.indexOfPoint(newPoint) < 0) {
                 var propensity = Math.floor(random() * 10.0);
                 tileTypeNumber =  propensity < 6 ? 1 : 0
             } else {
@@ -117,12 +117,12 @@ Maze.prototype.findPath = function() {
 }
 
 // extend Array base type
-Array.prototype.contains = function(obj) {
+Array.prototype.indexOfPoint = function(obj) {
     var i = this.length;
     while (i--) {
         if (this[i].x === obj.x && this[i].y === obj.y) {
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 };
