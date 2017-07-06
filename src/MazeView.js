@@ -4,6 +4,8 @@ import Maze from './shared/Maze';
 import Tile from './shared/Tile';
 import Point from './shared/Point';
 
+const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
+
 export default function MazeView(id) {
     var seed = Math.random();
     console.log("SEED: " + seed);
@@ -14,7 +16,7 @@ export default function MazeView(id) {
 
     this.displayMaze();
 
-    this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect());
+    this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.getPathingPoints().length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
 }
 
@@ -46,30 +48,38 @@ MazeView.prototype.displayMaze = function() {
     }
 }
 
-MazeView.prototype.displaySvgPathForTilePath = function(path) {
+MazeView.prototype.drawPath = function() {
+    var path = this.maze.findPath();
+
     // Translate the tile path into relative coords
     var svgPath = [];
 
     var containerBoundingRect = this.element.getBoundingClientRect();
 
     for (var i = 0; i < path.length; i++) {
-        var point = path[i];
+        var svgSegment = [];
 
-        var tileElement = this.tileElements[point.y][point.x];
-        var boundingRect = tileElement.getBoundingClientRect();
+        for (var j = 0; j < path[i].length; j++) {
+            var point = path[i][j];
 
-        var center = new Point(boundingRect.left + boundingRect.width / 2.0,
-                                boundingRect.top + boundingRect.height / 2.0);
-        center.x -= containerBoundingRect.left;
-        center.y -= containerBoundingRect.top;
+            var tileElement = this.tileElements[point.y][point.x];
+            var boundingRect = tileElement.getBoundingClientRect();
 
-        svgPath.push(center);
+            var center = new Point(boundingRect.left + boundingRect.width / 2.0,
+                                    boundingRect.top + boundingRect.height / 2.0);
+            center.x -= containerBoundingRect.left;
+            center.y -= containerBoundingRect.top;
+
+            svgSegment.push(center);
+        }
+
+        svgPath.push(svgSegment);
     }
 
     this.pathSvgView.drawPath(svgPath);
 }
 
-function PathSvgView(containerBoundingRect) {
+function PathSvgView(containerBoundingRect, segmentCount) {
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
     svgElement.setAttribute('width', containerBoundingRect.width);
@@ -79,33 +89,48 @@ function PathSvgView(containerBoundingRect) {
     innerElement.setAttribute('class', 'svg-paths');
     svgElement.appendChild(innerElement);
 
-    var pathElement = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-    innerElement.appendChild(pathElement);
+    var pathElements = [];
+    for (var i = 0; i < segmentCount; i++) {
+        var pathElement = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        pathElement.setAttribute('stroke', colors[i%colors.length]);
 
+        innerElement.appendChild(pathElement);
+
+        pathElements.push(pathElement);
+    }
+
+    this.pathElements = pathElements;
     this.svgElement = svgElement;
 }
 
 PathSvgView.prototype.drawPath = function(path) {
-    var svgPath = [];
-
     for (var i = 0; i < path.length; i++) {
-        svgPath.push(path[i].x + " " + path[i].y);
-    }
+        if (path[i].length == 0) {
+            continue;
+        }
 
-    var pathString = svgPath.join(" L");
-    pathString = "M" + pathString
+        var svgSegment = [];
+
+        for (var j = 0; j < path[i].length; j++) {
+            svgSegment.push(path[i][j].x + " " + path[i][j].y);
+        }
+
+        var pathString = svgSegment.join(" L");
+        pathString = "M" + pathString;
+        
+        this.pathElements[i].setAttribute('d', pathString);
+    }
 
     this.animateSvg(pathString);
 }
 
 PathSvgView.prototype.animateSvg = function(pathSvgString) {
-    this.svgElement.querySelector('path').setAttribute('d', pathSvgString);
-
     var lineDrawing = anime({
         targets: '.path-container path',
         strokeDashoffset: [anime.setDashoffset, 0],
         easing: 'easeInOutSine',
         duration: 1000,
+        delay: function(el, i) { return i * 1000; },
     });
 }
 

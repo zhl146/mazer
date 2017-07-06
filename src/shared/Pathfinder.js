@@ -47,9 +47,6 @@ Pathfinder.prototype.findPath = function(start, end) {
         return [];
     }
 
-    console.log(start);
-    console.log(end);
-
     start.g = 0;
     start.f = 0;
 
@@ -78,7 +75,6 @@ Pathfinder.prototype.findPath = function(start, end) {
     while ( openSet.size() ) {
 
         var currentPoint = openSet.pop();
-        console.log(currentPoint);
         if ( counter >=1000) { break;}
         counter ++;
 

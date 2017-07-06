@@ -10,10 +10,11 @@ export default function Maze(seed) {
     this.xsize = 20;
     this.ysize = 20;
 
+    // Used to find paths through this maze
+    this.pathfinder = new Pathfinder(this);
+
     // holds the waypoints (points between start and end) that
     // need to be traveled to in order
-
-    var waypoints = [];
     var numWaypoints = 2;
     var numPathVertexes = numWaypoints*10;
 
@@ -38,8 +39,7 @@ export default function Maze(seed) {
     }
 
     for (var i = 0; i < numPathVertexes - 1; i++) {
-        var pathfinder = new Pathfinder(this);
-        var pathSegment = pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
+        var pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
         if (i !== 0) {
             pathSegment.shift();
         }
@@ -47,7 +47,6 @@ export default function Maze(seed) {
     }
 
     this.start = pathVertices.shift().copy();
-    console.log(this.start)
     this.start.f = 0;
     this.start.g = 0;
 
@@ -58,12 +57,7 @@ export default function Maze(seed) {
         pathVertices.splice(index, 1);
     }
 
-    this.wayPoints = pathVertices;
-
-    console.log('adfsdfgergegh')
-    console.log(this.start)
-    console.log(this.end)
-    console.log(protectedPath);
+    this.waypoints = pathVertices;
 
     for (var y = 0; y < this.ysize; y++) {
         var row = [];
@@ -108,6 +102,25 @@ Maze.prototype.generateEmptyMaze = function() {
     }
     this.maze = maze
 };
+
+Maze.prototype.getPathingPoints = function() {
+    var points = [this.start];
+    points.push(...this.waypoints);
+    points.push(this.end);
+
+    return points;
+}
+
+Maze.prototype.findPath = function() {
+    var pathingPoints = this.getPathingPoints();
+    var path = [];
+
+    for (var i = 0; i < pathingPoints.length - 1; i++) {
+        var segment = this.pathfinder.findPath(pathingPoints[i], pathingPoints[i+1]);
+        path.push(segment);
+    }
+    return path;
+}
 
 // extend Array base type
 Array.prototype.contains = function(obj) {
