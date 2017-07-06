@@ -29,7 +29,7 @@ MazeView.prototype.setupMaze = function() {
 
         this.tileElements.push([]);
 
-        for (var x = 0; x < this.maze.maze.length; x++) {
+        for (var x = 0; x < this.maze.maze[y].length; x++) {
             var point = new Point(x,y);
 
             var tileWrapper = document.createElement('div');
@@ -63,7 +63,7 @@ MazeView.prototype.setupMaze = function() {
     }
 
     for (var y = 0; y < this.maze.maze.length; y++) {
-        for (var x = 0; x < this.maze.maze.length; x++) {
+        for (var x = 0; x < this.maze.maze[y].length; x++) {
             this.setupTile(new Point(x, y));
         }
     }

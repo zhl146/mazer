@@ -9,14 +9,17 @@ export default function Maze(seed) {
     // maze params
     this.xsize = 20;
     this.ysize = 20;
+    this.blockerProbability = 0.2;
+    this.actionPoints = 10;
+    // holds the waypoints (points between start and end) that
+    // need to be traveled to in order
+    this.numWaypoints = 2;
+    this.numPathVertexes = 20;
+
+    this.generateMazeParams(random);
 
     // Used to find paths through this maze
     this.pathfinder = new Pathfinder(this);
-
-    // holds the waypoints (points between start and end) that
-    // need to be traveled to in order
-    const numWaypoints = 2;
-    const numPathVertexes = 20;
 
     var generatedMaze = [];
     this.generateEmptyMaze();
@@ -24,21 +27,21 @@ export default function Maze(seed) {
     // we need to have at least one valid path through the maze
     var protectedPath = [];
 
-    // holds genereated set of points that will create the protected path
+    // holds generated set of points that will create the protected path
     var pathVertices = [];
 
     // reusable point
     var newPoint;
 
     // generate start/end/waypoints
-    while ( pathVertices.length < numPathVertexes ) {
+    while ( pathVertices.length < this.numPathVertexes ) {
         newPoint = this.generateNewPoint(random);
         if (pathVertices.indexOfPoint(newPoint) < 0) {
             pathVertices.push(newPoint);
         }
     }
 
-    for (var i = 0; i < numPathVertexes - 1; i++) {
+    for (var i = 0; i < this.numPathVertexes - 1; i++) {
         var pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
         if (i !== 0) {
             // Shift so that the path so that it's continuous (end of previous equals
@@ -49,7 +52,7 @@ export default function Maze(seed) {
     }
 
     // Select random vertices to delete, excluding start and end
-    while (pathVertices.length > numWaypoints + 2) {
+    while (pathVertices.length > this.numWaypoints + 2) {
         var index = Math.floor(1.0 + random() * (pathVertices.length - 2.0));
         pathVertices.splice(index, 1);
     }
@@ -62,8 +65,8 @@ export default function Maze(seed) {
             newPoint = new Point(x, y);
             var tileType;
             if (protectedPath.indexOfPoint(newPoint) < 0) {
-                var propensity = Math.floor(random() * 10.0);
-                tileType =  propensity < 6 ? 'Blocker' : 'Empty'
+                var propensity = random();
+                tileType =  propensity <= this.blockerProbability ? 'Blocker' : 'Empty'
             } else {
                 tileType = 'Empty';
             }
@@ -150,6 +153,31 @@ Maze.prototype.getUserChanges = function(changedMaze) {
         }
     }
     return diffPoints;
+};
+
+Maze.prototype.generateMazeParams = function(random) {
+
+    this.xsize = Math.floor(random() * 5) + 14;
+    this.ysize = Math.floor(random() * 5) + 14;
+    console.log('xsize: ' + this.xsize);
+    console.log('ysize: ' + this.ysize);
+
+    var size = this.xsize * this.ysize;
+
+    this.numWaypoints = 0;
+    this.numPathVertexes = Math.floor(random() * size / 100) + 10;
+    for (var i = 0; i < this.numPathVertexes / 10; i++) {
+        if (random() > 0.6) {
+            this.numWaypoints++;
+        }
+    }
+
+    this.blockerProbability = random() * 0.3 + 0.3;
+
+    console.log(this.blockerProbability)
+
+    this.actionPoints = 10 + random() * this.xsize + this.ysize;
+
 };
 
 // extend Array base type
