@@ -96,7 +96,7 @@ MazeView.prototype.setupTile = function(point) {
         tileElement.className = "tile tile_waypoint";
     } else if (!mazeTile.isPassable()) {
         if (mazeTile.userPlaced) {
-            tileWrapper.className = "tile_wrapper tile_color_user";
+            tileWrapper.className = "tile_wrapper tile_color_natural";
             tileElement.className = "tile tile_unwalkable_user";
         } else {
             tileWrapper.className = "tile_wrapper tile_color_natural";

@@ -15,9 +15,23 @@ a {
   color: #00B7FF;
 }
 
+@function nth-or-null($list, $index) {
+    @return if(length($list) >= $index, nth($list, $index), null);
+}
+
+@mixin aspect-ratio($arglist... /*$width/$ratio, $height*/) {
+    $map : keywords($arglist);
+    $height: map-get($map, height) or nth-or-null($arglist, 2);
+    $width:  map-get($map, width)  or nth-or-null($arglist, 1);
+    $ratio:  map-get($map, ratio)  or if($width and $height, $width/$height, nth-or-null($arglist, 1)) or 1;
+    $padding: 1/$ratio * 100%;
+    &:before { content: ''; float:left; padding-bottom: $padding; margin-right:-100%; }
+    &:after  { content: ''; display:table; clear: both; }
+}
+
+
 .tile {
-    height: $tileSize;
-    width: $tileSize;
+    left:0; top:0; right:0; bottom:0;
 }
 
 .tile_color_natural {
@@ -28,60 +42,18 @@ a {
     background-color: $groundColor_User;
 }
 
-.tile_unwalkable {
-    position: relative;
-}
-
-.tile_unwalkable:before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-left: 10px solid $groundColor_Natural;
-    border-right: 10px solid $groundColor_Natural;
-    width: 20px;
-    height: 0;
-}
-
-.tile_unwalkable:after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    border-left: 10px solid $groundColor_Natural;
-    border-right: 10px solid $groundColor_Natural;
-    width: 20px;
-    height: 0;
-}
-
 .tile_unwalkable_natural {
-    @extend .tile_unwalkable;
-    background-color: $blockerColor_Natural;
-}
-
-.tile_unwalkable_natural:before {
-    @extend .tile_unwalkable;
-    border-bottom: 10px solid $blockerColor_Natural;
-}
-
-.tile_unwalkable_natural:after {
-    @extend .tile_unwalkable;
-    border-top: 10px solid $blockerColor_Natural;
+    width: 100%;
+    height: 100%;
+    background-image: url("/Regular_octagon.svg");
+    background-size: cover;
 }
 
 .tile_unwalkable_user {
-    @extend .tile_unwalkable;
-    background-color: $blockerColor_User;
-}
-
-.tile_unwalkable_user:before {
-    @extend .tile_unwalkable;
-    border-bottom: 10px solid $blockerColor_User;
-}
-
-.tile_unwalkable_user:after {
-    @extend .tile_unwalkable;
-    border-top: 10px solid $blockerColor_User;
+    width: 100%;
+    height: 100%;
+    background-image: url("/Regular_octagon_user.svg");
+    background-size: cover;
 }
 
 .tile_waypoint {
@@ -106,8 +78,8 @@ a {
 }
 
 .tile_wrapper {
-    height: $tileSize;
-    width: $tileSize;
+    @include aspect-ratio(1);
+    flex: 0 1 $tileSize;
     position: relative;
     display: inline-block;
 }
@@ -126,6 +98,8 @@ a {
 }
 
 .tile_container {
+    display: flex;
+    flex-direction: row;
 }
 
 .tile_text {
@@ -141,7 +115,7 @@ a {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translateX(-50%) translateY(-50%);
+    transform: translatex(-50%) translatey(-50%);
 }
 
 #maze_container {
