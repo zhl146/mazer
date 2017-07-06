@@ -18,7 +18,7 @@ export default function Maze(seed) {
     const numWaypoints = 2;
     const numPathVertexes = 20;
 
-    var maze = [];
+    var generatedMaze = [];
     this.generateEmptyMaze();
 
     // we need to have at least one valid path through the maze
@@ -66,19 +66,19 @@ export default function Maze(seed) {
         var row = [];
         for (var x = 0; x < this.xsize; x++) {
             newPoint = new Point(x, y);
-            var tileTypeNumber;
+            var tileType;
             if (protectedPath.indexOfPoint(newPoint) < 0) {
                 var propensity = Math.floor(random() * 10.0);
-                tileTypeNumber =  propensity < 6 ? 1 : 0
+                tileType =  propensity < 6 ? 'Blocker' : 'Empty'
             } else {
-                tileTypeNumber = 0;
+                tileType = 'Empty';
             }
-            row.push(new Tile(tileTypeNumber));
+            row.push(new Tile(Tile.Type[tileType]));
         }
-        maze.push(row);
+        generatedMaze.push(row);
     }
 
-    this.maze = maze;
+    this.maze = generatedMaze;
 };
 
 Maze.prototype.isPassable = function(point)
@@ -114,7 +114,39 @@ Maze.prototype.findPath = function() {
         path.push(segment);
     }
     return path;
-}
+};
+
+Maze.prototype.addBlocker = function(row, column) {
+    this.maze[row][column].type = Tile.Type.Blocker;
+    this.maze[row][column].userPlaced = true;
+};
+
+Maze.prototype.removeBlocker = function(row, column) {
+    this.maze[row][column].type = Tile.Type.Empty;
+};
+
+Maze.prototype.applyChanges = function(diffPoints) {
+    for (var i = 0; i < diffPoints.length; i++ ) {
+        var point = diffPoints[i];
+        this.maze[point.y][point.x].type = this.maze[point.y][point.x].type + point.operationType;
+    }
+};
+
+Maze.prototype.getUserChanges = function(changedMaze) {
+    var diffPoints = [];
+
+    for ( var row = 0; row < this.xsize; row++) {
+        for ( var column = 0; column < this.ysize; column++ ){
+            var operationType = changedMaze.maze[row][column].type - this.maze[row][column].type;
+            if ( operationType !== 0 ) {
+                var newPoint = new Point(column, row);
+                newPoint.operationType = operationType;
+                diffPoints.push(newPoint);
+            }
+        }
+    }
+    return diffPoints;
+};
 
 // extend Array base type
 Array.prototype.indexOfPoint = function(obj) {

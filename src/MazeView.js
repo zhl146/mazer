@@ -11,6 +11,7 @@ export default function MazeView(id) {
     console.log("SEED: " + seed);
 
     this.maze = new Maze(seed);
+
     this.tileElements = [];
     this.element = document.getElementById(id);
 
