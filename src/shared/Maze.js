@@ -99,7 +99,7 @@ Maze.prototype.generateEmptyMaze = function() {
     for (var y = 0; y < this.ysize; y++) {
         var row = [];
         for (var x = 0; x < this.xsize; x++) {
-            row.push(new Tile(Tile.Type.Walkable));
+            row.push(new Tile(Tile.Type.Empty));
         }
         maze.push(row);
     }

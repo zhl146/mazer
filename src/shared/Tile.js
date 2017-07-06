@@ -1,12 +1,13 @@
 export default function Tile(type) {
     this.type = type;
+    this.userPlaced = false;
 }
 
 Tile.Type = {
-    Walkable: 0,
-    Unwalkable: 1,
+    Empty: 0,
+    Blocker: 1,
 };
 
 Tile.prototype.isPassable = function() {
-    return this.type === Tile.Type.Walkable;
+    return this.type === Tile.Type.Empty;
 };
