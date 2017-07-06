@@ -12,7 +12,32 @@ a {
 }
 
 .tile_unwalkable {
-    background-color: #FF4500;
+    background: red;
+    position: relative;
+}
+
+.tile_unwalkable:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-bottom: 10px solid red;
+    border-left: 10px solid #4C9DB8;
+    border-right: 10px solid #4C9DB8;
+    width: 20px;
+    height: 0;
+}
+
+.tile_unwalkable:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-top: 10px solid red;
+    border-left: 10px solid #4C9DB8;
+    border-right: 10px solid #4C9DB8;
+    width: 20px;
+    height: 0;
 }
 
 .tile {
@@ -20,9 +45,10 @@ a {
 }
 
 .tile_wrapper {
+    position: relative;
     max-width: 40px;
     flex: 1;
-    margin: 1px;
+    margin: 0;
 }
 
 .tile_container {
@@ -36,8 +62,8 @@ a {
 
 .path-container {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
 }
 
 .svg-paths {
