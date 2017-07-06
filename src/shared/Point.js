@@ -18,7 +18,7 @@ Point.prototype.setG = function(cost) {
 Point.prototype.setH = function(endPoint) {
     var xDiff = Math.abs( endPoint.x - this.x );
     var yDiff = Math.abs( endPoint.y - this.y );
-    this.h = xDiff*xDiff + yDiff*yDiff;
+    this.h = 7 * (xDiff + yDiff);
 };
 
 Point.prototype.setF = function() {

@@ -101,11 +101,11 @@ Pathfinder.prototype.findPath = function(start, end) {
 
             if (neighborG < 0) {
                 openSet.push(neighbor);
-                gTracker[neighbor.y][neighbor.x] = currentG + 1;
+                gTracker[neighbor.y][neighbor.x] = neighbor.g;
             }
             else if (neighbor.g < neighborG) {
                 openSet.push(neighbor);
-                gTracker[neighbor.y][neighbor.x] = currentG+ 1;
+                gTracker[neighbor.y][neighbor.x] = neighbor.g;
             }
         }
     }
