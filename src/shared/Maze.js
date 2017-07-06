@@ -26,7 +26,7 @@ export default function Maze(seed) {
         var row = [];
         for (var x = 0; x < this.xsize; x++) {
             var tileTypeNumber = Math.floor(random() * 10.0);
-            row.push(new Tile(tileTypeNumber === 9 ? 1 : 0));
+            row.push(new Tile(tileTypeNumber < 3 ? 1 : 0));
         }
 
         maze.push(row);
@@ -35,8 +35,9 @@ export default function Maze(seed) {
     this.maze = maze;
 }
 
-Maze.prototype.contains = function(point)
+Maze.prototype.isPassable = function(point)
 {
     return point.x >= 0 && point.y >= 0 &&
-        point.x < this.xsize && point.y < this.ysize;
+        point.x < this.xsize && point.y < this.ysize &&
+        this.maze[point.y][point.x].isPassable();
 };

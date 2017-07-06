@@ -7,6 +7,6 @@ Tile.Type = {
     Unwalkable: 1,
 }
 
-Tile.prototype.isWalkable = function() {
+Tile.prototype.isPassable = function() {
     return this.type == Tile.Type.Walkable;
 }

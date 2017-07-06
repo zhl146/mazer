@@ -37,14 +37,14 @@ export default function Pathfinder(maze)
 // returns an array of points as an ending path
 // return empty array if fails to find solution
 Pathfinder.prototype.findPath = function(start, end) {
-    if (!this.maze.contains(start)) {
-        console.log("Maze does not contain start point", start);
-        return null;
+    if (!this.maze.isPassable(start)) {
+        console.log("Start point is impassable", start);
+        return [];
     }
 
-    if (!this.maze.contains(end)) {
-        console.log("Maze does not contain end point", end);
-        return null;
+    if (!this.maze.isPassable(end)) {
+        console.log("End point is impassable", end);
+        return [];
     }
 
     console.log(start);

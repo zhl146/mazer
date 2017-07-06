@@ -27,7 +27,7 @@ Point.prototype.getAdjacent = function(maze) {
     var self = this;
 
     var addPoint = function(newPoint) {
-        if ( maze.contains(newPoint) ) {
+        if ( maze.isPassable(newPoint) ) {
             newPoint.setParent(self);
             newPoint.setG();
             newPoint.setH(maze.end);
