@@ -56,7 +56,7 @@ export default function Maze(seed) {
 
     // Select random vertices to delete, excluding start and end
     while (pathVertices.length > numWaypoints + 2) {
-        var index = Math.floor(1.0 + Math.random() * (pathVertices.length - 2.0));
+        var index = Math.floor(1.0 + random() * (pathVertices.length - 2.0));
         pathVertices.splice(index, 1);
     }
 
