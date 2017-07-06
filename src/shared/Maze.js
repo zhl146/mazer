@@ -48,12 +48,6 @@ export default function Maze(seed) {
         protectedPath.push(...pathSegment);
     }
 
-    this.start = pathVertices[0].copy();
-    this.start.f = 0;
-    this.start.g = 0;
-
-    this.end = pathVertices[pathVertices.length-1].copy();
-
     // Select random vertices to delete, excluding start and end
     while (pathVertices.length > numWaypoints + 2) {
         var index = Math.floor(1.0 + random() * (pathVertices.length - 2.0));
