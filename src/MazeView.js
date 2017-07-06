@@ -29,7 +29,7 @@ MazeView.prototype.setupMaze = function() {
 
         this.tileElements.push([]);
 
-        for (var x = 0; x < this.maze.maze.length; x++) {
+        for (var x = 0; x < this.maze.maze[y].length; x++) {
             var point = new Point(x,y);
 
             var tileWrapper = document.createElement('div');
@@ -63,7 +63,7 @@ MazeView.prototype.setupMaze = function() {
     }
 
     for (var y = 0; y < this.maze.maze.length; y++) {
-        for (var x = 0; x < this.maze.maze.length; x++) {
+        for (var x = 0; x < this.maze.maze[y].length; x++) {
             this.setupTile(new Point(x, y));
         }
     }
@@ -96,7 +96,7 @@ MazeView.prototype.setupTile = function(point) {
         tileElement.className = "tile tile_waypoint";
     } else if (!mazeTile.isPassable()) {
         if (mazeTile.userPlaced) {
-            tileWrapper.className = "tile_wrapper tile_color_user";
+            tileWrapper.className = "tile_wrapper tile_color_natural";
             tileElement.className = "tile tile_unwalkable_user";
         } else {
             tileWrapper.className = "tile_wrapper tile_color_natural";
