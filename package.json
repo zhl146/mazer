@@ -15,7 +15,7 @@
     "express": "^4.15.3",
     "jade": "^1.11.0",
     "mongodb": "^2.2.29",
-    "mongoose": "4.10.8",
+    "mongoose": "=4.10.8",
     "morgan": "^1.8.2",
     "node-sass-middleware": "^0.9.8",
     "sass": "^1.0.0-beta.1",
