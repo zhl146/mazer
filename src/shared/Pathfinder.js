@@ -50,6 +50,9 @@ Pathfinder.prototype.findPath = function(start, end) {
     console.log(start);
     console.log(end);
 
+    start.g = 0;
+    start.f = 0;
+
     // list of tiles that have been explored
     var closedSet = new PointSet();
 
@@ -82,8 +85,9 @@ Pathfinder.prototype.findPath = function(start, end) {
         if ( currentPoint.x === end.x && currentPoint.y === end.y ) {
             var path = [];
             var node = currentPoint;
+            path.unshift(node);
             while (node.parent) {
-                path.push(node.parent);
+                path.unshift(node.parent);
                 node = node.parent;
             }
             return path;
@@ -91,7 +95,7 @@ Pathfinder.prototype.findPath = function(start, end) {
 
         closedSet.add(currentPoint);
 
-        for ( var neighbor of currentPoint.getAdjacent( this.maze ) ) {
+        for ( var neighbor of currentPoint.getAdjacent( this.maze, end ) ) {
             if (closedSet.has(neighbor)) {
                 continue;
             }

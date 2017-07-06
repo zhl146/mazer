@@ -3,6 +3,10 @@ export default function Point(x, y) {
     this.y = y;
 };
 
+Point.prototype.copy = function() {
+  return new Point(this.x, this.y);
+};
+
 Point.prototype.setParent = function(parentPoint) {
     this.parent = parentPoint;
 };
@@ -21,7 +25,7 @@ Point.prototype.setF = function() {
     this.f = this.g + this.h;
 };
 
-Point.prototype.getAdjacent = function(maze) {
+Point.prototype.getAdjacent = function(maze, endpoint) {
     var pointArray = [];
     var newPoint;
     var self = this;
@@ -30,7 +34,7 @@ Point.prototype.getAdjacent = function(maze) {
         if ( maze.isPassable(newPoint) ) {
             newPoint.setParent(self);
             newPoint.setG();
-            newPoint.setH(maze.end);
+            newPoint.setH(endpoint);
             newPoint.setF();
             pointArray.push(newPoint)
         }

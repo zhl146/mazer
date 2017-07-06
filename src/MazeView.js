@@ -5,10 +5,10 @@ import Tile from './shared/Tile';
 import Point from './shared/Point';
 
 export default function MazeView(id) {
-    var seed = 0.6195641405638261 //Math.random();
+    var seed = Math.random();
     console.log("SEED: " + seed);
 
-    this.maze = new Maze(Math.random());
+    this.maze = new Maze(seed);
     this.tileElements = [];
     this.element = document.getElementById(id);
 
