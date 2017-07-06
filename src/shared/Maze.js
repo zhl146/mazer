@@ -122,6 +122,7 @@ Maze.prototype.findPath = function() {
         var segment = this.pathfinder.findPath(this.waypoints[i], this.waypoints[i+1]);
         path.push(segment);
     }
+
     return path;
 };
 

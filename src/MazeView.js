@@ -11,7 +11,6 @@ export default function MazeView(id) {
     console.log("SEED: " + seed);
 
     this.maze = new Maze(seed);
-
     this.tileElements = [];
     this.element = document.getElementById(id);
 
@@ -183,11 +182,24 @@ function PathSvgView(containerBoundingRect, segmentCount) {
 }
 
 PathSvgView.prototype.drawPath = function(path) {
+    // If any segment is empty, empty all segments and do nothing
+    var haveEmptySegment = false;
     for (var i = 0; i < path.length; i++) {
         if (path[i].length == 0) {
-            continue;
+            haveEmptySegment = true;
+            break;
         }
+    }
 
+    if (haveEmptySegment) {
+        for (var i = 0; i < path.length; i++) {
+            this.pathElements[i].setAttribute('d', "");
+        }
+        return;
+    }
+
+    // If all segments are unempty, continue and draw all paths
+    for (var i = 0; i < path.length; i++) {
         var svgSegment = [];
 
         for (var j = 0; j < path[i].length; j++) {
