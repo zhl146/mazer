@@ -15,13 +15,15 @@ export default function MazeView(id) {
     this.tileElements = [];
     this.element = document.getElementById(id);
 
-    this.displayMaze();
+    this.setupMaze();
 
     this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
+
+    this.drawPath();
 }
 
-MazeView.prototype.displayMaze = function() {
+MazeView.prototype.setupMaze = function() {
     for (var y = 0; y < this.maze.maze.length; y++) {
         var rowContainer = document.createElement('div');
         rowContainer.className = "tile_container";
@@ -29,42 +31,86 @@ MazeView.prototype.displayMaze = function() {
         this.tileElements.push([]);
 
         for (var x = 0; x < this.maze.maze.length; x++) {
+            var point = new Point(x,y);
+
             var tileWrapper = document.createElement('div');
             tileWrapper.className = "tile_wrapper";
 
-            var waypointIndex = this.maze.waypoints.indexOfPoint(new Point(x, y));
-            if (waypointIndex >= 0) {
-                var tileTextElement = document.createElement('div');
-                tileTextElement.className = "tile_text absolute_center";
-                tileTextElement.style.color = colors[waypointIndex%colors.length];
-
-                var text = "";
-                if (waypointIndex == 0) {
-                    text = "S";
-                } else if (waypointIndex == this.maze.waypoints.length - 1) {
-                    text = "E";
-                } else {
-                    text = "" + waypointIndex;
-                }
-
-                tileTextElement.innerHTML = text;
-                tileWrapper.appendChild(tileTextElement);
-            }
-
             var tileElement = document.createElement('div');
-            if (waypointIndex >= 0) {
-                tileElement.className = "tile_waypoint";
-            } else if (!this.maze.maze[y][x].isPassable()) {
-                tileElement.className = "tile_unwalkable";
-            }
+            tileElement.className = "tile";
+
+            var tileOverlay = document.createElement('div');
+            tileOverlay.className = "tile_tint_overlay";
+
+            var tileTextElement = document.createElement('div');
+            tileTextElement.className = "tile_text absolute_center";
+
+            (function(self, point) {
+                var pointCapture = point.copy();
+                tileOverlay.addEventListener("mousedown", function(mouseEvent) {
+                    self.tileClicked(mouseEvent, pointCapture);
+                });
+            })(this, point);
 
             tileWrapper.appendChild(tileElement);
+            tileWrapper.appendChild(tileOverlay);
+            tileWrapper.appendChild(tileTextElement);
             rowContainer.appendChild(tileWrapper);
 
             this.tileElements[y].push(tileWrapper);
         }
 
         this.element.appendChild(rowContainer);
+    }
+
+    for (var y = 0; y < this.maze.maze.length; y++) {
+        for (var x = 0; x < this.maze.maze.length; x++) {
+            this.setupTile(new Point(x, y));
+        }
+    }
+}
+
+MazeView.prototype.setupTile = function(point) {
+    var mazeTile = this.maze.maze[point.y][point.x];
+    var tileWrapper = this.tileElements[point.y][point.x];
+
+    var waypointIndex = this.maze.waypoints.indexOfPoint(point);
+    if (waypointIndex >= 0) {
+        var tileTextElement = tileWrapper.querySelector('.tile_text');
+
+        var text = "";
+        if (waypointIndex == 0) {
+            text = "S";
+        } else if (waypointIndex == this.maze.waypoints.length - 1) {
+            text = "E";
+        } else {
+            text = "" + waypointIndex;
+        }
+
+        tileTextElement.innerHTML = text;
+        tileWrapper.appendChild(tileTextElement);
+    }
+
+    var tileElement = tileWrapper.querySelector('.tile');
+    if (waypointIndex >= 0) {
+        tileWrapper.className = "tile_wrapper tile_color_natural";
+        tileElement.className = "tile tile_waypoint";
+    } else if (!mazeTile.isPassable()) {
+        if (mazeTile.userPlaced) {
+            tileWrapper.className = "tile_wrapper tile_color_user";
+            tileElement.className = "tile tile_unwalkable_user";
+        } else {
+            tileWrapper.className = "tile_wrapper tile_color_natural";
+            tileElement.className = "tile tile_unwalkable_natural";
+        }
+    } else {
+        if (mazeTile.userPlaced) {
+            tileWrapper.className = "tile_wrapper tile_color_user";
+            tileElement.className = "tile tile_walkable_user";
+        } else {
+            tileWrapper.className = "tile_wrapper tile_color_natural";
+            tileElement.className = "tile tile_walkable_natural";
+        }
     }
 }
 
@@ -97,6 +143,19 @@ MazeView.prototype.drawPath = function() {
     }
 
     this.pathSvgView.drawPath(svgPath);
+}
+
+MazeView.prototype.tileClicked = function(mouseEvent, point) {
+    if (!this.maze.isModifiable(point)) {
+        return;
+    }
+
+    var tile = this.maze.maze[point.y][point.x];
+    tile.userPlaced = !tile.userPlaced;
+    tile.type = (tile.type == Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
+
+    this.setupTile(point);
+    this.drawPath();
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {

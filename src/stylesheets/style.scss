@@ -1,5 +1,7 @@
-$groundColor: sandybrown;
-$blockerColor: darkred;
+$groundColor_Natural: sandybrown;
+$groundColor_User: peru;
+$blockerColor_Natural: darkred;
+$blockerColor_User: tomato;
 $waypointColor: coral;
 
 $tileSize: 40px;
@@ -13,10 +15,20 @@ a {
   color: #00B7FF;
 }
 
-.tile_unwalkable {
+.tile {
     height: $tileSize;
     width: $tileSize;
-    background-color: $blockerColor;
+}
+
+.tile_color_natural {
+    background-color: $groundColor_Natural;
+}
+
+.tile_color_user {
+    background-color: $groundColor_User;
+}
+
+.tile_unwalkable {
     position: relative;
 }
 
@@ -25,9 +37,8 @@ a {
     position: absolute;
     top: 0;
     left: 0;
-    border-bottom: 10px solid $blockerColor;
-    border-left: 10px solid $groundColor;
-    border-right: 10px solid $groundColor;
+    border-left: 10px solid $groundColor_Natural;
+    border-right: 10px solid $groundColor_Natural;
     width: 20px;
     height: 0;
 }
@@ -37,22 +48,50 @@ a {
     position: absolute;
     bottom: 0;
     left: 0;
-    border-top: 10px solid $blockerColor;
-    border-left: 10px solid $groundColor;
-    border-right: 10px solid $groundColor;
+    border-left: 10px solid $groundColor_Natural;
+    border-right: 10px solid $groundColor_Natural;
     width: 20px;
     height: 0;
+}
+
+.tile_unwalkable_natural {
+    @extend .tile_unwalkable;
+    background-color: $blockerColor_Natural;
+}
+
+.tile_unwalkable_natural:before {
+    @extend .tile_unwalkable;
+    border-bottom: 10px solid $blockerColor_Natural;
+}
+
+.tile_unwalkable_natural:after {
+    @extend .tile_unwalkable;
+    border-top: 10px solid $blockerColor_Natural;
+}
+
+.tile_unwalkable_user {
+    @extend .tile_unwalkable;
+    background-color: $blockerColor_User;
+}
+
+.tile_unwalkable_user:before {
+    @extend .tile_unwalkable;
+    border-bottom: 10px solid $blockerColor_User;
+}
+
+.tile_unwalkable_user:after {
+    @extend .tile_unwalkable;
+    border-top: 10px solid $blockerColor_User;
 }
 
 .tile_waypoint {
     width: 0;
     height: 0;
     border: $tileSize/3 solid transparent;
-    border-bottom-color: $waypointColor;
     top: -$tileSize/3;
     //left: $tileSize/2;
     position: relative;
-    z-index: 500;
+    border-bottom-color: $waypointColor;
 }
 
 .tile_waypoint:after {
@@ -69,9 +108,21 @@ a {
 .tile_wrapper {
     height: $tileSize;
     width: $tileSize;
-    background-color: $groundColor;
     position: relative;
     display: inline-block;
+}
+
+.tile_tint_overlay {
+    background-color: rgba(0,0,0,0);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.tile_tint_overlay:hover {
+    background-color: rgba(255,255,255,0.5);
 }
 
 .tile_container {
@@ -83,6 +134,7 @@ a {
     font-weight: 600;
 
     z-index: 1000;
+    pointer-events: none;
 }
 
 .absolute_center {
@@ -100,6 +152,7 @@ a {
     position: absolute;
     top: 0;
     right: 0;
+    pointer-events: none;
 }
 
 .svg-paths {

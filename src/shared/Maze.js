@@ -83,10 +83,19 @@ export default function Maze(seed) {
 
 Maze.prototype.isPassable = function(point)
 {
-    return point.x >= 0 && point.y >= 0 &&
-        point.x < this.xsize && point.y < this.ysize &&
+    return this.contains(point) &&
         this.maze[point.y][point.x].isPassable();
 };
+
+Maze.prototype.isModifiable = function(point) {
+    return this.contains(point) &&
+        this.waypoints.indexOfPoint(point) < 0;
+}
+
+Maze.prototype.contains = function(point) {
+    return point.x >= 0 && point.y >= 0 &&
+        point.x < this.xsize && point.y < this.ysize;
+}
 
 Maze.prototype.generateNewPoint = function(random) {
     var pointX = Math.floor(random() * this.xsize);

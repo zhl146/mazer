@@ -7,5 +7,3 @@ import Pathfinder from './shared/Pathfinder';
 import MazeView from './MazeView';
 
 var view = new MazeView('maze_container');
-
-view.drawPath();
