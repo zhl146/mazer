@@ -38,7 +38,7 @@ router.get('/:seed', function(req, res, next) {
 
     var scoreQuery = ScoreModel.find(query, projection, options, function(error, scores) {
         if (error) {
-            res.status(500).json({ 'error': err });
+            res.status(500).json({ 'error': error });
         } else if (!scores) {
             res.status(400).json({ 'error': 'Out of bounds' });
         } else {

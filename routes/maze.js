@@ -28,7 +28,7 @@ router.post('/check', function(req, res, next) {
                 return;
             }
 
-            ScoreModel.count({ 'score': { '$gte': product.score } }, function(error, count) {
+            ScoreModel.count({ 'date': solution.seed, 'score': { '$gte': product.score } }, function(error, count) {
                 if (error) {
                     res.status(500).json({ 'error': err });
                 } else {

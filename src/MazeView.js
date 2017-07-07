@@ -9,7 +9,7 @@ const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
 
 export default function MazeView(id, seed) {
     this.seed = seed;
-    // console.log("SEED: " + this.seed);
+    console.log("SEED: " + this.seed);
 
     this.maze = new Maze(this.seed);
     this.baseMaze = new Maze(this.seed);
@@ -247,7 +247,7 @@ MazeView.prototype.initializeViewInformation = function () {
     document.getElementById('removal-cost').innerHTML = removeCost;
 };
 
-MazeView.prototype.submitSolution = function(username) {
+MazeView.prototype.submitSolution = function(name) {
     // generate user actions to recreate the current maze
     var diffPoints = this.baseMaze.getUserChanges(this.maze);
 
@@ -274,7 +274,7 @@ MazeView.prototype.submitSolution = function(username) {
 
     var data = {
         "seed": this.maze.seed,
-        "username": username,
+        "name": name,
         "diffPoints": diffPoints
     };
     xhr.send(JSON.stringify(data));

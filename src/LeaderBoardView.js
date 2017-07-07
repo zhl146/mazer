@@ -13,27 +13,33 @@ LeaderBoardView.prototype.initLeaderBoard = function() {
     })(this)
 };
 
-LeaderBoardView.prototype.populateLeaderBoard = function() {
-    var startIndex = 0;
-    var numScores = 10;
+LeaderBoardView.prototype.getScores = function(start, length) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        // this is the maze checking URL
+        var url = 'http://localhost:3000/leaderboard/' + this.seed + '?start=' + start + '&length=' + length;
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState !== 4) {
+                return;
+            }
 
-    var xhr = new XMLHttpRequest();
-    // this is the maze checking URL
-    var url = 'http://localhost:3000/leaderboard/' + this.seed + '?start=' + startIndex + '&' + '?length=' + numScores;
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            this.addScoresToLeaderboard(response.scores);
-        }
-    }.bind(this);
-    xhr.send(null);
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                resolve(response.scores);
+            } else {
+                reject(xhr);
+            }
+        }.bind(this);
+        xhr.send(null);
+    }.bind(this));
 };
 
-LeaderBoardView.prototype.addScoresToLeaderboard = function(scores) {
+LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeThreeScores, closeThreeStartRank) {
     this.clear();
 
     var topTen = document.getElementById('top-scores');
+    var closeThree = document.getElementById('closest-scores');
 
     var makeScore = function(rank, name, score) {
         var scoreContainer = document.createElement('div');
@@ -57,24 +63,27 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(scores) {
         return scoreContainer;
     }
 
-    for (var i = 0; i < scores.length; i++) {
-        var score = makeScore(i+1, scores[i].name, scores[i].score);
+    for (var i = 0; i < topTenScores.length; i++) {
+        var score = makeScore(i+1, topTenScores[i].name, topTenScores[i].score);
         topTen.appendChild(score);
     }
 
-    for (var i = scores.length; i < 10; i++) {
-        score = makeScore(i+1, 'derpman', 9000);
-        topTen.appendChild(score);
+    for (var i = 0; i < closeThreeScores.length; i++) {
+        var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i].name, closeThreeScores[i].score);
+        closeThree.appendChild(score);
     }
-
 };
 
-LeaderBoardView.prototype.createScoreEntry =function(score) {
-    
+LeaderBoardView.prototype.fillScores = function(rank) {
+    var self = this;
+    // subtract 2 from rank because start is zero-indexed
+    return Promise.all([this.getScores(0, 10), this.getScores(rank-2, 3)])
+        .then(function(values) {
+            self.addScoresToLeaderboard(values[0], values[1], rank-2);
+        }.bind(this));
 };
 
 LeaderBoardView.prototype.show = function () {
-    this.populateLeaderBoard();
     this.leaderBoard.classList.remove('hidden');
 };
 
