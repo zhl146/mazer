@@ -16,6 +16,8 @@ export default function Maze(seed) {
     this.numWaypoints = 2;
     this.numPathVertexes = 20;
 
+    this.pathLength = 0;
+
     this.generateMazeParams(random);
 
     // Used to find paths through this maze
@@ -139,12 +141,13 @@ Maze.prototype.applyChanges = function(diffPoints) {
     }
 };
 
-Maze.prototype.getUserChanges = function(changedMaze) {
+Maze.prototype.getUserChanges = function(userMaze) {
     var diffPoints = [];
+    var changedMaze = userMaze.maze;
 
-    for ( var row = 0; row < this.xsize; row++) {
-        for ( var column = 0; column < this.ysize; column++ ){
-            var operationType = changedMaze.maze[row][column].type - this.maze[row][column].type;
+    for ( var row = 0; row < this.ysize; row++) {
+        for ( var column = 0; column < this.xsize; column++ ){
+            var operationType = changedMaze[row][column].type - this.maze[row][column].type;
             if ( operationType !== 0 ) {
                 var newPoint = new Point(column, row);
                 newPoint.operationType = operationType;
@@ -178,12 +181,12 @@ Maze.prototype.generateMazeParams = function(random) {
 
     this.actionPoints = Math.floor(10 + generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
 
-    console.log('xsize: ' + this.xsize);
-    console.log('ysize: ' + this.ysize);
-    console.log('blocker probability: ' + this.blockerProbability);
-    console.log('waypoints: ' + this.numWaypoints);
-    console.log('path vertexes: ' + this.numPathVertexes);
-    console.log('actions:' + this.actionPoints);
+    // console.log('xsize: ' + this.xsize);
+    // console.log('ysize: ' + this.ysize);
+    // console.log('blocker probability: ' + this.blockerProbability);
+    // console.log('waypoints: ' + this.numWaypoints);
+    // console.log('path vertexes: ' + this.numPathVertexes);
+    // console.log('actions:' + this.actionPoints);
 };
 
 // extend Array base type

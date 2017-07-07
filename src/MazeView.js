@@ -3,6 +3,7 @@ import anime from 'animejs';
 import Maze from './shared/Maze';
 import Tile from './shared/Tile';
 import Point from './shared/Point';
+import Score from './shared/Score';
 
 const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
 
@@ -11,6 +12,9 @@ export default function MazeView(id) {
     console.log("SEED: " + seed);
 
     this.maze = new Maze(seed);
+    this.baseMaze = new Maze(seed);
+    this.seed = seed;
+
     this.tileElements = [];
     this.element = document.getElementById(id);
 
@@ -78,9 +82,9 @@ MazeView.prototype.setupTile = function(point) {
         var tileTextElement = tileWrapper.querySelector('.tile_text');
 
         var text = "";
-        if (waypointIndex == 0) {
+        if (waypointIndex === 0) {
             text = "S";
-        } else if (waypointIndex == this.maze.waypoints.length - 1) {
+        } else if (waypointIndex === this.maze.waypoints.length - 1) {
             text = "E";
         } else {
             text = "" + waypointIndex;
@@ -148,7 +152,7 @@ MazeView.prototype.drawPath = function() {
 // where 0 is most recent
 MazeView.prototype.debug_showGTrackers = function(i) {
     console.log(this.maze.pathfinder.lastGTracker);
-    if (this.maze.pathfinder.lastGTracker[i] == null) {
+    if (this.maze.pathfinder.lastGTracker[i] === null) {
         return;
     }
 
@@ -166,10 +170,12 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
 
     var tile = this.maze.maze[point.y][point.x];
     tile.userPlaced = !tile.userPlaced;
-    tile.type = (tile.type == Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
+    tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
     this.setupTile(point);
     this.drawPath();
+    var diffPoints = this.baseMaze.getUserChanges(this.maze);
+    var score = new Score('', diffPoints, this.seed)
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {
