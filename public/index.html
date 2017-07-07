@@ -5,6 +5,7 @@
 <body>
 <div class="content">
     <div id="resource-container">
+        <span id="current-score"></span>
         <span id="action-counter"></span>
     </div>
     <div id="maze_container"></div>
@@ -17,28 +18,34 @@
     </div>
 </div>
 
-<div class="leaderboard">
-    <h1>HIGH SCORES</h1>
-    <div class="divider"></div>
-    <div class="top-scores">
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
+<div id="leaderboard" class="leaderboard-overlay hidden">
+    <div class="leaderboard">
+        <h1>HIGH SCORES</h1>
+        <div class="divider"></div>
+        <div class="top-scores">
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+
+        </div>
+
+        <div class="divider"></div>
+        <div class="closest-scores">
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+            <div class="score"><span class="number">#</span><span class="name">name</span><span class="score">score</span></div>
+        </div>
+
+        <button id="back-btn">OK</button>
     </div>
 
-    <div class="divider"></div>
-    <div class="closest-scores">
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-        <div class="score"><span>score</span><button>view solution</button></div>
-    </div>
 </div>
 
 

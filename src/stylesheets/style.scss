@@ -8,6 +8,10 @@ $tileSize: 40px;
 
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   padding: 0;
   margin: 0;
@@ -102,7 +106,7 @@ a {
   font-size: 1em;
   font-weight: 600;
 
-  z-index: 1000;
+  z-index: 3;
   pointer-events: none;
 }
 
@@ -127,7 +131,8 @@ a {
 #resource-container {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
+  font-size: 2em;
 }
 
 #bottom-container {
@@ -165,11 +170,27 @@ a {
 
 /* leaderboard stuff */
 
+.leaderboard-overlay {
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: snow;
+}
+
 .leaderboard {
+  padding: 50px;
+  background-color: $groundColor_Natural;
   margin: auto;
   text-align: center;
-  padding: 50px;
-  width: 75%;
+  @media screen and (max-width: 767px){
+    width: 90%;
+  }
+  @media screen and (min-width: 768px){
+    width: 768px;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -177,6 +198,10 @@ a {
     font-size: 2em;
     margin-bottom: 0;
   }
+}
+
+.hidden {
+  display: none;
 }
 
 .top-scores, .closest-scores{
@@ -187,7 +212,11 @@ a {
 .score {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
+
+  > * {
+    margin: 5px 20px;
+  }
 
   button {
     background: none;
