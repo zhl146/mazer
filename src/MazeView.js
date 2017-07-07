@@ -7,13 +7,12 @@ import Score from './shared/Score';
 
 const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
 
-export default function MazeView(id) {
-    var seed = Math.random();
-    console.log("SEED: " + seed);
-
-    this.maze = new Maze(seed);
-    this.baseMaze = new Maze(seed);
+export default function MazeView(id, seed) {
     this.seed = seed;
+    console.log("SEED: " + this.seed);
+
+    this.maze = new Maze(this.seed);
+    this.baseMaze = new Maze(this.seed);
 
     this.tileElements = [];
     this.element = document.getElementById(id);
