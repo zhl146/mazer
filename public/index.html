@@ -18,8 +18,21 @@
     </div>
 </div>
 
-<div id="leaderboard" class="leaderboard-overlay hidden">
-    <div class="leaderboard">
+<div id="username-popup" class="modal-overlay hidden">
+    <div class="username-popup">
+        <h1>Enter your name</h1>
+
+        <input id="username-input" type="text" name="name">
+
+        <div class="button-row">
+            <button id="username-submit-btn" class="submit-btn">SUBMIT</button>
+            <button id="username-cancel-btn" class="submit-btn">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<div id="leaderboard" class="modal-overlay hidden">
+    <div class="modal-columnlayout-dialog">
         <h1>HIGH SCORES</h1>
         <div class="divider"></div>
         <div id="top-scores" class="top-scores">

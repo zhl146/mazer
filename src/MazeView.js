@@ -247,7 +247,7 @@ MazeView.prototype.initializeViewInformation = function () {
     document.getElementById('removal-cost').innerHTML = removeCost;
 };
 
-MazeView.prototype.submitSolution = function() {
+MazeView.prototype.submitSolution = function(username) {
     // generate user actions to recreate the current maze
     var diffPoints = this.baseMaze.getUserChanges(this.maze);
 
@@ -272,6 +272,7 @@ MazeView.prototype.submitSolution = function() {
 
     var data = {
         "seed": this.maze.seed,
+        "username": username,
         "diffPoints": diffPoints
     };
     xhr.send(JSON.stringify(data));
