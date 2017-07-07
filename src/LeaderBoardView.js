@@ -26,16 +26,24 @@ LeaderBoardView.prototype.getRemoteScores = function() {
     xhr.open("GET", url, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            var json = JSON.parse(xhr.responseText);
-            // NEED TO EDIT TO RECEIVE THINGS FROM SERVER
-            this.addScoresToLeaderboard(json.scores);
+            var scores = JSON.parse(xhr.responseText);
+            this.addScoresToLeaderboard(scores);
         }
     }.bind(this);
     xhr.send(null);
 };
 
 LeaderBoardView.prototype.addScoresToLeaderboard = function(scores) {
+    var numScores = scores.length;
+    var numPlaceholders = 10 - scores.length;
 
+    for (var i = 0; i < scores.length; i++) {
+        console.log(scores[i]);
+    }
+};
+
+LeaderBoardView.prototype.createScoreEntry =function(score) {
+    
 };
 
 LeaderBoardView.prototype.show = function () {

@@ -12,6 +12,11 @@ $tileSize: 40px;
   box-sizing: border-box;
 }
 
+html {
+  padding: 0;
+  margin: 0;
+}
+
 body {
   padding: 0;
   margin: 0;
@@ -133,9 +138,11 @@ a {
   flex-direction: row;
   justify-content: space-between;
   font-size: 2em;
+  margin-bottom: 10px;
 }
 
 #bottom-container {
+  margin: 10px 0;
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
@@ -235,7 +242,6 @@ a {
 }
 
 button {
-  margin: 20px;
   background: none;
   font-family: 'VT323', monospace;
   outline: none;

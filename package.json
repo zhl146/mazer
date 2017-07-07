@@ -15,7 +15,7 @@
     "debug": "^2.6.8",
     "express": "^4.15.3",
     "jade": "^1.11.0",
-    "mongodb": "^2.2.29",
+    "mongodb": "^2.2.30",
     "mongoose": "=4.10.8",
     "morgan": "^1.8.2",
     "node-sass-middleware": "^0.9.8",
@@ -30,7 +30,7 @@
     "install": "^0.10.1",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
-    "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0"
+    "webpack": "^3.1.0",
+    "webpack-dev-server": "^2.5.1"
   }
 }
