@@ -254,9 +254,10 @@ MazeView.prototype.submitSolution = function() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             var json = JSON.parse(xhr.responseText);
-            console.log(json.score);
+            console.log(json);
         }
     };
+
     var data = {
         "seed": this.maze.seed,
         "diffPoints": diffPoints
