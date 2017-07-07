@@ -187,6 +187,8 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     var diffPoints = this.baseMaze.getUserChanges(this.maze);
     var score = new Score('', diffPoints, this.seed);
 
+    this.updateScore(score.score);
+
     // Only redraw the path if the new path is different
     if (this.pathsDiffer(path, this.lastPath)) {
         this.drawPath(path);
@@ -196,7 +198,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
 
 MazeView.prototype.findInvalidPathSegmentIndex = function(path) {
     for (var i = 0; i < path.length; i++) {
-        if (path[i].length == 0) {
+        if (path[i].length === 0) {
             return i;
         }
     }
@@ -225,18 +227,17 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
 }
 
 MazeView.prototype.updateActionsUsed = function() {
-    var actionString = 'actions left: ' + this.maze.actionsUsed + '/' + this.maze.actionPoints;
+    var actionString = 'actions left: ' + (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
     document.getElementById('action-counter').innerHTML = actionString;
 }
 
+MazeView.prototype.updateScore = function (score) {
+    document.getElementById('current-score').innerHTML = 'SCORE: ' + score;
+}
+
 MazeView.prototype.initializeViewInformation = function () {
-    (function(self) {
-        var submitBtn = document.getElementById('submit-btn');
-        submitBtn.addEventListener("click", function() {
-            self.submitSolution();
-        })
-    })(this);
-    document.getElementById('action-counter').innerHTML = 'actions left: 0/' + this.maze.actionPoints;
+    document.getElementById('current-score').innerHTML = 'SCORE: 0';
+    document.getElementById('action-counter').innerHTML = 'actions left: '+ this.maze.actionPoints + '/' + this.maze.actionPoints;
     var removeCost = 'Cost to remove a natural blocker: ' + this.maze.removalCost + ' action points';
     document.getElementById('removal-cost').innerHTML = removeCost;
 }
