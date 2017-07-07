@@ -6,9 +6,11 @@ $waypointColor: coral;
 
 $tileSize: 40px;
 
+@import url('https://fonts.googleapis.com/css?family=VT323');
+
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    font-family: 'VT323', monospace;
 }
 
 a {
@@ -86,8 +88,7 @@ a {
 }
 
 .tile_text {
-    font-size: 0.7em;
-    font-family: 'Playfair Display SC', serif;
+    font-size: 1em;
     font-weight: 600;
 
     z-index: 1000;
