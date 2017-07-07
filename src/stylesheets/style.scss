@@ -175,9 +175,7 @@ a {
   stroke-dasharray: 10;
 }
 
-/* leaderboard stuff */
-
-.leaderboard-overlay {
+.modal-overlay {
   z-index: 100;
   position: absolute;
   top: 0;
@@ -187,7 +185,7 @@ a {
   background: snow;
 }
 
-.leaderboard {
+.modal-columnlayout-dialog {
   padding: 50px;
   background-color: $groundColor_Natural;
   margin: auto;
@@ -206,6 +204,8 @@ a {
     margin-bottom: 0;
   }
 }
+
+/* leaderboard stuff */
 
 .hidden {
   display: none;
@@ -247,4 +247,19 @@ button {
   outline: none;
   border: none;
   font-size: 2em;
+}
+
+/*! username popup stuff */
+
+.username-popup {
+    @extend .modal-columnlayout-dialog;
+    margin-top: 50px;
+}
+
+.button_row {
+    flex-direction: row;
+
+    > button {
+        flex: 1 1 auto;
+    }
 }

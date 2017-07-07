@@ -6,6 +6,7 @@ import Pathfinder from './shared/Pathfinder';
 
 import MazeView from './MazeView';
 import LeaderBoardView from './LeaderBoardView';
+import UsernamePopupView from './UsernamePopupView';
 
 var xhr = new XMLHttpRequest();
 // this is the maze seed url
@@ -24,9 +25,15 @@ xhr.send(null);
 
 
 var leaderboard = new LeaderBoardView();
+var usernamePopup = new UsernamePopupView();
 
 var submitBtn = document.getElementById('submit-btn');
 submitBtn.addEventListener("click", function() {
-    mazeView.submitSolution();
+    usernamePopup.show();
+});
+
+usernamePopup.submitBtn.addEventListener("click", function() {
+    usernamePopup.hide();
+    mazeView.submitSolution(usernamePopup.input.value);
     leaderboard.show();
 });
