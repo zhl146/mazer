@@ -162,3 +162,45 @@ a {
   stroke-linejoin: bevel;
   stroke-dasharray: 10;
 }
+
+/* leaderboard stuff */
+
+.leaderboard {
+  margin: auto;
+  text-align: center;
+  padding: 50px;
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  > h1{
+    font-size: 2em;
+    margin-bottom: 0;
+  }
+}
+
+.top-scores, .closest-scores{
+  width: 80%;
+  flex: 1 1 auto;
+}
+
+.score {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  button {
+    background: none;
+    font-family: 'VT323', monospace;
+    outline: none;
+    border: none;
+    font-size: 1em;
+  }
+}
+
+.divider {
+  height: 0;
+  margin: 25px;
+  width: 100%;
+  border-bottom: 1px solid grey;
+}
