@@ -1,8 +1,11 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express';
 
-var seed = require('./maze-functions/generate-seed');
-var leaderboard = require('../database/database-stuff');
+import seed from './maze-functions/generate-seed';
+import leaderboard from '../database/database-stuff';
+
+import Maze from '../src/shared/Maze';
+
+var router = express.Router();
 
 /* validates a user solution and does stuff */
 /* turn this into a post later */
@@ -16,14 +19,16 @@ router.post('/check', function(req, res, next) {
 
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
-    leaderboard.save({
+    var maze = new Maze(0);
+    res.send(JSON.stringify(maze.maze));
+    /*leaderboard.save({
         name: 'zhen',
         score: 1000,
         date: seed.generate(),
         solution: ['this should be an array of solutions']
     });
     leaderboard.retrieve({'date': seed.generate()});
-    res.send(seed.generate())
+    res.send(seed.generate())*/
 });
 
 module.exports = router;

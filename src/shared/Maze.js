@@ -5,6 +5,7 @@ import Pathfinder from './Pathfinder';
 
 export default function Maze(seed) {
     var random = seedrandom(seed);
+    this.seed = seed;
 
     // maze params
     this.xsize = 20;
@@ -202,6 +203,49 @@ Maze.prototype.generateMazeParams = function(random) {
     // console.log('path vertexes: ' + this.numPathVertexes);
     // console.log('actions:' + this.actionPoints);
 };
+
+// Flips the tile type. Returns true for success, false for failure.
+Maze.prototype.doActionOnTile = function(point) {
+    if (!this.isModifiable(point)) {
+        return false;
+    }
+
+    var tile = this.maze[point.y][point.x];
+
+    // before we do anything, check if the user has enough action points
+    // to do the desired action
+    var operationCost = this.operationCostForActionOnTile(tile);
+    if (this.actionsUsed + operationCost > this.actionPoints) {
+        return false;
+    }
+
+    // Modify the tile
+    tile.userPlaced = !tile.userPlaced;
+    tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
+    this.actionsUsed += operationCost;
+
+    return true;
+}
+
+Maze.prototype.operationCostForActionOnTile = function(tile) {
+    var operationCost = 0;
+    if (tile.userPlaced) {
+        if (tile.type === Tile.Type.Blocker) {
+            operationCost = -1
+        } else {
+            operationCost = - this.removalCost;
+        }
+    }
+    else {
+        if (tile.type === Tile.Type.Blocker) {
+            operationCost =  this.removalCost;
+        } else {
+            operationCost = 1
+        }
+    }
+    
+    return operationCost
+}
 
 // extend Array base type
 Array.prototype.indexOfPoint = function(obj) {

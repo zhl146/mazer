@@ -1,6 +1,8 @@
-(function() {
-    var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
+export var Score = {};
+
+(function() {
     mongoose.Promise = global.Promise;
 
     var leaderBoard = mongoose.Schema({
@@ -12,7 +14,7 @@
 
     mongoose.connect('mongodb://localhost:27017/database');
 
-    exports.Score = mongoose.model('Score', leaderBoard);
+    Score = mongoose.model('Score', leaderBoard);
 
     mongoose.disconnect();
 })();
