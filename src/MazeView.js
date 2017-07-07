@@ -121,10 +121,6 @@ MazeView.prototype.setupTile = function(point) {
 }
 
 MazeView.prototype.drawPath = function(path) {
-    if (this.findInvalidPathSegmentIndex(path) >= 0) {
-        pathSvgView.clear();
-    }
-
     // Translate the tile path into relative screen coords
     var svgPath = [];
 
@@ -169,38 +165,21 @@ MazeView.prototype.debug_showGTrackers = function(i) {
 }
 
 MazeView.prototype.tileClicked = function(mouseEvent, point) {
-    // checks if the point is okay to change
-    if (!this.maze.isModifiable(point) ) {
+    if (!this.maze.doActionOnTile(point)) {
         return;
     }
-
-    var tile = this.maze.maze[point.y][point.x];
-    // before it does anything, checks if the user has enough action points
-    // to do the desired action
-    var operationCost = this.operationCostForActionOnTile(tile, this.maze);
-    if (this.maze.actionsUsed + operationCost > this.maze.actionPoints) {
-        return;
-    }
-
-    // Modify the tile
-    tile.userPlaced = !tile.userPlaced;
-    tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
     // If the path is blocked at any point, do not allow the user to place the tile
     var path = this.maze.findPath();
     var invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path)
     if (invalidPathSegmentIndex >= 0) {
-        // Undo
-        tile.userPlaced = !tile.userPlaced;
-        tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
-
-        // Flash the corresponding path segment
+        // Undo and flash blocked path
         this.pathSvgView.flashInvalidPathSegment(invalidPathSegmentIndex);
+        this.maze.doActionOnTile(point);
         return;
     }
 
-    // We're clear to do the operation
-    this.maze.actionsUsed += operationCost;
+    // The action has taken place
     this.updateActionsUsed();
 
     // Modify the actual maze view to reflect the changes
@@ -245,26 +224,6 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
     return false;
 }
 
-MazeView.prototype.operationCostForActionOnTile = function(clickedTile, maze) {
-    var operationCost = 0;
-    if (clickedTile.userPlaced) {
-        if (clickedTile.type === Tile.Type.Blocker) {
-            operationCost = -1
-        } else {
-            operationCost = - maze.removalCost;
-        }
-    }
-    else {
-        if (clickedTile.type === Tile.Type.Blocker) {
-            operationCost =  maze.removalCost;
-        } else {
-            operationCost = 1
-        }
-    }
-    
-    return operationCost
-}
-
 MazeView.prototype.updateActionsUsed = function() {
     var actionString = 'actions left: ' + this.maze.actionsUsed + '/' + this.maze.actionPoints;
     document.getElementById('action-counter').innerHTML = actionString;
@@ -298,8 +257,11 @@ MazeView.prototype.submitSolution = function() {
     //         console.log(json.email + ", " + json.password);
     //     }
     // };
-    var data = JSON.stringify({"diffPoints": diffPoints});
-    xhr.send(data);
+    var data = {
+        "seed": this.maze.seed,
+        "diffPoints": diffPoints
+    };
+    xhr.send(JSON.stringify(data));
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {

@@ -1,15 +1,15 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var sassMiddleware = require('node-sass-middleware');
+import express from 'express';
+import path from 'path';
+import favicon from 'serve-favicon';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import sassMiddleware from 'node-sass-middleware';
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var maze = require('./routes/maze');
-var leaderboard = require('./routes/leaderboard');
+import index from './routes/index';
+import users from './routes/users';
+import maze from './routes/maze';
+import leaderboard from './routes/leaderboard';
 
 var app = express();
 
