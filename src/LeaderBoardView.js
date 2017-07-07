@@ -31,6 +31,7 @@ LeaderBoardView.prototype.populateLeaderBoard = function() {
 };
 
 LeaderBoardView.prototype.addScoresToLeaderboard = function(scores) {
+    this.clear();
 
     var topTen = document.getElementById('top-scores');
 
@@ -79,4 +80,16 @@ LeaderBoardView.prototype.show = function () {
 
 LeaderBoardView.prototype.hide = function() {
     this.leaderBoard.classList.add('hidden');
+};
+
+LeaderBoardView.prototype.clear = function() {
+    var topTen = document.getElementById('top-scores');
+    var closeThree = document.getElementById('closest-scores');
+    
+    while (topTen.hasChildNodes()) {
+        topTen.removeChild(topTen.lastChild);
+    }
+    while (closeThree.hasChildNodes()) {
+        closeThree.removeChild(closeThree.lastChild);
+    }
 };
