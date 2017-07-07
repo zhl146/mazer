@@ -40,8 +40,12 @@ var initView = function(seed) {
 
     usernamePopup.submitBtn.addEventListener("click", function() {
         usernamePopup.hide();
-        mazeView.submitSolution(usernamePopup.input.value);
-        leaderboard.show();
+        mazeView.submitSolution(usernamePopup.input.value)
+            .then(
+                function(rank) {
+                    leaderboard.show();
+                }
+            )
     });
 
 };

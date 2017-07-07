@@ -258,13 +258,15 @@ MazeView.prototype.submitSolution = function(username) {
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     var solutionComplete = new Promise(
-        function() {
+        function(resolve, reject) {
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var json = JSON.parse(xhr.responseText);
-                    resolve(json);
-                } else {
-                    reject();
+                if (xhr.readyState === 4 ) {
+                    if (xhr.status === 200) {
+                        var json = JSON.parse(xhr.responseText);
+                        resolve(json.rank);
+                    } else {
+                        reject();
+                    }
                 }
             };
         }
@@ -277,7 +279,7 @@ MazeView.prototype.submitSolution = function(username) {
     };
     xhr.send(JSON.stringify(data));
 
-    return Promise;
+    return solutionComplete;
 };
 
 function PathSvgView(containerBoundingRect, segmentCount) {
