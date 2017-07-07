@@ -271,8 +271,35 @@ MazeView.prototype.updateActionsUsed = function() {
 }
 
 MazeView.prototype.initializeViewInformation = function () {
+    (function(self) {
+        var submitBtn = document.getElementById('submit-btn');
+        submitBtn.addEventListener("click", function() {
+            self.submitSolution();
+        })
+    })(this);
     document.getElementById('action-counter').innerHTML = 'actions left: 0/' + this.maze.actionPoints;
-    document.getElementById('removal-cost').innerHTML = 'Cost to remove a natural blocker: ' + this.maze.removalCost;
+    var removeCost = 'Cost to remove a natural blocker: ' + this.maze.removalCost + ' action points';
+    document.getElementById('removal-cost').innerHTML = removeCost;
+}
+
+MazeView.prototype.submitSolution = function() {
+    // generate user actions to recreate the current maze
+    var diffPoints = this.baseMaze.getUserChanges(this.maze);
+
+    var xhr = new XMLHttpRequest();
+
+    // this is the maze checking URL
+    var url = 'http://localhost:3000/maze/check';
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    // xhr.onreadystatechange = function () {
+    //     if (xhr.readyState === 4 && xhr.status === 200) {
+    //         var json = JSON.parse(xhr.responseText);
+    //         console.log(json.email + ", " + json.password);
+    //     }
+    // };
+    var data = JSON.stringify({"diffPoints": diffPoints});
+    xhr.send(data);
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {

@@ -10,6 +10,7 @@ router.post('/check', function(req, res, next) {
     // take the posted maze coords and use pathfinder to get path
     // get user identifier
     // record path length in database with user identifier
+    console.log(req.body);
     res.send('this should validate maze solution')
 });
 
