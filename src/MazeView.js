@@ -200,6 +200,8 @@ function PathSvgView(containerBoundingRect, segmentCount) {
 
     this.pathElements = pathElements;
     this.svgElement = svgElement;
+
+    this.currentAnimation = null;
 }
 
 PathSvgView.prototype.drawPath = function(path) {
@@ -233,17 +235,44 @@ PathSvgView.prototype.drawPath = function(path) {
         this.pathElements[i].setAttribute('d', pathString);
     }
 
-    this.animateSvg(pathString);
+    this.animateSvg();
 }
 
-PathSvgView.prototype.animateSvg = function(pathSvgString) {
-    var lineDrawing = anime({
-        targets: '.path-container path',
-        strokeDashoffset: [anime.setDashoffset, 0],
-        easing: 'easeInOutSine',
-        duration: 1000,
-        delay: function(el, i) { return i * 1000; },
-    });
+PathSvgView.prototype.animateSvg = function() {
+    var lineTimeline = anime.timeline();
+
+    if (this.currentAnimation != null) {
+        this.currentAnimation.pause();
+    }
+
+    for (var i = 0; i < this.pathElements.length; i++) {
+        var easing = null;
+        if (i === 0) {
+            easing = 'easeInSine';
+        } else if (i === this.pathElements.length-1) {
+            easing = 'easeOutSine';
+        } else {
+            easing = 'linear';
+        }
+
+        var self = this;
+        (function() {
+            var pathElement = self.pathElements[i];
+            var duration = Math.min(10*pathElement.getAttribute('d').length, 2000);
+            pathElement.setAttribute('visibility', 'hidden');
+            lineTimeline.add({
+                targets: pathElement,
+                strokeDashoffset: [anime.setDashoffset, 0],
+                easing: easing,
+                duration: duration,
+                begin: function(anim) {
+                    pathElement.setAttribute('visibility', 'auto');
+                }
+            });
+        })();
+    }
+
+    this.currentAnimation = lineTimeline;
 }
 
 PathSvgView.prototype.getElement = function() {
