@@ -13,22 +13,31 @@ router.post('/check', function(req, res, next) {
     var solution = req.body;
     var score = new Score('', solution.diffPoints, solution.seed);
 
-    if (score.score > 0) {
+    if (score.score >= 0) {
         var scoreModel = new ScoreModel();
         scoreModel.name = "personmanguy";
         scoreModel.score = score.score;
         scoreModel.date = solution.seed;
         scoreModel.solution = solution.diffPoints;
 
-        scoreModel.save(function(error, docs) {
+        console.log(score.score);
+
+        scoreModel.save(function(error, product) {
             if (error) {
                 res.status(500).json({ 'error': err });
-            } else {
-                res.json({ 'success': true });
+                return;
             }
+
+            ScoreModel.count({ 'score': { '$gte': product.score } }, function(error, count) {
+                if (error) {
+                    res.status(500).json({ 'error': err });
+                } else {
+                    res.json({ 'rank': count });
+                }
+            });
         });
     } else {
-        res.status(400).json({ 'success': false });
+        res.status(400).json({ 'error' : 'u r cheater' });
     }
 
 });

@@ -4,7 +4,7 @@ import ScoreModel from '../database/leaderBoard-model'
 var router = express.Router();
 
 /* gets json with leaderboard stats */
-router.get('/', function(req, res, next) {
+router.get('/:seed', function(req, res, next) {
     var start = req.query.start;
     var length = req.query.length;
 
@@ -18,10 +18,25 @@ router.get('/', function(req, res, next) {
         length = 100;
     }
 
-    var scoreQuery = ScoreModel.find({}, undefined, {
+    var query = {
+        'date': req.params.seed,
+    }
+
+    var options = {
         'skip': start,
-        'limit': length
-    }, function(error, scores) {
+        'limit': length,
+        'sort': {
+            'score': -1
+        },
+    };
+
+    var projection = {
+        'name': 1,
+        'score': 1,
+        '_id': 0,
+    };
+
+    var scoreQuery = ScoreModel.find(query, projection, options, function(error, scores) {
         if (error) {
             res.status(500).json({ 'error': err });
         } else if (!scores) {
