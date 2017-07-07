@@ -15,8 +15,3 @@ submitBtn.addEventListener("click", function() {
     view.submitSolution();
     leaderboard.show();
 });
-
-var toggleBtn = document.getElementById('toggle');
-toggleBtn.addEventListener("click", function() {
-    leaderboard.show();
-});
