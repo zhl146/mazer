@@ -271,40 +271,19 @@ PathSvgView.prototype.drawPath = function(path) {
 }
 
 PathSvgView.prototype.animateSvg = function() {
-    var lineTimeline = anime.timeline();
-
     if (this.currentAnimation != null) {
         this.currentAnimation.pause();
     }
 
-    for (var i = 0; i < this.pathElements.length; i++) {
-        var easing = null;
-        if (i === 0) {
-            easing = 'easeInSine';
-        } else if (i === this.pathElements.length-1) {
-            easing = 'easeOutSine';
-        } else {
-            easing = 'linear';
-        }
+    var animation = anime({
+        targets: this.pathElements,
+        strokeDashoffset: [20, 0],
+        easing: 'linear',
+        duration: 1000,
+        loop: true
+    });
 
-        var self = this;
-        (function() {
-            var pathElement = self.pathElements[i];
-            var duration = Math.min(10*pathElement.getAttribute('d').length, 2000);
-            pathElement.setAttribute('visibility', 'hidden');
-            lineTimeline.add({
-                targets: pathElement,
-                strokeDashoffset: [anime.setDashoffset, 0],
-                easing: easing,
-                duration: duration,
-                begin: function(anim) {
-                    pathElement.setAttribute('visibility', 'auto');
-                }
-            });
-        })();
-    }
-
-    this.currentAnimation = lineTimeline;
+    this.currentAnimation = animation;
 }
 
 PathSvgView.prototype.getElement = function() {
