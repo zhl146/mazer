@@ -27,6 +27,12 @@ export default function MazeView(id) {
 
     this.lastPath = this.maze.findPath();
     this.drawPath(this.lastPath);
+
+    var self = this;
+    window.addEventListener('resize', function() {
+        // Redraw the SVG path every time the window resizes
+        self.drawPath(self.lastPath);
+    });
 }
 
 MazeView.prototype.setupMaze = function() {
@@ -269,8 +275,8 @@ MazeView.prototype.submitSolution = function() {
 function PathSvgView(containerBoundingRect, segmentCount) {
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
-    svgElement.setAttribute('width', containerBoundingRect.width);
-    svgElement.setAttribute('height', containerBoundingRect.height);
+    svgElement.setAttribute('width', '100%');
+    svgElement.setAttribute('height', '100%');
 
     var innerElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
     innerElement.setAttribute('class', 'svg-paths');
