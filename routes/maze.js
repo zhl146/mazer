@@ -3,18 +3,16 @@ import express from 'express';
 import seed from './maze-functions/generate-seed';
 import leaderboard from '../database/database-stuff';
 
-import Maze from '../src/shared/Maze';
+import Score from '../src/shared/Score';
 
 var router = express.Router();
 
 /* validates a user solution and does stuff */
 /* turn this into a post later */
 router.post('/check', function(req, res, next) {
-    // take the posted maze coords and use pathfinder to get path
-    // get user identifier
-    // record path length in database with user identifier
-    console.log(req.body);
-    res.send('this should validate maze solution')
+    var solution = req.body;
+    var score = new Score('', solution.diffPoints, solution.seed);
+    res.json({'score': score.score});
 });
 
 /* should return a json describing the current maze */

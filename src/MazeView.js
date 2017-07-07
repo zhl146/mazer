@@ -251,12 +251,12 @@ MazeView.prototype.submitSolution = function() {
     var url = 'http://localhost:3000/maze/check';
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
-    // xhr.onreadystatechange = function () {
-    //     if (xhr.readyState === 4 && xhr.status === 200) {
-    //         var json = JSON.parse(xhr.responseText);
-    //         console.log(json.email + ", " + json.password);
-    //     }
-    // };
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = JSON.parse(xhr.responseText);
+            console.log(json.score);
+        }
+    };
     var data = {
         "seed": this.maze.seed,
         "diffPoints": diffPoints

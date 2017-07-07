@@ -23,7 +23,12 @@ module.exports = {
     },
 
     devServer: {
-        contentBase: path.join(__dirname, 'public')
+        contentBase: path.join(__dirname, 'public'),
+        proxy: {
+            "/maze": {
+                target: "http://localhost:3000",
+            }
+        }
     }
 };
 

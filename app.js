@@ -5,6 +5,7 @@ import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import sassMiddleware from 'node-sass-middleware';
+import cors from 'cors';
 
 import index from './routes/index';
 import users from './routes/users';
@@ -12,6 +13,8 @@ import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 
 var app = express();
+
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

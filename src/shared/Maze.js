@@ -147,13 +147,6 @@ Maze.prototype.removeBlocker = function(row, column) {
     this.maze[row][column].type = Tile.Type.Empty;
 };
 
-Maze.prototype.applyChanges = function(diffPoints) {
-    for (var i = 0; i < diffPoints.length; i++ ) {
-        var point = diffPoints[i];
-        this.maze[point.y][point.x].type = this.maze[point.y][point.x].type + point.operationType;
-    }
-};
-
 Maze.prototype.getUserChanges = function(userMaze) {
     var diffPoints = [];
     var changedMaze = userMaze.maze;
