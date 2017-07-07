@@ -14,6 +14,7 @@ export default function MazeView(id) {
     this.maze = new Maze(seed);
     this.baseMaze = new Maze(seed);
     this.seed = seed;
+    this.actionCounter = 0;
 
     this.tileElements = [];
     this.element = document.getElementById(id);
@@ -164,18 +165,49 @@ MazeView.prototype.debug_showGTrackers = function(i) {
 }
 
 MazeView.prototype.tileClicked = function(mouseEvent, point) {
-    if (!this.maze.isModifiable(point)) {
+    // checks if the point is okay to change
+    if (!this.maze.isModifiable(point) ) {
         return;
     }
 
     var tile = this.maze.maze[point.y][point.x];
-    tile.userPlaced = !tile.userPlaced;
-    tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
+    // before it does anything, checks if the user has enough action points
+    // to do the desired action
+    if (this.enoughActionPoints(tile)) {
+        console.log('Actions taken: ' + this.actionCounter + '/' + this.maze.actionPoints);
+        tile.userPlaced = !tile.userPlaced;
+        tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
-    this.setupTile(point);
-    this.drawPath();
-    var diffPoints = this.baseMaze.getUserChanges(this.maze);
-    var score = new Score('', diffPoints, this.seed)
+        this.setupTile(point);
+        this.drawPath();
+        var diffPoints = this.baseMaze.getUserChanges(this.maze);
+        var score = new Score('', diffPoints, this.seed)
+    }
+}
+
+MazeView.prototype.enoughActionPoints = function( clickedTile) {
+    var operationCost = 0;
+    if (clickedTile.userPlaced) {
+        if (clickedTile.type === Tile.Type.Blocker) {
+            operationCost = -1
+        } else {
+            operationCost = -5
+        }
+    }
+    else {
+        if (clickedTile.type === Tile.Type.Blocker) {
+            operationCost = 5
+        } else {
+            operationCost = 1
+        }
+    }
+
+    if (! (this.actionCounter + operationCost > this.maze.actionPoints)) {
+        this.actionCounter += operationCost;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {
