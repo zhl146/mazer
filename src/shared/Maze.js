@@ -157,27 +157,33 @@ Maze.prototype.getUserChanges = function(changedMaze) {
 
 Maze.prototype.generateMazeParams = function(random) {
 
-    this.xsize = Math.floor(random() * 5) + 14;
-    this.ysize = Math.floor(random() * 5) + 14;
-    console.log('xsize: ' + this.xsize);
-    console.log('ysize: ' + this.ysize);
+    var generateRandomBetween = function(min, max) {
+        return random() * ( max - min ) + min;
+    };
+
+    this.xsize = Math.floor(generateRandomBetween(15, 40));
+    this.ysize = Math.floor(generateRandomBetween(15, 40));
 
     var size = this.xsize * this.ysize;
 
     this.numWaypoints = 0;
-    this.numPathVertexes = Math.floor(random() * size / 100) + 10;
-    for (var i = 0; i < this.numPathVertexes / 10; i++) {
+    this.numPathVertexes = Math.floor(generateRandomBetween(.6, 1) * Math.sqrt(size));
+    for (var i = 0; i < this.numPathVertexes / 5; i++) {
         if (random() > 0.6) {
             this.numWaypoints++;
         }
     }
 
-    this.blockerProbability = random() * 0.3 + 0.3;
+    this.blockerProbability = generateRandomBetween(0.2, 0.6);
 
-    console.log(this.blockerProbability)
+    this.actionPoints = Math.floor(10 + generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
 
-    this.actionPoints = 10 + random() * this.xsize + this.ysize;
-
+    console.log('xsize: ' + this.xsize);
+    console.log('ysize: ' + this.ysize);
+    console.log('blocker probability: ' + this.blockerProbability);
+    console.log('waypoints: ' + this.numWaypoints);
+    console.log('path vertexes: ' + this.numPathVertexes);
+    console.log('actions:' + this.actionPoints);
 };
 
 // extend Array base type
