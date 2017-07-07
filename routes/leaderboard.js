@@ -8,7 +8,7 @@ router.get('/:seed', function(req, res, next) {
     var start = req.query.start;
     var length = req.query.length;
 
-    if (start === undefined) {
+    if (start === undefined || start < 0) {
         start = 0;
     }
 

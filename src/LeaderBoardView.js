@@ -79,7 +79,7 @@ LeaderBoardView.prototype.fillScores = function(rank) {
     // subtract 2 from rank because start is zero-indexed
     return Promise.all([this.getScores(0, 10), this.getScores(rank-2, 3)])
         .then(function(values) {
-            self.addScoresToLeaderboard(values[0], values[1], rank-2);
+            self.addScoresToLeaderboard(values[0], values[1], Math.max(rank-2, 0));
         }.bind(this));
 };
 
