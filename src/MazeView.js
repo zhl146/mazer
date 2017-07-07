@@ -74,7 +74,7 @@ MazeView.prototype.setupMaze = function() {
             this.setupTile(new Point(x, y));
         }
     }
-}
+};
 
 MazeView.prototype.setupTile = function(point) {
     var mazeTile = this.maze.maze[point.y][point.x];
@@ -118,7 +118,7 @@ MazeView.prototype.setupTile = function(point) {
             tileElement.className = "tile tile_walkable_natural";
         }
     }
-}
+};
 
 MazeView.prototype.drawPath = function(path) {
     // Translate the tile path into relative screen coords
@@ -147,7 +147,7 @@ MazeView.prototype.drawPath = function(path) {
     }
 
     this.pathSvgView.drawPath(svgPath);
-}
+};
 
 // Renders the G-values of the specified index of pathfinder run,
 // where 0 is most recent
@@ -162,7 +162,7 @@ MazeView.prototype.debug_showGTrackers = function(i) {
             this.tileElements[y][x].querySelector('.tile_text').innerHTML = this.maze.pathfinder.lastGTracker[i][y][x];
         }
     }
-}
+};
 
 MazeView.prototype.tileClicked = function(mouseEvent, point) {
     if (!this.maze.doActionOnTile(point)) {
@@ -171,7 +171,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
 
     // If the path is blocked at any point, do not allow the user to place the tile
     var path = this.maze.findPath();
-    var invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path)
+    var invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path);
     if (invalidPathSegmentIndex >= 0) {
         // Undo and flash blocked path
         this.pathSvgView.flashInvalidPathSegment(invalidPathSegmentIndex);
@@ -194,7 +194,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
         this.drawPath(path);
     }
     this.lastPath = path;
-}
+};
 
 MazeView.prototype.findInvalidPathSegmentIndex = function(path) {
     for (var i = 0; i < path.length; i++) {
@@ -204,7 +204,7 @@ MazeView.prototype.findInvalidPathSegmentIndex = function(path) {
     }
 
     return -1;
-}
+};
 
 MazeView.prototype.pathsDiffer = function(pathA, pathB) {
     if (pathA.length !== pathB.length) {
@@ -224,23 +224,23 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
     }
 
     return false;
-}
+};
 
 MazeView.prototype.updateActionsUsed = function() {
     var actionString = 'actions left: ' + (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
     document.getElementById('action-counter').innerHTML = actionString;
-}
+};
 
 MazeView.prototype.updateScore = function (score) {
     document.getElementById('current-score').innerHTML = 'SCORE: ' + score;
-}
+};
 
 MazeView.prototype.initializeViewInformation = function () {
     document.getElementById('current-score').innerHTML = 'SCORE: 0';
     document.getElementById('action-counter').innerHTML = 'actions left: '+ this.maze.actionPoints + '/' + this.maze.actionPoints;
     var removeCost = 'Cost to remove a natural blocker: ' + this.maze.removalCost + ' action points';
     document.getElementById('removal-cost').innerHTML = removeCost;
-}
+};
 
 MazeView.prototype.submitSolution = function() {
     // generate user actions to recreate the current maze
@@ -264,7 +264,7 @@ MazeView.prototype.submitSolution = function() {
         "diffPoints": diffPoints
     };
     xhr.send(JSON.stringify(data));
-}
+};
 
 function PathSvgView(containerBoundingRect, segmentCount) {
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
@@ -296,7 +296,7 @@ PathSvgView.prototype.clear = function() {
     for (var i = 0; i < path.length; i++) {
         this.pathElements[i].setAttribute('d', "");
     }
-}
+};
 
 PathSvgView.prototype.drawPath = function(path) {
     for (var i = 0; i < path.length; i++) {
@@ -313,7 +313,7 @@ PathSvgView.prototype.drawPath = function(path) {
     }
 
     this.animateSvg();
-}
+};
 
 PathSvgView.prototype.animateSvg = function() {
     if (this.currentAnimation != null) {
@@ -329,7 +329,7 @@ PathSvgView.prototype.animateSvg = function() {
     });
 
     this.currentAnimation = animation;
-}
+};
 
 PathSvgView.prototype.flashInvalidPathSegment = function(i) {
     if (this.pathElements[i].animation !== undefined &&
@@ -348,8 +348,8 @@ PathSvgView.prototype.flashInvalidPathSegment = function(i) {
     });
 
     this.pathElements[i].animation = animation;
-}
+};
 
 PathSvgView.prototype.getElement = function() {
     return this.svgElement;
-}
+};

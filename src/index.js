@@ -18,6 +18,5 @@ submitBtn.addEventListener("click", function() {
 
 var toggleBtn = document.getElementById('toggle');
 toggleBtn.addEventListener("click", function() {
-    console.log('click')
     leaderboard.show();
 });

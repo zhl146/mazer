@@ -5,7 +5,6 @@ export default function LeaderBoardView() {
 
 LeaderBoardView.prototype.initLeaderBoard = function() {
     (function(self) {
-        console.log(self)
         var backBtn = document.getElementById('back-btn');
         backBtn.addEventListener('click', function() {
             self.hide();
