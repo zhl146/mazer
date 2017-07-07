@@ -25,7 +25,8 @@ export default function MazeView(id) {
     this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
 
-    this.drawPath();
+    this.lastPath = this.maze.findPath();
+    this.drawPath(this.lastPath);
 }
 
 MazeView.prototype.setupMaze = function() {
@@ -119,9 +120,7 @@ MazeView.prototype.setupTile = function(point) {
     }
 }
 
-MazeView.prototype.drawPath = function() {
-    var path = this.maze.findPath();
-
+MazeView.prototype.drawPath = function(path) {
     // Translate the tile path into relative screen coords
     var svgPath = [];
 
@@ -180,10 +179,37 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
         tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
         this.setupTile(point);
-        this.drawPath();
         var diffPoints = this.baseMaze.getUserChanges(this.maze);
-        var score = new Score('', diffPoints, this.seed)
+        var score = new Score('', diffPoints, this.seed);
+
+        // Get the new path, but only redraw if it's changed
+        var path = this.maze.findPath();
+        if (this.pathsDiffer(path, this.lastPath)) {
+            this.drawPath(path);
+            console.log("redraw");
+        }
+        this.lastPath = path;
     }
+}
+
+MazeView.prototype.pathsDiffer = function(pathA, pathB) {
+    if (pathA.length !== pathB.length) {
+        return true;
+    }
+
+    for (var i = 0; i < pathA.length; i++) {
+        if (pathA[i].length !== pathB[i].length) {
+            return true;
+        }
+
+        for (var j = 0; j < pathA[i].length; j++) {
+            if (pathA[i][j].x !== pathB[i][j].x || pathA[i][j].y !== pathB[i][j].y) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 MazeView.prototype.enoughActionPoints = function(clickedTile, maze) {
@@ -249,20 +275,14 @@ function PathSvgView(containerBoundingRect, segmentCount) {
 }
 
 PathSvgView.prototype.drawPath = function(path) {
-    // If any segment is empty, empty all segments and do nothing
-    var haveEmptySegment = false;
+    // If any segment is empty, we have no path - draw nothing
     for (var i = 0; i < path.length; i++) {
         if (path[i].length == 0) {
-            haveEmptySegment = true;
-            break;
+            for (var i = 0; i < path.length; i++) {
+                this.pathElements[i].setAttribute('d', "");
+            }
+            return;
         }
-    }
-
-    if (haveEmptySegment) {
-        for (var i = 0; i < path.length; i++) {
-            this.pathElements[i].setAttribute('d', "");
-        }
-        return;
     }
 
     // If all segments are unempty, continue and draw all paths
