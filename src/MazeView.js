@@ -14,12 +14,13 @@ export default function MazeView(id) {
     this.maze = new Maze(seed);
     this.baseMaze = new Maze(seed);
     this.seed = seed;
-    this.actionCounter = 0;
 
     this.tileElements = [];
     this.element = document.getElementById(id);
 
     this.setupMaze();
+
+    this.initializeViewInformation();
 
     this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
@@ -174,7 +175,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     // before it does anything, checks if the user has enough action points
     // to do the desired action
     if (this.enoughActionPoints(tile, this.maze)) {
-        console.log('Actions taken: ' + this.actionCounter + '/' + this.maze.actionPoints);
+        console.log('Actions taken: ' + this.maze.actionsUsed + '/' + this.maze.actionPoints);
         tile.userPlaced = !tile.userPlaced;
         tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
@@ -202,12 +203,23 @@ MazeView.prototype.enoughActionPoints = function(clickedTile, maze) {
         }
     }
 
-    if (! (this.actionCounter + operationCost > this.maze.actionPoints)) {
-        this.actionCounter += operationCost;
+    if (! (this.maze.actionsUsed + operationCost > this.maze.actionPoints)) {
+        this.maze.actionsUsed += operationCost;
+        this.updateActionsUsed();
         return true;
     } else {
         return false;
     }
+}
+
+MazeView.prototype.updateActionsUsed = function() {
+    var actionString = 'actions left: ' + this.maze.actionsUsed + '/' + this.maze.actionPoints;
+    document.getElementById('action-counter').innerHTML = actionString;
+}
+
+MazeView.prototype.initializeViewInformation = function () {
+    document.getElementById('action-counter').innerHTML = 'actions left: 0/' + this.maze.actionPoints;
+    document.getElementById('removal-cost').innerHTML = 'Cost to remove a natural blocker: ' + this.maze.removalCost;
 }
 
 function PathSvgView(containerBoundingRect, segmentCount) {

@@ -9,7 +9,8 @@ $tileSize: 40px;
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
 body {
-  padding: 50px;
+  padding: 0;
+  margin: 0;
   font-family: 'VT323', monospace;
 }
 
@@ -29,6 +30,11 @@ a {
   $padding: 1/$ratio * 100%;
   &:before { content: ''; float:left; padding-bottom: $padding; margin-right:-100%; }
   &:after  { content: ''; display:table; clear: both; }
+}
+
+.content {
+  margin: 20px auto 0 auto;
+  width: 75%;
 }
 
 .tile {
@@ -111,6 +117,34 @@ a {
   top: 0;
   right: 0;
   pointer-events: none;
+}
+
+#resource-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+#bottom-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+#info-container {
+  > p {
+    margin: 4px;
+  }
+}
+
+.submit-btn {
+  background-color: saddlebrown;
+  border: none;
+  padding: 8px;
+  box-shadow: none;
+  outline: none;
+  font-size: 1.5em;
+  font-family: 'VT323', monospace;
 }
 
 .svg-paths {

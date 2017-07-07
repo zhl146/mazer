@@ -14,6 +14,10 @@ export default function Maze(seed) {
     // how many action points the user gets to spend
     // adding a blocker always costs 1
     this.actionPoints = 10;
+
+    // how many actions the user has used up
+    this.actionsUsed = 0;
+
     // holds the waypoints (points between start and end) that
     // need to be traveled to in order
     this.numWaypoints = 2;
