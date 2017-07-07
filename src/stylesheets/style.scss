@@ -219,10 +219,10 @@ a {
 .score {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
 
-  > * {
-    margin: 5px 20px;
+  * {
+    width: 30%;
   }
 
   button {

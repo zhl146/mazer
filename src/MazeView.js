@@ -9,7 +9,7 @@ const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
 
 export default function MazeView(id, seed) {
     this.seed = seed;
-    console.log("SEED: " + this.seed);
+    // console.log("SEED: " + this.seed);
 
     this.maze = new Maze(this.seed);
     this.baseMaze = new Maze(this.seed);
@@ -257,18 +257,26 @@ MazeView.prototype.submitSolution = function() {
     var url = 'http://localhost:3000/maze/check';
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var json = JSON.parse(xhr.responseText);
-            console.log(json);
+    var solutionComplete = new Promise(
+        function() {
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    resolve(json);
+                } else {
+                    reject();
+                }
+            };
         }
-    };
+    );
 
     var data = {
         "seed": this.maze.seed,
         "diffPoints": diffPoints
     };
     xhr.send(JSON.stringify(data));
+
+    return Promise;
 };
 
 function PathSvgView(containerBoundingRect, segmentCount) {

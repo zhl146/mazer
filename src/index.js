@@ -13,20 +13,30 @@ var url = 'http://localhost:3000/maze';
 xhr.open("GET", url, true);
 
 var mazeView = null;
+var leaderboard = null;
+
+var seed = null;
 
 xhr.onreadystatechange = function() {
     if (xhr.readyState === 4 && xhr.status === 200) {
-        mazeView = new MazeView('maze_container', JSON.parse(xhr.responseText).seed);
+        seed = JSON.parse(xhr.responseText).seed;
+        initView(seed);
     }
-}.bind(this);
+};
 
 xhr.send(null);
 
+var initView = function(seed) {
+    mazeView = new MazeView('maze_container', seed);
+    leaderboard = new LeaderBoardView(seed);
 
-var leaderboard = new LeaderBoardView();
+    var submitBtn = document.getElementById('submit-btn');
+    submitBtn.addEventListener("click", function() {
+        mazeView.submitSolution().then(
+            leaderboard.show()
+        );
 
-var submitBtn = document.getElementById('submit-btn');
-submitBtn.addEventListener("click", function() {
-    mazeView.submitSolution();
-    leaderboard.show();
-});
+    });
+}
+
+
