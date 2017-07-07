@@ -1,7 +1,7 @@
 import express from 'express';
 
 import seed from './maze-functions/generate-seed';
-import leaderboard from '../database/database-stuff';
+import ScoreModel from '../database/leaderBoard-model';
 
 import Score from '../src/shared/Score';
 
@@ -12,7 +12,25 @@ var router = express.Router();
 router.post('/check', function(req, res, next) {
     var solution = req.body;
     var score = new Score('', solution.diffPoints, solution.seed);
-    res.json({'score': score.score});
+
+    if (score.score > 0) {
+        var scoreModel = new ScoreModel();
+        scoreModel.name = "personmanguy";
+        scoreModel.score = score.score;
+        scoreModel.date = solution.seed;
+        scoreModel.solution = solution.diffPoints;
+
+        scoreModel.save(function(error, docs) {
+            if (error) {
+                res.status(500).json({ 'error': err });
+            } else {
+                res.json({ 'success': true });
+            }
+        });
+    } else {
+        res.status(400).json({ 'success': false });
+    }
+
 });
 
 /* should return a json describing the current maze */
@@ -29,4 +47,4 @@ router.get('/', function(req, res, next) {
     res.send(seed.generate())*/
 });
 
-module.exports = router;
+export default router;

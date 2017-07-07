@@ -25,13 +25,11 @@ Score.prototype.calculateScore = function() {
 
     // use the new maze to calculate the user's submitted path
     var adjustedPath = userMaze.findPath();
-    console.log(adjustedPath);
 
     var baseScore = Math.floor(this.calculatePathLength(defaultPath)*100);
     var unadjustedScore = Math.floor(this.calculatePathLength(adjustedPath)*100);
 
     var adjustedScore = unadjustedScore - baseScore;
-    console.log(adjustedScore);
     return adjustedScore
 };
 

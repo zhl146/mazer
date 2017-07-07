@@ -1,20 +1,12 @@
 import mongoose from 'mongoose';
 
-export var Score = {};
+var scoreSchema = mongoose.Schema({
+    name: String,
+    score: Number,
+    date: String,
+    solution: Array
+});
 
-(function() {
-    mongoose.Promise = global.Promise;
+var ScoreModel = mongoose.model('ScoreModel', scoreSchema);
 
-    var leaderBoard = mongoose.Schema({
-        name: String,
-        score: Number,
-        date: String,
-        solution: Array
-    });
-
-    mongoose.connect('mongodb://localhost:27017/database');
-
-    Score = mongoose.model('Score', leaderBoard);
-
-    mongoose.disconnect();
-})();
+export default ScoreModel;
