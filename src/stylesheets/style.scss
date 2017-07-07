@@ -34,7 +34,12 @@ a {
 
 .content {
   margin: 20px auto 0 auto;
-  width: 75%;
+  @media screen and (max-width: 767px){
+    width: 90%;
+  }
+  @media screen and (min-width: 768px){
+    width: 768px;
+  }
 }
 
 .tile {
@@ -70,7 +75,7 @@ a {
 
 .tile_wrapper {
   @include aspect-ratio(1);
-  flex: 0 1 $tileSize;
+  flex: 1 1 $tileSize;
   position: relative;
   display: inline-block;
 }
