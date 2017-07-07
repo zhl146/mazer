@@ -12,9 +12,11 @@ var xhr = new XMLHttpRequest();
 var url = 'http://localhost:3000/maze';
 xhr.open("GET", url, true);
 
+var mazeView = null;
+
 xhr.onreadystatechange = function() {
     if (xhr.readyState === 4 && xhr.status === 200) {
-        var view = new MazeView('maze_container', JSON.parse(xhr.responseText).seed);
+        mazeView = new MazeView('maze_container', JSON.parse(xhr.responseText).seed);
     }
 }.bind(this);
 
@@ -25,6 +27,6 @@ var leaderboard = new LeaderBoardView();
 
 var submitBtn = document.getElementById('submit-btn');
 submitBtn.addEventListener("click", function() {
-    view.submitSolution();
+    mazeView.submitSolution();
     leaderboard.show();
 });
