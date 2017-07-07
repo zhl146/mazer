@@ -121,6 +121,10 @@ MazeView.prototype.setupTile = function(point) {
 }
 
 MazeView.prototype.drawPath = function(path) {
+    if (this.findInvalidPathSegmentIndex(path) >= 0) {
+        pathSvgView.clear();
+    }
+
     // Translate the tile path into relative screen coords
     var svgPath = [];
 
@@ -173,23 +177,52 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     var tile = this.maze.maze[point.y][point.x];
     // before it does anything, checks if the user has enough action points
     // to do the desired action
-    if (this.enoughActionPoints(tile, this.maze)) {
-        console.log('Actions taken: ' + this.maze.actionsUsed + '/' + this.maze.actionPoints);
+    var operationCost = this.operationCostForActionOnTile(tile, this.maze);
+    if (this.maze.actionsUsed + operationCost > this.maze.actionPoints) {
+        return;
+    }
+
+    // Modify the tile
+    tile.userPlaced = !tile.userPlaced;
+    tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
+
+    // If the path is blocked at any point, do not allow the user to place the tile
+    var path = this.maze.findPath();
+    var invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path)
+    if (invalidPathSegmentIndex >= 0) {
+        // Undo
         tile.userPlaced = !tile.userPlaced;
         tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
 
-        this.setupTile(point);
-        var diffPoints = this.baseMaze.getUserChanges(this.maze);
-        var score = new Score('', diffPoints, this.seed);
-
-        // Get the new path, but only redraw if it's changed
-        var path = this.maze.findPath();
-        if (this.pathsDiffer(path, this.lastPath)) {
-            this.drawPath(path);
-            console.log("redraw");
-        }
-        this.lastPath = path;
+        // Flash the corresponding path segment
+        this.pathSvgView.flashInvalidPathSegment(invalidPathSegmentIndex);
+        return;
     }
+
+    // We're clear to do the operation
+    this.maze.actionsUsed += operationCost;
+    this.updateActionsUsed();
+
+    // Modify the actual maze view to reflect the changes
+    this.setupTile(point);
+    var diffPoints = this.baseMaze.getUserChanges(this.maze);
+    var score = new Score('', diffPoints, this.seed);
+
+    // Only redraw the path if the new path is different
+    if (this.pathsDiffer(path, this.lastPath)) {
+        this.drawPath(path);
+    }
+    this.lastPath = path;
+}
+
+MazeView.prototype.findInvalidPathSegmentIndex = function(path) {
+    for (var i = 0; i < path.length; i++) {
+        if (path[i].length == 0) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 MazeView.prototype.pathsDiffer = function(pathA, pathB) {
@@ -212,7 +245,7 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
     return false;
 }
 
-MazeView.prototype.enoughActionPoints = function(clickedTile, maze) {
+MazeView.prototype.operationCostForActionOnTile = function(clickedTile, maze) {
     var operationCost = 0;
     if (clickedTile.userPlaced) {
         if (clickedTile.type === Tile.Type.Blocker) {
@@ -228,14 +261,8 @@ MazeView.prototype.enoughActionPoints = function(clickedTile, maze) {
             operationCost = 1
         }
     }
-
-    if (! (this.maze.actionsUsed + operationCost > this.maze.actionPoints)) {
-        this.maze.actionsUsed += operationCost;
-        this.updateActionsUsed();
-        return true;
-    } else {
-        return false;
-    }
+    
+    return operationCost
 }
 
 MazeView.prototype.updateActionsUsed = function() {
@@ -274,18 +301,13 @@ function PathSvgView(containerBoundingRect, segmentCount) {
     this.currentAnimation = null;
 }
 
-PathSvgView.prototype.drawPath = function(path) {
-    // If any segment is empty, we have no path - draw nothing
+PathSvgView.prototype.clear = function() {
     for (var i = 0; i < path.length; i++) {
-        if (path[i].length == 0) {
-            for (var i = 0; i < path.length; i++) {
-                this.pathElements[i].setAttribute('d', "");
-            }
-            return;
-        }
+        this.pathElements[i].setAttribute('d', "");
     }
+}
 
-    // If all segments are unempty, continue and draw all paths
+PathSvgView.prototype.drawPath = function(path) {
     for (var i = 0; i < path.length; i++) {
         var svgSegment = [];
 
@@ -316,6 +338,25 @@ PathSvgView.prototype.animateSvg = function() {
     });
 
     this.currentAnimation = animation;
+}
+
+PathSvgView.prototype.flashInvalidPathSegment = function(i) {
+    if (this.pathElements[i].animation !== undefined &&
+            !this.pathElements[i].animation.completed) {
+        this.pathElements[i].animation.seek(1.0);
+    }
+
+    var animation = anime({
+        targets: this.pathElements[i],
+        stroke: '#FF0000',
+        'stroke-width': 6,
+        easing: 'linear',
+        loop: 4,
+        direction: 'alternate',
+        duration: 100,
+    });
+
+    this.pathElements[i].animation = animation;
 }
 
 PathSvgView.prototype.getElement = function() {
