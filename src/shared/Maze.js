@@ -10,11 +10,19 @@ export default function Maze(seed) {
     this.xsize = 20;
     this.ysize = 20;
     this.blockerProbability = 0.2;
+
+    // how many action points the user gets to spend
+    // adding a blocker always costs 1
     this.actionPoints = 10;
     // holds the waypoints (points between start and end) that
     // need to be traveled to in order
     this.numWaypoints = 2;
+
+    // how many points are used to generate the protected path
     this.numPathVertexes = 20;
+
+    // action point cost to remove a natural blocker
+    this.removalCost = 5;
 
     this.pathLength = 0;
 
@@ -180,6 +188,8 @@ Maze.prototype.generateMazeParams = function(random) {
     this.blockerProbability = generateRandomBetween(0.2, 0.6);
 
     this.actionPoints = Math.floor(10 + generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
+
+    this.removalCost = Math.floor(generateRandomBetween(2, 10));
 
     // console.log('xsize: ' + this.xsize);
     // console.log('ysize: ' + this.ysize);

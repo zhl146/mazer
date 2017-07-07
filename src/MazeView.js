@@ -173,7 +173,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     var tile = this.maze.maze[point.y][point.x];
     // before it does anything, checks if the user has enough action points
     // to do the desired action
-    if (this.enoughActionPoints(tile)) {
+    if (this.enoughActionPoints(tile, this.maze)) {
         console.log('Actions taken: ' + this.actionCounter + '/' + this.maze.actionPoints);
         tile.userPlaced = !tile.userPlaced;
         tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
@@ -185,18 +185,18 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     }
 }
 
-MazeView.prototype.enoughActionPoints = function( clickedTile) {
+MazeView.prototype.enoughActionPoints = function(clickedTile, maze) {
     var operationCost = 0;
     if (clickedTile.userPlaced) {
         if (clickedTile.type === Tile.Type.Blocker) {
             operationCost = -1
         } else {
-            operationCost = -5
+            operationCost = - maze.removalCost;
         }
     }
     else {
         if (clickedTile.type === Tile.Type.Blocker) {
-            operationCost = 5
+            operationCost =  maze.removalCost;
         } else {
             operationCost = 1
         }

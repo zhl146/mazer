@@ -10,7 +10,7 @@ $tileSize: 40px;
 
 body {
   padding: 50px;
-    font-family: 'VT323', monospace;
+  font-family: 'VT323', monospace;
 }
 
 a {
@@ -18,107 +18,107 @@ a {
 }
 
 @function nth-or-null($list, $index) {
-    @return if(length($list) >= $index, nth($list, $index), null);
+  @return if(length($list) >= $index, nth($list, $index), null);
 }
 
 @mixin aspect-ratio($arglist... /*$width/$ratio, $height*/) {
-    $map : keywords($arglist);
-    $height: map-get($map, height) or nth-or-null($arglist, 2);
-    $width:  map-get($map, width)  or nth-or-null($arglist, 1);
-    $ratio:  map-get($map, ratio)  or if($width and $height, $width/$height, nth-or-null($arglist, 1)) or 1;
-    $padding: 1/$ratio * 100%;
-    &:before { content: ''; float:left; padding-bottom: $padding; margin-right:-100%; }
-    &:after  { content: ''; display:table; clear: both; }
+  $map : keywords($arglist);
+  $height: map-get($map, height) or nth-or-null($arglist, 2);
+  $width:  map-get($map, width)  or nth-or-null($arglist, 1);
+  $ratio:  map-get($map, ratio)  or if($width and $height, $width/$height, nth-or-null($arglist, 1)) or 1;
+  $padding: 1/$ratio * 100%;
+  &:before { content: ''; float:left; padding-bottom: $padding; margin-right:-100%; }
+  &:after  { content: ''; display:table; clear: both; }
 }
 
 .tile {
-    left:0; top:0; right:0; bottom:0;
+  left:0; top:0; right:0; bottom:0;
 }
 
 .tile_color_natural {
-    background-color: $groundColor_Natural;
+  background-color: $groundColor_Natural;
 }
 
 .tile_color_user {
-    background-color: $groundColor_User;
+  background-color: $groundColor_User;
 }
 
 .tile_unwalkable_natural {
-    position: absolute;
-    left: 0; top: 0; right: 0; bottom: 0;
-    background-image: url("/Regular_octagon.svg");
-    background-size: cover;
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background-image: url("/Regular_octagon.svg");
+  background-size: cover;
 }
 
 .tile_unwalkable_user {
-    position: absolute;
-    left: 0; top: 0; right: 0; bottom: 0;
-    background-image: url("/Regular_octagon_user.svg");
-    background-size: cover;
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background-image: url("/Regular_octagon_user.svg");
+  background-size: cover;
 }
 
 .tile_waypoint {
-    position: absolute;
-    left: 0; top: 0; right: 0; bottom: 0;
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
 }
 
 .tile_wrapper {
-    @include aspect-ratio(1);
-    flex: 0 1 $tileSize;
-    position: relative;
-    display: inline-block;
+  @include aspect-ratio(1);
+  flex: 0 1 $tileSize;
+  position: relative;
+  display: inline-block;
 }
 
 .tile_tint_overlay {
-    background-color: rgba(0,0,0,0);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  background-color: rgba(0,0,0,0);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .tile_tint_overlay:hover {
-    background-color: rgba(255,255,255,0.5);
+  background-color: rgba(255,255,255,0.5);
 }
 
 .tile_container {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .tile_text {
-    font-size: 1em;
-    font-weight: 600;
+  font-size: 1em;
+  font-weight: 600;
 
-    z-index: 1000;
-    pointer-events: none;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .absolute_center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translatex(-50%) translatey(-50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translatex(-50%) translatey(-50%);
 }
 
 #maze_container {
-    position: relative;
+  position: relative;
 }
 
 .path-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: none;
 }
 
 .svg-paths {
-    fill: none;
-    fill-rule: evenodd;
-    stroke-opacity: 0.8;
-    stroke: #4E8D00;
-    stroke-width: 4;
-    stroke-linecap: butt;
-    stroke-linejoin: bevel;
+  fill: none;
+  fill-rule: evenodd;
+  stroke-opacity: 0.8;
+  stroke: #4E8D00;
+  stroke-width: 4;
+  stroke-linecap: butt;
+  stroke-linejoin: bevel;
 }
