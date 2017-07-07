@@ -15,7 +15,7 @@ router.post('/check', function(req, res, next) {
 
     if (score.score >= 0) {
         var scoreModel = new ScoreModel();
-        scoreModel.name = "personmanguy";
+        scoreModel.name = (solution.name ? solution.name : "anonymous");
         scoreModel.score = score.score;
         scoreModel.date = solution.seed;
         scoreModel.solution = solution.diffPoints;
