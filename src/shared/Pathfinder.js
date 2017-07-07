@@ -31,6 +31,8 @@ PointSet.prototype.del = function(point) {
 export default function Pathfinder(maze)
 {
     this.maze = maze;
+
+    this.lastGTracker = [null, null, null, null, null];
 }
 
 // takes a start point and end point
@@ -75,18 +77,11 @@ Pathfinder.prototype.findPath = function(start, end) {
     while ( openSet.size() ) {
 
         var currentPoint = openSet.pop();
-        if ( counter >=1000) { break;}
+        if ( counter >= 2000) { break;}
         counter ++;
 
         if ( currentPoint.x === end.x && currentPoint.y === end.y ) {
-            var path = [];
-            var node = currentPoint;
-            path.unshift(node);
-            while (node.parent) {
-                path.unshift(node.parent);
-                node = node.parent;
-            }
-            return path;
+            break;
         }
 
         closedSet.add(currentPoint);
@@ -110,6 +105,23 @@ Pathfinder.prototype.findPath = function(start, end) {
         }
     }
 
-    return [];
+    this.lastGTracker.unshift(gTracker);
+    this.lastGTracker.pop();
+
+    if (gTracker[end.y][end.x] < 0) {
+        // Never visited end node, so no path
+        return [];
+    }
+
+    var path = [];
+    var node = currentPoint;
+    path.unshift(node);
+    while (node.parent) {
+        path.unshift(node.parent);
+        node = node.parent;
+    }
+    this.lastGTracker.unshift(gTracker);
+    this.lastGTracker.pop();
+    return path;
 };
 

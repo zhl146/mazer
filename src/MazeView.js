@@ -144,6 +144,21 @@ MazeView.prototype.drawPath = function() {
     this.pathSvgView.drawPath(svgPath);
 }
 
+// Renders the G-values of the specified index of pathfinder run,
+// where 0 is most recent
+MazeView.prototype.debug_showGTrackers = function(i) {
+    console.log(this.maze.pathfinder.lastGTracker);
+    if (this.maze.pathfinder.lastGTracker[i] == null) {
+        return;
+    }
+
+    for (var y = 0; y < this.tileElements.length; y++) {
+        for (var x = 0; x < this.tileElements[y].length; x++) {
+            this.tileElements[y][x].querySelector('.tile_text').innerHTML = this.maze.pathfinder.lastGTracker[i][y][x];
+        }
+    }
+}
+
 MazeView.prototype.tileClicked = function(mouseEvent, point) {
     if (!this.maze.isModifiable(point)) {
         return;

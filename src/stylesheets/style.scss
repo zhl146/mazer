@@ -56,24 +56,8 @@ a {
 }
 
 .tile_waypoint {
-    width: 0;
-    height: 0;
-    border: $tileSize/3 solid transparent;
-    top: -$tileSize/3;
-    //left: $tileSize/2;
-    position: relative;
-    border-bottom-color: $waypointColor;
-}
-
-.tile_waypoint:after {
-    content: '';
-    left: -$tileSize/3;
-    top: $tileSize/3;
     position: absolute;
-    width: 0;
-    height: 0;
-    border: $tileSize/3 solid transparent;
-    border-top-color: $waypointColor;
+    left: 0; top: 0; right: 0; bottom: 0;
 }
 
 .tile_wrapper {
@@ -102,7 +86,7 @@ a {
 }
 
 .tile_text {
-    font-size: $tileSize/2;
+    font-size: 0.7em;
     font-family: 'Playfair Display SC', serif;
     font-weight: 600;
 
