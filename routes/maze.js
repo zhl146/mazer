@@ -26,7 +26,7 @@ router.post('/check', function(req, res, next) {
     }).then(existingScore => {
         if (existingScore.length > 0) {
             // Return the already-existing score to prevent spamming
-            return Promise.resolve(existingDocs[0]);
+            return Promise.resolve(existingScore[0]);
         }
 
         var scoreModel = new ScoreModel();

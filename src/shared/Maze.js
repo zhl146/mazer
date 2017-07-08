@@ -4,12 +4,15 @@ import Point from './Point';
 import Pathfinder from './Pathfinder';
 
 export default function Maze(seed) {
-    var random = seedrandom(seed);
+    this.random = seedrandom(seed);
     this.seed = seed;
 
     // maze params
     this.xsize = 20;
     this.ysize = 20;
+
+    this.unusedPoints = [];
+
     this.blockerProbability = 0.2;
 
     // how many action points the user gets to spend
@@ -29,9 +32,7 @@ export default function Maze(seed) {
     // action point cost to remove a natural blocker
     this.removalCost = 5;
 
-    this.pathLength = 0;
-
-    this.generateMazeParams(random);
+    this.generateMazeParams();
 
     // Used to find paths through this maze
     this.pathfinder = new Pathfinder(this);
@@ -49,13 +50,15 @@ export default function Maze(seed) {
     var newPoint;
 
     // generate start/end/waypoints
+    // they must be at least 2 distance apart to be accepted
     while ( pathVertices.length < this.numPathVertexes ) {
-        newPoint = this.generateNewPoint(random);
-        if (pathVertices.indexOfPoint(newPoint) < 0) {
+        newPoint = this.generateNewPoint();
+        if (pathVertices.pointIsAtLeastThisFar(newPoint, 2) ) {
             pathVertices.push(newPoint);
         }
     }
 
+    // connect vertexes with path to create a random protected path between the start and end
     for (var i = 0; i < this.numPathVertexes - 1; i++) {
         var pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
         if (i !== 0) {
@@ -68,30 +71,31 @@ export default function Maze(seed) {
 
     // Select random vertices to delete, excluding start and end
     while (pathVertices.length > this.numWaypoints + 2) {
-        var index = Math.floor(1.0 + random() * (pathVertices.length - 2.0));
+        var index = Math.floor(1.0 + this.random() * (pathVertices.length - 2.0));
         pathVertices.splice(index, 1);
     }
 
     // the leftover points are the waypoints
     this.waypoints = pathVertices;
 
-    for (var y = 0; y < this.ysize; y++) {
-        var row = [];
-        for (var x = 0; x < this.xsize; x++) {
-            newPoint = new Point(x, y);
-            var tileType;
-            if (protectedPath.indexOfPoint(newPoint) < 0) {
-                var propensity = random();
-                tileType =  propensity <= this.blockerProbability ? 'Blocker' : 'Empty'
-            } else {
-                tileType = 'Empty';
-            }
-            row.push(new Tile(Tile.Type[tileType]));
-        }
-        generatedMaze.push(row);
-    }
-
-    this.maze = generatedMaze;
+    this.generateBlockers();
+    // for (var y = 0; y < this.ysize; y++) {
+    //     var row = [];
+    //     for (var x = 0; x < this.xsize; x++) {
+    //         newPoint = new Point(x, y);
+    //         var tileType;
+    //         if (!protectedPath.containsPoint(newPoint)) {
+    //             var propensity = this.random();
+    //             tileType =  propensity <= this.blockerProbability ? 'Blocker' : 'Empty'
+    //         } else {
+    //             tileType = 'Empty';
+    //         }
+    //         row.push(new Tile(Tile.Type[tileType]));
+    //     }
+    //     generatedMaze.push(row);
+    // }
+    //
+    // this.maze = generatedMaze;
 };
 
 Maze.prototype.isPassable = function(point)
@@ -110,10 +114,9 @@ Maze.prototype.contains = function(point) {
         point.x < this.xsize && point.y < this.ysize;
 };
 
-Maze.prototype.generateNewPoint = function(random) {
-    var pointX = Math.floor(random() * this.xsize);
-    var pointY = Math.floor(random() * this.ysize);
-    return new Point(pointX, pointY);
+Maze.prototype.generateNewPoint = function() {
+    var randomPointIndex = this.generateRandomBetween(0, this.unusedPoints.length - 1);
+    return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
 Maze.prototype.generateEmptyMaze = function() {
@@ -165,30 +168,39 @@ Maze.prototype.getUserChanges = function(userMaze) {
     return diffPoints;
 };
 
-Maze.prototype.generateMazeParams = function(random) {
+Maze.prototype.generateRandomBetween = function(min, max) {
+    return this.random() * ( max - min ) + min;
+};
 
-    var generateRandomBetween = function(min, max) {
-        return random() * ( max - min ) + min;
-    };
+Maze.prototype.generateMazeParams = function() {
 
-    this.xsize = Math.floor(generateRandomBetween(15, 40));
-    this.ysize = Math.floor(generateRandomBetween(15, 40));
+    this.xsize = Math.floor(this.generateRandomBetween(15, 40));
+    this.ysize = Math.floor(this.generateRandomBetween(15, 40));
 
     var size = this.xsize * this.ysize;
 
     this.numWaypoints = 0;
-    this.numPathVertexes = Math.floor(generateRandomBetween(.6, 1) * Math.sqrt(size));
+    this.numPathVertexes = Math.floor(this.generateRandomBetween(.6, 1) * Math.sqrt(size));
     for (var i = 0; i < this.numPathVertexes / 5; i++) {
-        if (random() > 0.6) {
+        if (this.random() > 0.6) {
             this.numWaypoints++;
         }
     }
 
-    this.blockerProbability = generateRandomBetween(0.2, 0.6);
+    this.blockerProbability = this.generateRandomBetween(0.2, 0.6);
 
-    this.actionPoints = Math.floor(10 + generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
+    this.actionPoints = Math.floor(10 + this.generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
 
-    this.removalCost = Math.floor(generateRandomBetween(2, 10));
+    this.removalCost = Math.floor(this.generateRandomBetween(2, 10));
+
+    // this creates a list of all points on our maze
+    var newPoint;
+    for ( var row = 0; row < this.ysize; row++) {
+        for (var col = 0; col < this.xsize; col++) {
+            newPoint = new Point(col, row);
+            this.unusedPoints.push(newPoint);
+        }
+    }
 
     // console.log('xsize: ' + this.xsize);
     // console.log('ysize: ' + this.ysize);
@@ -239,6 +251,40 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
     }
     
     return operationCost
+};
+
+Maze.prototype.generateBlockers = function() {
+};
+
+Maze.prototype.seedBlockers = function() {
+    var numSeedPoints = 5;
+    var blockerPoints = [];
+    for (var i = 0; i < numSeedPoints; i++) {
+
+         blockerPoints.push()
+    }
+};
+
+
+// extra array functions to test arrays with points
+Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
+
+    var calculateDistance = function(point1, point2) {
+        var xDiff = point1.x - point2.x;
+        var yDiff = point1.y - point2.y;
+        return Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+    };
+
+    for (var i = 0; i < this.length; i++) {
+        if ( calculateDistance(this[i], point) < distance ) {
+            return false;
+        }
+    }
+    return true;
+};
+
+Array.prototype.containsPoint = function(obj) {
+    return ( this.indexOfPoint(obj) >= 0 );
 };
 
 // extend Array base type

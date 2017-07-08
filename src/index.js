@@ -17,7 +17,9 @@ var getMazeSeed = function() {
 
     return new XhrPromise(xhr)
         .then(function(response) {
-            return Promise.resolve(response.seed);
+            var seed = Math.random();
+            Promise.resolve(seed);
+            // return Promise.resolve(response.seed);
         });
 };
 
