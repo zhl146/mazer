@@ -253,14 +253,31 @@ MazeView.prototype.updateActionsUsed = function() {
 };
 
 MazeView.prototype.updateScore = function (score) {
-    document.getElementById('current-score').innerHTML = 'SCORE: ' + score;
+    var scoreCounter = document.getElementById('current-score');
+    var currentScore = scoreCounter.innerHTML;
+
+    var myObject = {
+        score: currentScore,
+    };
+
+    var JSobjectProp = anime({
+        targets: myObject,
+        score: score,
+        easing: 'easeInOutQuad',
+        round: 1,
+        update: function() {
+            scoreCounter.innerHTML = myObject.score;
+        }
+    });
+
 };
 
 MazeView.prototype.initializeViewInformation = function () {
-    document.getElementById('current-score').innerHTML = 'SCORE: 0';
-    document.getElementById('action-counter').innerHTML = 'actions left: '+ this.maze.actionPoints + '/' + this.maze.actionPoints;
-    var removeCost = 'Cost to remove a natural blocker: ' + this.maze.removalCost + ' action points';
-    document.getElementById('removal-cost').innerHTML = removeCost;
+    document.getElementById('current-score').innerHTML = '0';
+    document.getElementById('action-counter').innerHTML = 'actions left: '
+        + this.maze.actionPoints + '/' + this.maze.actionPoints;
+    document.getElementById('removal-cost').innerHTML = 'Cost to remove a natural blocker: '
+        + this.maze.removalCost + ' action points';
 };
 
 MazeView.prototype.submitSolution = function(name) {
