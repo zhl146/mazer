@@ -461,7 +461,6 @@ PathSvgView.prototype.animateToDashed = function() {
             // Leaving this interferes with animejs, and we get the
             // stroke-dasharray from svg-paths-dashed anyway
             this.pathElements[i].removeAttribute('stroke-dasharray');
-            console.log("wetf");
             this.pathElements[i].style['stroke-dasharray'] = null;
         }
 

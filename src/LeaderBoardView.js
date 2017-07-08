@@ -86,11 +86,11 @@ LeaderBoardView.prototype.fillScores = function(rank) {
 };
 
 LeaderBoardView.prototype.show = function () {
-    this.leaderBoard.classList.remove('hidden');
+    this.leaderBoard.classList.remove('inactive');
 };
 
 LeaderBoardView.prototype.hide = function() {
-    this.leaderBoard.classList.add('hidden');
+    this.leaderBoard.classList.add('inactive');
 };
 
 LeaderBoardView.prototype.clear = function() {
