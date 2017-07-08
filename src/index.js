@@ -7,34 +7,26 @@ import Pathfinder from './shared/Pathfinder';
 import MazeView from './MazeView';
 import LeaderBoardView from './LeaderBoardView';
 import UsernamePopupView from './UsernamePopupView';
+import XhrPromise from './XhrPromise';
 
-var xhr = new XMLHttpRequest();
-// this is the maze seed url
-var url = 'http://localhost:3000/maze';
-xhr.open("GET", url, true);
+var getMazeSeed = function() {
+    var xhr = new XMLHttpRequest();
+    var url = 'http://localhost:3000/maze';
+    xhr.responseType = 'json';
+    xhr.open("GET", url, true);
 
-var mazeView = null;
-var leaderboard = null;
-var usernamePopup = new UsernamePopupView();
-
-var seed = null;
-
-xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-        seed = JSON.parse(xhr.responseText).seed;
-        initView(seed);
-    }
+    return new XhrPromise(xhr)
+        .then(function(response) {
+            return Promise.resolve(response.seed);
+        });
 };
 
-xhr.send(null);
-
-
 var initView = function(seed) {
-    mazeView = new MazeView('maze_container', seed);
-    leaderboard = new LeaderBoardView(seed);
+    var mazeView = new MazeView('maze_container', seed);
+    var leaderboard = new LeaderBoardView(seed);
+    var usernamePopup = new UsernamePopupView(seed);
 
-    var submitBtn = document.getElementById('submit-btn');
-    submitBtn.addEventListener("click", function() {
+    mazeView.submitBtn.addEventListener("click", function() {
         usernamePopup.show();
     });
 
@@ -48,5 +40,6 @@ var initView = function(seed) {
                 }
             )
     });
-
 };
+
+getMazeSeed().then(initView);
