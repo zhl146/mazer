@@ -45,8 +45,7 @@ router.post('/check', function(req, res, next) {
         res.json({ 'rank': rank });
     }).catch(error => {
         if (error) {
-            res.status(500).json({ 'error': err });
-            return;
+            res.status(500).json({ 'error': error });
         }
     });
 });

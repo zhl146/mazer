@@ -48,11 +48,10 @@ var getMazeSeed = function() {
     xhr.responseType = 'json';
     xhr.open("GET", url, true);
 
-    return new XhrPromise(xhr)
+    return XhrPromise(xhr)
         .then(function(response) {
             // var seed = Math.random();
-            // Promise.resolve(seed);
-            // the above code doesn't work for me anymore
+            // return Promise.resolve(seed);
             return Promise.resolve(response.seed);
         });
 };
