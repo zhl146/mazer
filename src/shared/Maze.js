@@ -7,9 +7,12 @@ export default function Maze(seed) {
     this.random = seedrandom(seed);
     this.seed = seed;
 
+    // ------------------------------------------------------
     // maze params
+    // ------------------------------------------------------
     this.xsize = 20;
     this.ysize = 20;
+    this.tileset = {};
 
     // array of points
     // anything unused at the end has a chance of becoming a blocker
@@ -38,7 +41,12 @@ export default function Maze(seed) {
     // action point cost to remove a natural blocker
     this.removalCost = 5;
 
+    // this function overwrites all of the above defaults
     this.generateMazeParams();
+
+    // ------------------------------------------------------
+    // pathfinding
+    // ------------------------------------------------------
 
     // Used to find paths through this maze
     this.pathfinder = new Pathfinder(this);
@@ -89,8 +97,51 @@ export default function Maze(seed) {
     // the leftover points are the waypoints
     this.waypoints = pathVertices;
 
+    // ------------------------------------------------------
+    // blocker generation
+    // ------------------------------------------------------
+
     this.generateBlockers();
 };
+
+Maze.tilesets = [
+    {
+        'name': 'desert',
+        "colors": {
+            'groundNatural': 'sandybrown',
+            'groundUser': 'peru',
+            'blockerNatural': 'darkred',
+            'blockerUser': 'tomato',
+        }
+    },
+    {
+        'name': 'forest',
+        "colors": {
+            'groundNatural': '#8FCB9B',
+            'groundUser': '#636940',
+            'blockerNatural': '#0C8346',
+            'blockerUser': '#054A29',
+        }
+    },
+    {
+        'name': 'winter',
+        "colors": {
+            'groundNatural': 'rgb(240,240,240)',
+            'groundUser': '#BAA68D',
+            'blockerNatural': 'rgb(175,175,175)',
+            'blockerUser': 'rgb(75,75,75)',
+        }
+    },
+    {
+        'name': 'dark',
+        "colors": {
+            'groundNatural': '#689165',
+            'groundUser': '#748067',
+            'blockerNatural': '#436436',
+            'blockerUser': '#14281D',
+        }
+    }
+];
 
 Maze.prototype.isPassable = function(point)
 {
@@ -162,6 +213,8 @@ Maze.prototype.generateRandomBetween = function(min, max) {
 };
 
 Maze.prototype.generateMazeParams = function() {
+
+    this.tileset = Maze.tilesets[this.generateRandomBetween(0, 3)];
 
     this.xsize = Math.floor(this.generateRandomBetween(15, 40));
     this.ysize = Math.floor(this.generateRandomBetween(15, 40));

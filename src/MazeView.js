@@ -94,6 +94,10 @@ MazeView.prototype.generateTileElements = function() {
     }
 };
 
+MazeView.prototype.applyTileset = function () {
+    
+};
+
 MazeView.prototype.setupTile = function(point) {
     var mazeTile = this.maze.maze[point.y][point.x];
     var tileWrapper = this.tileElements[point.y][point.x];
