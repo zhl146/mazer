@@ -14,6 +14,7 @@ import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 
 var database = mongoose.connect('mongodb://localhost/test');
+mongoose.Promise = Promise;
 
 var app = express();
 
