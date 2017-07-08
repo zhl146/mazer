@@ -13,33 +13,42 @@ router.post('/check', function(req, res, next) {
     var solution = req.body;
     var score = new Score('', solution.diffPoints, solution.seed);
 
-    if (score.score >= 0) {
+    if (score.score < 0) {
+        res.status(400).json({ 'error' : 'u r cheater' });
+        return;
+    }
+
+    // First search for duplicates
+    ScoreModel.find({
+        'name': solution.name,
+        'score': score.score,
+        'date': solution.seed, 
+    }).then(existingScore => {
+        if (existingScore.length > 0) {
+            // Return the already-existing score to prevent spamming
+            return Promise.resolve(existingDocs[0]);
+        }
+
         var scoreModel = new ScoreModel();
         scoreModel.name = (solution.name ? solution.name : "Anonymous");
         scoreModel.score = score.score;
         scoreModel.date = solution.seed;
         scoreModel.solution = solution.diffPoints;
 
-        console.log(score.score);
-
-        scoreModel.save(function(error, product) {
-            if (error) {
-                res.status(500).json({ 'error': err });
-                return;
-            }
-
-            ScoreModel.count({ 'date': solution.seed, 'score': { '$gte': product.score } }, function(error, count) {
-                if (error) {
-                    res.status(500).json({ 'error': err });
-                } else {
-                    res.json({ 'rank': count });
-                }
-            });
+        return scoreModel.save();
+    }).then(savedScore => {
+        return ScoreModel.count({
+            'date': solution.seed,
+            'score': { '$gte': savedScore.score }
         });
-    } else {
-        res.status(400).json({ 'error' : 'u r cheater' });
-    }
-
+    }).then(rank => {
+        res.json({ 'rank': rank });
+    }).catch(error => {
+        if (error) {
+            res.status(500).json({ 'error': err });
+            return;
+        }
+    });
 });
 
 /* should return a json describing the current maze */
