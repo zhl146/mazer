@@ -16,6 +16,7 @@ export default function MazeView(id, seed) {
 
     this.tileElements = [];
     this.element = document.getElementById(id);
+    this.submitBtn = document.getElementById('submit-btn');
 
     this.setupMaze();
 
