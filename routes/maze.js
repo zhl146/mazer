@@ -44,7 +44,9 @@ router.post('/check', function(req, res, next) {
 
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
-    res.send(JSON.stringify({ seed: generateSeed() }));
+    var seed = generateSeed();
+    console.log(seed);
+    res.send(JSON.stringify({ 'seed': seed }));
 });
 
 export default router;

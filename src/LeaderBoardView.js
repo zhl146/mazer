@@ -94,7 +94,7 @@ LeaderBoardView.prototype.hide = function() {
 LeaderBoardView.prototype.clear = function() {
     var topTen = document.getElementById('top-scores');
     var closeThree = document.getElementById('closest-scores');
-    
+
     while (topTen.hasChildNodes()) {
         topTen.removeChild(topTen.lastChild);
     }
