@@ -3,6 +3,12 @@ export default function Point(x, y) {
     this.y = y;
 };
 
+Point.prototype.calculateDistance = function ( point ) {
+    var xDiff = this.x - point.x;
+    var yDiff = this.y - point.y;
+    return Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+};
+
 Point.prototype.copy = function() {
   return new Point(this.x, this.y);
 };
