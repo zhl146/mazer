@@ -14,20 +14,20 @@ export default function MazeView(id, seed) {
     this.maze = new Maze(this.seed);
     this.baseMaze = new Maze(this.seed);
 
+    this.scoreCalculator = new Score(this.baseMaze);
+
     this.tileElements = [];
     this.element = document.getElementById(id);
     this.submitBtn = document.getElementById('submit-btn');
     this.resetBtn = document.getElementById('reset-btn');
 
-    this.setupMaze();
-
     this.initializeViewInformation();
 
+    this.generateTileElements();
     this.pathSvgView = new PathSvgView(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.pathSvgView.getElement());
 
-    this.lastPath = this.maze.findPath();
-    this.drawPath(this.lastPath);
+    this.redrawAll();
 
     var self = this;
     window.addEventListener('resize', function() {
@@ -36,21 +36,24 @@ export default function MazeView(id, seed) {
     });
 }
 
-// THIS DOESNT WORK YET
-MazeView.prototype.clearMaze = function() {
-    while (this.element.hasChildNodes()) {
-        this.element.removeChild(this.element.lastChild);
-    }
-};
-
-// THIS DOESNT WORK YET
 MazeView.prototype.resetMaze = function() {
     this.maze = new Maze(this.seed);
-    this.clearMaze();
-    this.setupMaze();
+    this.redrawAll();
+    this.updateScore(0);
+}
+
+MazeView.prototype.redrawAll = function() {
+    for (var y = 0; y < this.tileElements.length; y++) {
+        for (var x = 0; x < this.tileElements[y].length; x++) {
+            this.setupTile(new Point(x, y));
+        }
+    }
+
+    this.lastPath = this.maze.findPath();
+    this.drawPath(this.lastPath);
 };
 
-MazeView.prototype.setupMaze = function() {
+MazeView.prototype.generateTileElements = function() {
     for (var y = 0; y < this.maze.maze.length; y++) {
         var rowContainer = document.createElement('div');
         rowContainer.className = "tile_container";
@@ -88,12 +91,6 @@ MazeView.prototype.setupMaze = function() {
         }
 
         this.element.appendChild(rowContainer);
-    }
-
-    for (var y = 0; y < this.maze.maze.length; y++) {
-        for (var x = 0; x < this.maze.maze[y].length; x++) {
-            this.setupTile(new Point(x, y));
-        }
     }
 };
 
@@ -205,10 +202,9 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
 
     // Modify the actual maze view to reflect the changes
     this.setupTile(point);
-    var diffPoints = this.baseMaze.getUserChanges(this.maze);
-    var score = new Score('', diffPoints, this.seed);
 
-    this.updateScore(score.score);
+    // Get the new score
+    this.updateScore(this.scoreCalculator.calculateScore(this.maze));
 
     // Only redraw the path if the new path is different
     if (this.pathsDiffer(path, this.lastPath)) {

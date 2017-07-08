@@ -1,35 +1,18 @@
-import Maze from "./Maze";
 
-export default function Score( name, diffPoints, date) {
-    this.name = name;
-    this.diffPoints = diffPoints;
-    this.date = date;
-    this.score = this.calculateScore()
+export default function Score(baseMaze) {
+    var defaultPath = baseMaze.findPath()
+    this.baseScore = Math.floor(this.calculatePathLength(defaultPath)*100);
 }
 
 // Returns an integer indicating the user's score. If negative, there was
 // a problem applying the user's actions (cheating or bug).
-Score.prototype.calculateScore = function() {
-    // userMaze starts out the same as the default maze
-    var userMaze = new Maze(this.date);
-    var defaultPath = userMaze.findPath()
-
-    // apply user's changes to the maze
-    // should make the maze the same as the one the user submitted
-    for (var i = 0; i < this.diffPoints.length; i++ ) {
-        var result = userMaze.doActionOnTile(this.diffPoints[i]);
-        if (result === false) {
-            return -1;
-        }
-    }
-
+Score.prototype.calculateScore = function(maze) {
     // use the new maze to calculate the user's submitted path
-    var adjustedPath = userMaze.findPath();
+    var adjustedPath = maze.findPath();
 
-    var baseScore = Math.floor(this.calculatePathLength(defaultPath)*100);
     var unadjustedScore = Math.floor(this.calculatePathLength(adjustedPath)*100);
+    var adjustedScore = unadjustedScore - this.baseScore;
 
-    var adjustedScore = unadjustedScore - baseScore;
     return adjustedScore
 };
 

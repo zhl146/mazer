@@ -4,6 +4,7 @@ import generateSeed from './maze-functions/generate-seed';
 import ScoreModel from '../database/leaderBoard-model';
 
 import Score from '../src/shared/Score';
+import Maze from '../src/shared/Maze';
 
 var router = express.Router();
 
@@ -11,17 +12,30 @@ var router = express.Router();
 /* turn this into a post later */
 router.post('/check', function(req, res, next) {
     var solution = req.body;
-    var score = new Score('', solution.diffPoints, solution.seed);
 
-    if (score.score < 0) {
-        res.status(400).json({ 'error' : 'u r cheater' });
-        return;
+    var baseMaze = new Maze(solution.seed);
+    var maze = new Maze(solution.seed);
+
+    console.log(solution.diffPoints);
+
+    // apply user's changes to the maze
+    // should make the maze the same as the one the user submitted
+    for (var i = 0; i < solution.diffPoints.length; i++ ) {
+        var result = maze.doActionOnTile(solution.diffPoints[i]);
+        if (result === false) {
+            // Invalid action
+            res.status(400).json({ 'error' : 'u r cheater' });
+            return;
+        }
     }
+
+    var scoreCalculator = new Score(baseMaze);
+    var score = scoreCalculator.calculateScore(maze);
 
     // First search for duplicates
     ScoreModel.find({
         'name': solution.name,
-        'score': score.score,
+        'score': score,
         'date': solution.seed, 
     }).then(existingScore => {
         if (existingScore.length > 0) {
@@ -31,7 +45,7 @@ router.post('/check', function(req, res, next) {
 
         var scoreModel = new ScoreModel();
         scoreModel.name = (solution.name ? solution.name : "Anonymous");
-        scoreModel.score = score.score;
+        scoreModel.score = score;
         scoreModel.date = solution.seed;
         scoreModel.solution = solution.diffPoints;
 
