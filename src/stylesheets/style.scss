@@ -172,6 +172,9 @@ a {
   stroke-width: 4;
   stroke-linecap: butt;
   stroke-linejoin: bevel;
+}
+
+.svg-paths-dashed {
   stroke-dasharray: 10;
 }
 
@@ -207,8 +210,12 @@ a {
 
 /* leaderboard stuff */
 
-.hidden {
+.inactive {
   display: none;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .top-scores, .closest-scores{
