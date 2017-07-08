@@ -72,6 +72,7 @@ export default function Maze(seed) {
         pathVertices.splice(index, 1);
     }
 
+    // the leftover points are the waypoints
     this.waypoints = pathVertices;
 
     for (var y = 0; y < this.ysize; y++) {
@@ -102,12 +103,12 @@ Maze.prototype.isPassable = function(point)
 Maze.prototype.isModifiable = function(point) {
     return this.contains(point) &&
         this.waypoints.indexOfPoint(point) < 0;
-}
+};
 
 Maze.prototype.contains = function(point) {
     return point.x >= 0 && point.y >= 0 &&
         point.x < this.xsize && point.y < this.ysize;
-}
+};
 
 Maze.prototype.generateNewPoint = function(random) {
     var pointX = Math.floor(random() * this.xsize);
@@ -218,7 +219,7 @@ Maze.prototype.doActionOnTile = function(point) {
     this.actionsUsed += operationCost;
 
     return true;
-}
+};
 
 Maze.prototype.operationCostForActionOnTile = function(tile) {
     var operationCost = 0;
@@ -238,7 +239,7 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
     }
     
     return operationCost
-}
+};
 
 // extend Array base type
 Array.prototype.indexOfPoint = function(obj) {
