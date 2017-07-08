@@ -9,7 +9,40 @@ import LeaderBoardView from './LeaderBoardView';
 import UsernamePopupView from './UsernamePopupView';
 import XhrPromise from './XhrPromise';
 
+var getUrlParameter = function(parameterName) {
+    var pageQueryString = window.location.search.substring(1);
+    var urlVariables = pageQueryString.split('&');
+    for (var i = 0; i < urlVariables.length; i++) 
+    {
+        var keyValuePair = urlVariables[i].split('=');
+        if (keyValuePair[0] == parameterName) 
+        {
+            return keyValuePair[1];
+        }
+    }
+    return null;
+}
+
+var generateRandomSeed = function() {
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var seed = [];
+    for (var i = 0; i < 8; i++) {
+        seed.push(chars[Math.floor(Math.random() * chars.length)]);
+    }
+    return seed.join('');
+}
+
 var getMazeSeed = function() {
+    var urlParamSeed = getUrlParameter("seed");
+    if (urlParamSeed == "random") {
+        var randomSeed = generateRandomSeed();
+        history.replaceState(null, "", "/?seed=" + randomSeed);
+
+        return Promise.resolve(randomSeed);
+    } else if (urlParamSeed !== null) {
+        return Promise.resolve(urlParamSeed);
+    }
+
     var xhr = new XMLHttpRequest();
     var url = 'http://localhost:3000/maze';
     xhr.responseType = 'json';
@@ -44,4 +77,8 @@ var initView = function(seed) {
     });
 };
 
-getMazeSeed().then(initView);
+getMazeSeed()
+    .catch(function(error) {
+        alert("Something went wrong! You can play locally, but score submission might not work. Error details: " + error);
+        return Promise.resolve(Math.random());
+    }).then(initView);
