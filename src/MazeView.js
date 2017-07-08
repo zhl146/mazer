@@ -17,6 +17,7 @@ export default function MazeView(id, seed) {
     this.tileElements = [];
     this.element = document.getElementById(id);
     this.submitBtn = document.getElementById('submit-btn');
+    this.resetBtn = document.getElementById('reset-btn');
 
     this.setupMaze();
 
@@ -34,6 +35,20 @@ export default function MazeView(id, seed) {
         self.drawPath(self.lastPath);
     });
 }
+
+// THIS DOESNT WORK YET
+MazeView.prototype.clearMaze = function() {
+    while (this.element.hasChildNodes()) {
+        this.element.removeChild(this.element.lastChild);
+    }
+};
+
+// THIS DOESNT WORK YET
+MazeView.prototype.resetMaze = function() {
+    this.maze = new Maze(this.seed);
+    this.clearMaze();
+    this.setupMaze();
+};
 
 MazeView.prototype.setupMaze = function() {
     for (var y = 0; y < this.maze.maze.length; y++) {

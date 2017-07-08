@@ -15,13 +15,13 @@ var getUrlParameter = function(parameterName) {
     for (var i = 0; i < urlVariables.length; i++) 
     {
         var keyValuePair = urlVariables[i].split('=');
-        if (keyValuePair[0] == parameterName) 
+        if (keyValuePair[0] === parameterName)
         {
             return keyValuePair[1];
         }
     }
     return null;
-}
+};
 
 var generateRandomSeed = function() {
     var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -30,11 +30,11 @@ var generateRandomSeed = function() {
         seed.push(chars[Math.floor(Math.random() * chars.length)]);
     }
     return seed.join('');
-}
+};
 
 var getMazeSeed = function() {
     var urlParamSeed = getUrlParameter("seed");
-    if (urlParamSeed == "random") {
+    if (urlParamSeed === "random") {
         var randomSeed = generateRandomSeed();
         history.replaceState(null, "", "/?seed=" + randomSeed);
 
@@ -50,9 +50,10 @@ var getMazeSeed = function() {
 
     return new XhrPromise(xhr)
         .then(function(response) {
-            var seed = Math.random();
-            Promise.resolve(seed);
-            // return Promise.resolve(response.seed);
+            // var seed = Math.random();
+            // Promise.resolve(seed);
+            // the above code doesn't work for me anymore
+            return Promise.resolve(response.seed);
         });
 };
 
@@ -63,6 +64,10 @@ var initView = function(seed) {
 
     mazeView.submitBtn.addEventListener("click", function() {
         usernamePopup.show();
+    });
+
+    mazeView.resetBtn.addEventListener("click", function() {
+        mazeView.resetMaze();
     });
 
     usernamePopup.submitBtn.addEventListener("click", function() {

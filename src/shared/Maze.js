@@ -254,7 +254,6 @@ Maze.prototype.generateBlockers = function() {
     }
 
     this.blockerPoints.push(...seedPoints);
-    console.log(this.blockerPoints);
     for (var i = 0; i < this.blockerPoints.length; i++) {
         var point = this.blockerPoints[i];
         this.setBlocker(point);
