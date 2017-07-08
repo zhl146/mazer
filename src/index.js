@@ -50,9 +50,9 @@ var getMazeSeed = function() {
 
     return XhrPromise(xhr)
         .then(function(response) {
-            // var seed = Math.random();
-            // return Promise.resolve(seed);
-            return Promise.resolve(response.seed);
+            var seed = Math.random();
+            return Promise.resolve(seed);
+            // return Promise.resolve(response.seed);
         });
 };
 
@@ -70,6 +70,7 @@ var initView = function(seed) {
     });
 
     usernamePopup.submitBtn.addEventListener("click", function() {
+        console.log('submit clicked')
         mazeView.submitSolution(usernamePopup.input.value)
             .then(
                 function(rank) {

@@ -94,8 +94,11 @@ MazeView.prototype.generateTileElements = function() {
     }
 };
 
-MazeView.prototype.applyTileset = function () {
-    
+MazeView.prototype.styleBtns = function() {
+    var buttons = document.querySelectorAll('.maze-btn');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].style.backgroundColor = this.maze.tileset.colors.groundNatural;
+    }
 };
 
 MazeView.prototype.setupTile = function(point) {
@@ -121,22 +124,27 @@ MazeView.prototype.setupTile = function(point) {
 
     var tileElement = tileWrapper.querySelector('.tile');
     if (waypointIndex >= 0) {
-        tileWrapper.className = "tile_wrapper tile_color_natural";
+        tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
+        tileWrapper.className = "tile_wrapper";
         tileElement.className = "tile tile_waypoint";
     } else if (!mazeTile.isPassable()) {
+        tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
+        tileWrapper.className = "tile_wrapper";
         if (mazeTile.userPlaced) {
-            tileWrapper.className = "tile_wrapper tile_color_natural";
+            tileElement.style.backgroundColor = this.maze.tileset.colors.blockerUser;
             tileElement.className = "tile tile_unwalkable_user";
         } else {
-            tileWrapper.className = "tile_wrapper tile_color_natural";
+            tileElement.style.backgroundColor = this.maze.tileset.colors.blockerNatural;
             tileElement.className = "tile tile_unwalkable_natural";
         }
     } else {
         if (mazeTile.userPlaced) {
-            tileWrapper.className = "tile_wrapper tile_color_user";
+            tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundUser;
+            tileWrapper.className = "tile_wrapper";
             tileElement.className = "tile tile_walkable_user";
         } else {
-            tileWrapper.className = "tile_wrapper tile_color_natural";
+            tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
+            tileWrapper.className = "tile_wrapper";
             tileElement.className = "tile tile_walkable_natural";
         }
     }
@@ -278,6 +286,7 @@ MazeView.prototype.initializeViewInformation = function () {
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
     document.getElementById('removal-cost').innerHTML = 'Cost to remove a natural blocker: '
         + this.maze.removalCost + ' action points';
+    this.styleBtns();
 };
 
 MazeView.prototype.submitSolution = function(name) {

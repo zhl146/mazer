@@ -214,7 +214,7 @@ Maze.prototype.generateRandomBetween = function(min, max) {
 
 Maze.prototype.generateMazeParams = function() {
 
-    this.tileset = Maze.tilesets[this.generateRandomBetween(0, 3)];
+    this.tileset = Maze.tilesets[Math.floor(this.generateRandomBetween(0, 3))];
 
     this.xsize = Math.floor(this.generateRandomBetween(15, 40));
     this.ysize = Math.floor(this.generateRandomBetween(15, 40));

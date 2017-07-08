@@ -38,55 +38,23 @@ body {
 
 /* things that need to change with theme colors */
 
-.tile_color_natural {
-  background-color: $groundColor_Natural;
-}
-
-.tile_color_user {
-  background-color: $groundColor_User;
-}
-
 .tile_unwalkable_natural {
   position: absolute;
   left: 0; top: 0; right: 0; bottom: 0;
-  background-color: $blockerColor_Natural;
   clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
 }
 
 .tile_unwalkable_user {
   position: absolute;
   left: 0; top: 0; right: 0; bottom: 0;
-  background-color: $blockerColor_User;
   clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
 }
 
 .maze-btn {
   background-color: $blockerColor_Natural;
-  color: white;
+  color: black;
   padding: 5px 10px;
 }
-
-.modal-columnlayout-dialog {
-  padding: 50px;
-  background-color: $groundColor_Natural;
-  margin: auto;
-  text-align: center;
-  @media screen and (max-width: 767px){
-    width: 90%;
-  }
-  @media screen and (min-width: 768px){
-    width: 768px;
-  }
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  > h1{
-    font-size: 2em;
-    margin-bottom: 0;
-  }
-}
-
-/* -------------------------------------------- */
 
 .content {
   margin: 20px auto 0 auto;
@@ -192,11 +160,12 @@ body {
 
 .modal-overlay {
   z-index: 100;
+  background-color: white;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
+  right: 0;
 }
 
 /* leaderboard stuff */
@@ -224,7 +193,7 @@ body {
   height: 0;
   margin: 25px;
   width: 100%;
-  border-bottom: 1px solid grey;
+  border-bottom: 1px solid black;
 }
 
 button {
@@ -235,11 +204,39 @@ button {
   font-size: 2em;
 }
 
+.modal-columnlayout-dialog {
+  padding: 50px;
+  background-color: $groundColor_Natural;
+  margin: auto;
+  text-align: center;
+  @media screen and (max-width: 767px){
+    width: 90%;
+  }
+  @media screen and (min-width: 768px){
+    width: 768px;
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  > h1{
+    font-size: 2em;
+    margin-bottom: 0;
+  }
+}
+
 /*! username popup stuff */
 
 .username-popup {
     @extend .modal-columnlayout-dialog;
     margin-top: 50px;
+    input {
+      margin: 20px;
+      border: none;
+      outline: none;
+      background: rgba(150,150,150,.6);
+      font-size: 2em;
+      font-family: 'VT323', monospace;
+    }
 }
 
 .button_row {
