@@ -1,9 +1,19 @@
 
+var debug = false;
+
+var debugEndpoint = 'http://localhost:3000';
+var prodEndpoint = 'https://zhenlu.info/maze';
+
 export default function MazeService(apiLocation) {
-    if (apiLocation === undefined) {
-        this.apiLocation = 'http://localhost:3000';
-    } else {
+    if (apiLocation !== undefined) {
         this.apiLocation = apiLocation;
+        return;
+    }
+
+    if (debug) {
+        this.apiLocation = debugEndpoint;
+    } else {
+        this.apiLocation = prodEndpoint;
     }
 };
 
