@@ -3,7 +3,7 @@ $groundColor_User: #748067;
 $blockerColor_Natural: #436436;
 $blockerColor_User: #14281D;
 
-$tileSize: 20px;
+$tileSize: 40px;
 
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
@@ -51,12 +51,32 @@ body {
 }
 
 .maze-btn {
+  position:relative;
   background-color: $blockerColor_Natural;
   color: black;
   padding: 5px 10px;
 }
 
-#maze_container {}
+.maze-btn:after {
+    content: '';
+    position: absolute;
+    width: 100%; height:100%;
+    top:0; left:0;
+    background:rgba(0,0,0,0.3);
+    opacity: 0;
+}
+
+.maze-btn:hover:after {
+    opacity: 1;
+}
+
+.submit-btn:hover {
+    color: snow;
+}
+
+.back-btn:hover {
+    color: snow;
+}
 
 .content {
   margin: 20px auto 0 auto;
