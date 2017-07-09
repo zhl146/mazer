@@ -1,8 +1,8 @@
 
 import './stylesheets/style.scss';
 
-import Point from './shared/Point';
-import Pathfinder from './shared/Pathfinder';
+import Point from '../shared/Point';
+import Pathfinder from '../shared/Pathfinder';
 
 import MazeView from './MazeView';
 import LeaderBoardView from './LeaderBoardView';
