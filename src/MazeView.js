@@ -7,6 +7,7 @@ import Score from '../shared/Score';
 
 import SvgPathDrawer from './SvgPathDrawer';
 import MazeService from './MazeService';
+import Util from './Util';
 
 export default function MazeView(id, seed) {
     this.seed = seed;
