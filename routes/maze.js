@@ -1,7 +1,7 @@
 import express from 'express';
 
 import generateSeed from './maze-functions/generate-seed';
-import ScoreModel from '../database/score.model';
+import ScoreModel from '../database/ScoreModel';
 
 import Score from '../src/shared/Score';
 import Maze from '../src/shared/Maze';
@@ -15,8 +15,6 @@ router.post('/check', function(req, res, next) {
 
     var baseMaze = new Maze(solution.seed);
     var maze = new Maze(solution.seed);
-
-    console.log(solution.diffPoints);
 
     // apply user's changes to the maze
     // should make the maze the same as the one the user submitted

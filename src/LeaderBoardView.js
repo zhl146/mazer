@@ -1,3 +1,6 @@
+
+import MazeService from './MazeService';
+
 export default function LeaderBoardView(seed, backgroundColor) {
     this.seed = seed;
     this.backgroundColor = backgroundColor;
@@ -14,28 +17,6 @@ LeaderBoardView.prototype.initLeaderBoard = function() {
     var leaderboardBody = this.leaderBoard.firstElementChild;
     leaderboardBody.style.backgroundColor = this.backgroundColor;
 
-};
-
-LeaderBoardView.prototype.getScores = function(start, length) {
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        // this is the maze checking URL
-        var url = 'http://localhost:3000/leaderboard/' + this.seed + '?start=' + start + '&length=' + length;
-        xhr.open("GET", url, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState !== 4) {
-                return;
-            }
-
-            if (xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                resolve(response.scores);
-            } else {
-                reject(xhr);
-            }
-        }.bind(this);
-        xhr.send(null);
-    }.bind(this));
 };
 
 LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeThreeScores, closeThreeStartRank) {
@@ -78,11 +59,15 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
 };
 
 LeaderBoardView.prototype.fillScores = function(rank) {
-    var self = this;
+    var mazeService = new MazeService();
+    
     // subtract 2 from rank because start is zero-indexed
-    return Promise.all([this.getScores(0, 10), this.getScores(rank-2, 3)])
+    var promiseArr = [mazeService.getScores(this.seed, 0, 10),
+                      mazeService.getScores(this.seed, rank-2, 3)];
+
+    return Promise.all(promiseArr)
         .then(function(values) {
-            self.addScoresToLeaderboard(values[0], values[1], Math.max(rank-2, 0));
+            this.addScoresToLeaderboard(values[0], values[1], Math.max(rank-2, 0));
         }.bind(this)).catch(function(error) {
             alert("Problem getting leaderboard values! " + error);
         }.bind(this));

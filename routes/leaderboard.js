@@ -1,5 +1,5 @@
 import express from 'express';
-import ScoreModel from '../database/score.model'
+import ScoreModel from '../database/ScoreModel'
 
 var router = express.Router();
 

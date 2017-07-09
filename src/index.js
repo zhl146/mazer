@@ -7,7 +7,7 @@ import Pathfinder from './shared/Pathfinder';
 import MazeView from './MazeView';
 import LeaderBoardView from './LeaderBoardView';
 import UsernamePopupView from './UsernamePopupView';
-import XhrPromise from './XhrPromise';
+import MazeService from './MazeService';
 
 var getUrlParameter = function(parameterName) {
     var pageQueryString = window.location.search.substring(1);
@@ -41,6 +41,9 @@ var getMazeSeed = function() {
         return Promise.resolve(randomSeed);
     } else if (urlParamSeed !== null) {
         return Promise.resolve(urlParamSeed);
+    } else {
+        var mazeService = new MazeService();
+        return mazeService.getDailySeed();
     }
 
     var xhr = new XMLHttpRequest();
@@ -81,8 +84,10 @@ var initView = function(seed) {
     });
 };
 
-getMazeSeed()
-    .catch(function(error) {
-        alert("Something went wrong! You can play locally, but score submission might not work. Error details: " + error);
-        return Promise.resolve(Math.random());
-    }).then(initView);
+window.onload = function() {
+    getMazeSeed()
+        .catch(function(error) {
+            alert("Something went wrong! You can play locally, but score submission might not work. Error details: " + error);
+            return Promise.resolve(Math.random());
+        }).then(initView);
+};

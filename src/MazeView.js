@@ -6,6 +6,7 @@ import Point from './shared/Point';
 import Score from './shared/Score';
 
 import SvgPathDrawer from './SvgPathDrawer';
+import MazeService from './MazeService';
 
 export default function MazeView(id, seed) {
     this.seed = seed;
@@ -297,36 +298,9 @@ MazeView.prototype.initializeViewInformation = function () {
 MazeView.prototype.submitSolution = function(name) {
     // generate user actions to recreate the current maze
     var diffPoints = this.baseMaze.getUserChanges(this.maze);
+    var mazeService = new MazeService();
 
-    var xhr = new XMLHttpRequest();
-
-    // this is the maze checking URL
-    var url = 'http://localhost:3000/maze/check';
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
-    var solutionComplete = new Promise(
-        function(resolve, reject) {
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 ) {
-                    if (xhr.status === 200) {
-                        var json = JSON.parse(xhr.responseText);
-                        resolve(json.rank);
-                    } else {
-                        reject();
-                    }
-                }
-            };
-        }
-    );
-
-    var data = {
-        "seed": this.maze.seed,
-        "name": name,
-        "diffPoints": diffPoints
-    };
-    xhr.send(JSON.stringify(data));
-
-    return solutionComplete;
+    return mazeService.submitSolution(this.maze.seed, name, diffPoints);
 };
 
 MazeView.prototype.togglePathDrawingMode = function() {
