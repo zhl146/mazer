@@ -3,7 +3,7 @@ $groundColor_User: #748067;
 $blockerColor_Natural: #436436;
 $blockerColor_User: #14281D;
 
-$tileSize: 40px;
+$tileSize: 20px;
 
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
@@ -55,6 +55,8 @@ body {
   color: black;
   padding: 5px 10px;
 }
+
+#maze_container {}
 
 .content {
   margin: 20px auto 0 auto;

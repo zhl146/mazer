@@ -1,7 +1,6 @@
 import anime from 'animejs';
 
 import Maze from '../shared/Maze';
-import Tile from '../shared/Tile';
 import Point from '../shared/Point';
 import Score from '../shared/Score';
 
@@ -128,6 +127,14 @@ MazeView.prototype.setupTile = function(point) {
         tileTextElement.innerHTML = text;
         tileWrapper.appendChild(tileTextElement);
     }
+
+    var xDimension = ( window.innerHeight - 75 ) / this.maze.ysize;
+    var yDimension = window.innerWidth / this.maze.xsize;
+
+    var tileDimension = xDimension > yDimension ? yDimension : xDimension;
+
+    // tileWrapper.style.height = tileDimension + 'px';
+    // tileWrapper.style.width = tileDimension + 'px';
 
     var tileElement = tileWrapper.querySelector('.tile');
     if (waypointIndex >= 0) {
@@ -311,4 +318,4 @@ MazeView.prototype.togglePathDrawingMode = function() {
     var nextPathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
     console.log(nextPathMode);
     this.traceBtn.innerHTML = SvgPathDrawer.PathDrawingMode.toString(nextPathMode);
-}
+};
