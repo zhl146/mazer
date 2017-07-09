@@ -289,8 +289,8 @@ MazeView.prototype.initializeViewInformation = function () {
     document.getElementById('current-score').innerHTML = '0';
     document.getElementById('action-counter').innerHTML = 'actions left: '
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
-    document.getElementById('removal-cost').innerHTML = 'Cost to remove a natural blocker: '
-        + this.maze.removalCost + ' action points';
+    document.getElementById('removal-cost').innerHTML = 'Cost to remove a blocker: '
+        + this.maze.removalCost + ' AP';
     this.styleBtns();
 };
 
