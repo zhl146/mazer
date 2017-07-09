@@ -20,6 +20,7 @@ export default function MazeView(id, seed) {
     this.element = document.getElementById(id);
     this.submitBtn = document.getElementById('submit-btn');
     this.resetBtn = document.getElementById('reset-btn');
+    this.traceBtn = document.getElementById('trace-btn');
 
     this.initializeViewInformation();
 
@@ -29,11 +30,12 @@ export default function MazeView(id, seed) {
 
     this.redrawAll();
 
-    var self = this;
     window.addEventListener('resize', function() {
         // Redraw the SVG path every time the window resizes
-        self.drawPath(self.lastPath);
-    });
+        this.drawPath(self.lastPath);
+    }.bind(this));
+
+    this.pathSvgView.introAnimation();
 }
 
 MazeView.prototype.resetMaze = function() {
@@ -324,6 +326,10 @@ MazeView.prototype.submitSolution = function(name) {
     return solutionComplete;
 };
 
+MazeView.prototype.tracePath = function() {
+    this.pathSvgView.tracePath();
+}
+
 function PathSvgView(containerBoundingRect, segmentCount) {
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
@@ -331,7 +337,7 @@ function PathSvgView(containerBoundingRect, segmentCount) {
     svgElement.setAttribute('height', '100%');
 
     var innerElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
-    innerElement.setAttribute('class', 'svg-paths');
+    innerElement.setAttribute('class', 'svg-paths svg-paths-dashed');
     svgElement.appendChild(innerElement);
 
     var pathElements = [];
@@ -344,10 +350,11 @@ function PathSvgView(containerBoundingRect, segmentCount) {
         pathElements.push(pathElement);
     }
 
+    this.graphicsElement = innerElement;
     this.pathElements = pathElements;
     this.svgElement = svgElement;
 
-    this.currentAnimation = null;
+    this.loopingAnimation = null;
 }
 
 PathSvgView.prototype.clear = function() {
@@ -370,12 +377,12 @@ PathSvgView.prototype.drawPath = function(path) {
         this.pathElements[i].setAttribute('d', pathString);
     }
 
-    this.animateSvg();
+    this.startAnimatingDashes();
 };
 
-PathSvgView.prototype.animateSvg = function() {
-    if (this.currentAnimation != null) {
-        this.currentAnimation.pause();
+PathSvgView.prototype.startAnimatingDashes = function() {
+    if (this.loopingAnimation != null) {
+        return;
     }
 
     var animation = anime({
@@ -386,8 +393,93 @@ PathSvgView.prototype.animateSvg = function() {
         loop: true
     });
 
-    this.currentAnimation = animation;
+    this.loopingAnimation = animation;
 };
+
+PathSvgView.prototype.tracePath = function(allAtOnce) {
+    if (this.loopingAninimation != null) {
+        this.loopingAnimation.pause();
+        this.loopingAnimation = null;
+    }
+
+    var lastPromise = null;
+    for (var i = 0; i < this.pathElements.length; i++) {
+        (function() {
+            var pathElement = this.pathElements[i];
+            var duration = Math.min(2*pathElement.getTotalLength(), 2000);
+
+            var easing = null;
+            if (i === 0) {
+                easing = 'easeInSine';
+            } else if (i === this.pathElements.length-1) {
+                easing = 'easeOutSine';
+            } else {
+                easing = 'linear';
+            }
+
+            pathElement.classList.add('hidden');
+            pathElement.style['stroke-dasharray'] = null;
+
+            function doDrawing() {
+                var lineDrawing = anime({
+                    targets: pathElement,
+                    strokeDashoffset: [anime.setDashoffset, 0],
+                    easing: easing,
+                    duration: duration,
+                    begin: function(anim) {
+                        pathElement.classList.remove('hidden');
+                    }
+                });
+
+                return lineDrawing.finished;
+            };
+
+            if (lastPromise === null) {
+                lastPromise = doDrawing();
+            } else {
+                lastPromise = lastPromise.then(doDrawing);
+            }
+        }).bind(this)();
+    }
+
+    lastPromise.then(this.animateToDashed.bind(this)).then(this.startAnimatingDashes.bind(this));
+};
+
+PathSvgView.prototype.introAnimation = function() {
+    var lineDrawing = anime({
+        targets: this.pathElements,
+        strokeDashoffset: [anime.setDashoffset, 0],
+        easing: 'easeInOutSine',
+        duration: 1000,
+        delay: function(el, i) { return i * 250 },
+    }).finished.then(this.animateToDashed.bind(this))
+    .then(this.startAnimatingDashes.bind(this));
+}
+
+PathSvgView.prototype.animateToDashed = function() {
+    for (var i = 0; i < this.pathElements.length; i++) {
+        this.pathElements[i].setAttribute('stroke-dasharray', '20, 0');
+        this.pathElements[i].style['stroke-dasharray'] = '20, 0';
+    }
+
+    var dashAnimation = anime({
+        targets: this.pathElements,
+        strokeDasharray: '10, 10',
+        easing: 'easeInOutSine',
+        duration: 500
+    });
+
+    return dashAnimation.finished.then(function(dashAnim) {
+        for (var i = 0; i < this.pathElements.length; i++) {
+            // Leaving this interferes with animejs, and we get the
+            // stroke-dasharray from svg-paths-dashed anyway
+            this.pathElements[i].removeAttribute('stroke-dasharray');
+            this.pathElements[i].style['stroke-dasharray'] = null;
+        }
+
+        return Promise.resolve(dashAnim);
+    }.bind(this));
+}
 
 PathSvgView.prototype.flashInvalidPathSegment = function(i) {
     if (this.pathElements[i].animation !== undefined &&

@@ -18,14 +18,15 @@
             <p id="removal-cost"></p>
         </div>
         <div>
-            <button id="reset-btn" class="maze-btn">RESET</button>
-            <button id="submit-btn" class="maze-btn">SUBMIT</button>
+            <button id="trace-btn" class="submit-btn">TRACE</button>
+            <button id="reset-btn" class="submit-btn">RESET</button>
+            <button id="submit-btn" class="submit-btn">SUBMIT</button>
         </div>
     </div>
 </div>
 
-<div id="username-popup" class="modal-overlay hidden">
-    <div id="username-popup-body" class="username-popup">
+<div id="username-popup" class="modal-overlay inactive">
+    <div class="username-popup">
         <h1>Enter your name</h1>
 
         <input id="username-input" type="text" name="name">
@@ -37,8 +38,8 @@
     </div>
 </div>
 
-<div id="leaderboard" class="modal-overlay hidden">
-    <div id="leaderboard-body" class="modal-columnlayout-dialog">
+<div id="leaderboard" class="modal-overlay inactive">
+    <div class="modal-columnlayout-dialog">
         <h1>HIGH SCORES</h1>
         <div class="divider"></div>
         <div id="top-scores" class="top-scores"></div>

@@ -18,9 +18,9 @@ UsernamePopupView.prototype.initPopup = function() {
 };
 
 UsernamePopupView.prototype.show = function () {
-    this.usernamePopup.classList.remove('hidden');
+    this.usernamePopup.classList.remove('inactive');
 };
 
 UsernamePopupView.prototype.hide = function() {
-    this.usernamePopup.classList.add('hidden');
+    this.usernamePopup.classList.add('inactive');
 };

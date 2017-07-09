@@ -69,6 +69,10 @@ var initView = function(seed) {
         mazeView.resetMaze();
     });
 
+    mazeView.traceBtn.addEventListener("click", function() {
+        mazeView.tracePath();
+    });
+
     usernamePopup.submitBtn.addEventListener("click", function() {
         mazeView.submitSolution(usernamePopup.input.value)
             .then(
