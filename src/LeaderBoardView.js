@@ -1,16 +1,19 @@
-export default function LeaderBoardView(seed) {
+export default function LeaderBoardView(seed, backgroundColor) {
     this.seed = seed;
+    this.backgroundColor = backgroundColor;
     this.leaderBoard = document.getElementById('leaderboard');
     this.initLeaderBoard();
 }
 
 LeaderBoardView.prototype.initLeaderBoard = function() {
-    (function(self) {
-        var backBtn = document.getElementById('back-btn');
-        backBtn.addEventListener('click', function() {
-            self.hide();
-        })
-    })(this)
+    var backBtn = document.getElementById('back-btn');
+    backBtn.addEventListener('click', function() {
+        this.hide();
+    }.bind(this));
+
+    var leaderboardBody = this.leaderBoard.firstElementChild;
+    leaderboardBody.style.backgroundColor = this.backgroundColor;
+
 };
 
 LeaderBoardView.prototype.getScores = function(start, length) {
