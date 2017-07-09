@@ -1,7 +1,7 @@
 import express from 'express';
 
 import generateSeed from './maze-functions/generate-seed';
-import ScoreModel from '../database/leaderBoard-model';
+import ScoreModel from '../database/score.model';
 
 import Score from '../src/shared/Score';
 import Maze from '../src/shared/Maze';
