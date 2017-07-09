@@ -334,9 +334,7 @@ MazeView.prototype.togglePathDrawingMode = function() {
     pathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
     this.svgPathDrawer.setMode(pathMode);
 
-    if (this.svgPathDrawer.pathDrawingMode === SvgPathDrawer.PathDrawingMode.Trace) {
-        this.traceBtn.innerHTML = "RUN";
-    } else if (this.svgPathDrawer.pathDrawingMode === SvgPathDrawer.PathDrawingMode.Run) {
-        this.traceBtn.innerHTML= "TRACE";
-    }
+    var nextPathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
+    console.log(nextPathMode);
+    this.traceBtn.innerHTML = SvgPathDrawer.PathDrawingMode.toString(nextPathMode);
 }

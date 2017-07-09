@@ -29,13 +29,24 @@ export default function SvgPathDrawer(containerBoundingRect, segmentCount) {
 
     this.loopingAnimation = null;
 
-    this.pathDrawingMode = SvgPathDrawer.PathDrawingMode.Trace;
+    this.pathDrawingMode = SvgPathDrawer.PathDrawingMode.Outline;
 }
 
 SvgPathDrawer.PathDrawingMode = {
-    Trace: 0,
-    Run: 1,
+    Outline: 0,
+    Trace: 1,
     Count: 2,
+
+    toString: function(mode) {
+        switch (mode) {
+            case SvgPathDrawer.PathDrawingMode.Outline:
+                return "OUTLINE";
+            case SvgPathDrawer.PathDrawingMode.Trace:
+                return "TRACE";
+            default:
+                return "LOL_BUG";
+        }
+    },
 }
 
 SvgPathDrawer.prototype.clear = function() {
@@ -71,7 +82,7 @@ SvgPathDrawer.prototype.setMode = function(mode) {
 }
 
 SvgPathDrawer.prototype.restartPath = function() {
-    if (this.pathDrawingMode === SvgPathDrawer.PathDrawingMode.Trace) {
+    if (this.pathDrawingMode === SvgPathDrawer.PathDrawingMode.Outline) {
         this.startAnimatingDashes();
     } else {
         this.startRunningPath();
@@ -104,14 +115,14 @@ SvgPathDrawer.prototype.startRunningPath = function() {
         totalPathLength += this.pathElements[i].getTotalLength();
     }
 
-    var traceLength = totalPathLength/10;
+    var traceLength = 30;
     var currentOffset = traceLength;
     var animations = [];
 
     for (var i = 0; i < this.pathElements.length; i++) {
         (function() {
             var pathElement = this.pathElements[i];
-            var duration = 5*totalPathLength;
+            var duration = 3*totalPathLength;
 
             var dashArray = traceLength + ',' + (totalPathLength-traceLength);
             pathElement.setAttribute('stroke-dasharray', dashArray);
@@ -152,6 +163,8 @@ SvgPathDrawer.prototype.stopAnimation = function(animation) {
 }
 
 SvgPathDrawer.prototype.introAnimation = function() {
+    this.resetDashArrayProps();
+
     var lineDrawing = anime({
         targets: this.pathElements,
         strokeDashoffset: [anime.setDashoffset, 0],
