@@ -50,16 +50,16 @@ var getMazeSeed = function() {
 
     return XhrPromise(xhr)
         .then(function(response) {
-            // var seed = Math.random();
-            // return Promise.resolve(seed);
-            return Promise.resolve(response.seed);
+            var seed = Math.random();
+            return Promise.resolve(seed);
+            // return Promise.resolve(response.seed);
         });
 };
 
 var initView = function(seed) {
     var mazeView = new MazeView('maze_container', seed);
-    var leaderboard = new LeaderBoardView(seed);
-    var usernamePopup = new UsernamePopupView(seed);
+    var leaderboard = new LeaderBoardView(seed, mazeView.maze.tileset.colors.groundNatural);
+    var usernamePopup = new UsernamePopupView(mazeView.maze.tileset.colors.groundNatural);
 
     mazeView.submitBtn.addEventListener("click", function() {
         usernamePopup.show();

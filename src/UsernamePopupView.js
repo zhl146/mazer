@@ -1,15 +1,17 @@
-export default function UsernamePopupView() {
+export default function UsernamePopupView(backgroundColor) {
     this.usernamePopup = document.getElementById('username-popup');
+    this.backgroundColor = backgroundColor;
     this.initPopup();
 }
 
 UsernamePopupView.prototype.initPopup = function() {
-    (function(self) {
-        var cancelBtn = document.getElementById('username-cancel-btn');
-        cancelBtn.addEventListener('click', function() {
-            self.hide();
-        })
-    })(this)
+    var cancelBtn = document.getElementById('username-cancel-btn');
+    cancelBtn.addEventListener('click', function() {
+        this.hide();
+    }.bind(this));
+
+    var usernamePopupBody = this.usernamePopup.firstElementChild;
+    usernamePopupBody.style.backgroundColor = this.backgroundColor;
 
     this.submitBtn = document.getElementById('username-submit-btn');
     this.input = document.getElementById('username-input');

@@ -1,8 +1,7 @@
-$groundColor_Natural: sandybrown;
-$groundColor_User: peru;
-$blockerColor_Natural: darkred;
-$blockerColor_User: tomato;
-$waypointColor: coral;
+$groundColor_Natural: #689165;
+$groundColor_User: #748067;
+$blockerColor_Natural: #436436;
+$blockerColor_User: #14281D;
 
 $tileSize: 40px;
 
@@ -23,10 +22,6 @@ body {
   font-family: 'VT323', monospace;
 }
 
-a {
-  color: #00B7FF;
-}
-
 @function nth-or-null($list, $index) {
   @return if(length($list) >= $index, nth($list, $index), null);
 }
@@ -41,6 +36,26 @@ a {
   &:after  { content: ''; display:table; clear: both; }
 }
 
+/* things that need to change with theme colors */
+
+.tile_unwalkable_natural {
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+
+.tile_unwalkable_user {
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+
+.maze-btn {
+  background-color: $blockerColor_Natural;
+  color: black;
+  padding: 5px 10px;
+}
+
 .content {
   margin: 20px auto 0 auto;
   @media screen and (max-width: 767px){
@@ -53,28 +68,6 @@ a {
 
 .tile {
   left:0; top:0; right:0; bottom:0;
-}
-
-.tile_color_natural {
-  background-color: $groundColor_Natural;
-}
-
-.tile_color_user {
-  background-color: $groundColor_User;
-}
-
-.tile_unwalkable_natural {
-  position: absolute;
-  left: 0; top: 0; right: 0; bottom: 0;
-  background-image: url("/Regular_octagon.svg");
-  background-size: cover;
-}
-
-.tile_unwalkable_user {
-  position: absolute;
-  left: 0; top: 0; right: 0; bottom: 0;
-  background-image: url("/Regular_octagon_user.svg");
-  background-size: cover;
 }
 
 .tile_waypoint {
@@ -99,7 +92,7 @@ a {
 }
 
 .tile_tint_overlay:hover {
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(75,75,75,0.6);
 }
 
 .tile_container {
@@ -154,16 +147,6 @@ a {
   }
 }
 
-.submit-btn {
-  background-color: saddlebrown;
-  border: none;
-  padding: 8px;
-  box-shadow: none;
-  outline: none;
-  font-size: 1.5em;
-  font-family: 'VT323', monospace;
-}
-
 .svg-paths {
   fill: none;
   fill-rule: evenodd;
@@ -180,32 +163,12 @@ a {
 
 .modal-overlay {
   z-index: 100;
+  background-color: white;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: snow;
-}
-
-.modal-columnlayout-dialog {
-  padding: 50px;
-  background-color: $groundColor_Natural;
-  margin: auto;
-  text-align: center;
-  @media screen and (max-width: 767px){
-    width: 90%;
-  }
-  @media screen and (min-width: 768px){
-    width: 768px;
-  }
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  > h1{
-    font-size: 2em;
-    margin-bottom: 0;
-  }
+  bottom: 0;
+  right: 0;
 }
 
 /* leaderboard stuff */
@@ -231,21 +194,13 @@ a {
   * {
     width: 30%;
   }
-
-  button {
-    background: none;
-    font-family: 'VT323', monospace;
-    outline: none;
-    border: none;
-    font-size: 1em;
-  }
 }
 
 .divider {
   height: 0;
   margin: 25px;
   width: 100%;
-  border-bottom: 1px solid grey;
+  border-bottom: 1px solid black;
 }
 
 button {
@@ -256,11 +211,39 @@ button {
   font-size: 2em;
 }
 
+.modal-columnlayout-dialog {
+  padding: 50px;
+  background-color: $groundColor_Natural;
+  margin: auto;
+  text-align: center;
+  @media screen and (max-width: 767px){
+    width: 90%;
+  }
+  @media screen and (min-width: 768px){
+    width: 768px;
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  > h1{
+    font-size: 2em;
+    margin-bottom: 0;
+  }
+}
+
 /*! username popup stuff */
 
 .username-popup {
     @extend .modal-columnlayout-dialog;
     margin-top: 50px;
+    input {
+      margin: 20px;
+      border: none;
+      outline: none;
+      background: rgba(150,150,150,.6);
+      font-size: 2em;
+      font-family: 'VT323', monospace;
+    }
 }
 
 .button_row {
