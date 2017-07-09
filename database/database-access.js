@@ -1,5 +1,5 @@
 exports.save = function(data) {
-    var leaderBoard = require('../database/leaderBoard-model');
+    var leaderBoard = require('./score.model');
 
     var score = new leaderBoard.Score({
         name: data.name,
@@ -14,7 +14,7 @@ exports.save = function(data) {
 };
 
 exports.retrieve = function(condition) {
-    var leaderBoard = require('../database/leaderBoard-model');
+    var leaderBoard = require('./score.model');
 
     leaderBoard.Score.find(condition, function( err, score) {
         console.log(score)
