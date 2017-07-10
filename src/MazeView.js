@@ -119,8 +119,8 @@ MazeView.prototype.setTileSize = function() {
 
     var yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
     var xDimension = ( window.innerWidth - 20 ) / this.maze.xsize;
-    console.log('x: ' + xDimension);
-    console.log('y: ' + yDimension);
+    // console.log('x: ' + xDimension);
+    // console.log('y: ' + yDimension);
 
     var tileDimension = xDimension > yDimension ? yDimension : xDimension;
 
@@ -333,6 +333,5 @@ MazeView.prototype.togglePathDrawingMode = function() {
     this.svgPathDrawer.setMode(pathMode);
 
     var nextPathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
-    console.log(nextPathMode);
     this.traceBtn.innerHTML = SvgPathDrawer.PathDrawingMode.toString(nextPathMode);
 };
