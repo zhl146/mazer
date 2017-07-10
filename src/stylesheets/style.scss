@@ -22,20 +22,6 @@ body {
   font-family: 'VT323', monospace;
 }
 
-@function nth-or-null($list, $index) {
-  @return if(length($list) >= $index, nth($list, $index), null);
-}
-
-@mixin aspect-ratio($arglist... /*$width/$ratio, $height*/) {
-  $map : keywords($arglist);
-  $height: map-get($map, height) or nth-or-null($arglist, 2);
-  $width:  map-get($map, width)  or nth-or-null($arglist, 1);
-  $ratio:  map-get($map, ratio)  or if($width and $height, $width/$height, nth-or-null($arglist, 1)) or 1;
-  $padding: 1/$ratio * 100%;
-  &:before { content: ''; float:left; padding-bottom: $padding; margin-right:-100%; }
-  &:after  { content: ''; display:table; clear: both; }
-}
-
 /* things that need to change with theme colors */
 
 .tile_unwalkable_natural {
@@ -58,12 +44,11 @@ body {
 
 .content {
   margin: 20px auto 0 auto;
-  @media screen and (max-width: 767px){
-    width: 90%;
-  }
-  @media screen and (min-width: 768px){
-    width: 768px;
-  }
+}
+
+.tile_container {
+  display: flex;
+  justify-content: center;
 }
 
 .tile {
@@ -76,8 +61,6 @@ body {
 }
 
 .tile_wrapper {
-  @include aspect-ratio(1);
-  flex: 1 1 $tileSize;
   position: relative;
   display: inline-block;
 }
@@ -131,11 +114,11 @@ body {
   flex-direction: row;
   justify-content: space-between;
   font-size: 3em;
-  margin-bottom: 10px;
+  margin: 10px;
 }
 
 #bottom-container {
-  margin: 10px 0;
+  margin: 10px;
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;

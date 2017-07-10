@@ -117,7 +117,7 @@ MazeView.prototype.setTileSize = function() {
     var footerHeight = document.getElementById('bottom-container').offsetHeight;
 
     var yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
-    var xDimension = ( window.innerWidth ) / this.maze.xsize;
+    var xDimension = ( window.innerWidth - 20 ) / this.maze.xsize;
     console.log('x: ' + xDimension);
     console.log('y: ' + yDimension);
 
