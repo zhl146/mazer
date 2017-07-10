@@ -50,7 +50,8 @@ MazeView.prototype.resetMaze = function() {
     this.maze = new Maze(this.seed);
     this.redrawAll();
     this.updateScore(0);
-}
+    this.updateActionsUsed();
+};
 
 MazeView.prototype.redrawAll = function() {
     for (var y = 0; y < this.tileElements.length; y++) {
