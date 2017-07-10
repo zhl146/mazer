@@ -29,12 +29,12 @@ export default function MazeView(id, seed) {
     this.svgPathDrawer = new SvgPathDrawer(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.svgPathDrawer.getElement());
 
-    // this.setTileSize();
+    this.setTileSize();
     this.redrawAll();
 
     window.addEventListener('resize', function() {
-        // // reset tile size every time the window resizes
-        // this.setTileSize();
+        // reset tile size every time the window resizes
+        this.setTileSize();
         // Redraw the SVG path every time the window resizes
         this.drawPath(this.lastPath);
     }.bind(this));
@@ -113,10 +113,13 @@ MazeView.prototype.styleBtns = function() {
 
 MazeView.prototype.setTileSize = function() {
 
-    var yDimension = ( window.innerHeight -200 ) / this.maze.ysize;
-    var xDimension = ( window.innerWidth -100 ) / this.maze.xsize;
-    console.log('x: ' + xDimension)
-    console.log('y: ' + yDimension)
+    var headerHeight = document.getElementById('resource-container').offsetHeight;
+    var footerHeight = document.getElementById('bottom-container').offsetHeight;
+
+    var yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
+    var xDimension = ( window.innerWidth ) / this.maze.xsize;
+    console.log('x: ' + xDimension);
+    console.log('y: ' + yDimension);
 
     var tileDimension = xDimension > yDimension ? yDimension : xDimension;
 
@@ -283,7 +286,7 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
 };
 
 MazeView.prototype.updateActionsUsed = function() {
-    var actionString = 'actions left: ' + (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
+    var actionString = 'AP: ' + (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
     document.getElementById('action-counter').innerHTML = actionString;
 };
 
@@ -308,7 +311,7 @@ MazeView.prototype.updateScore = function (score) {
 
 MazeView.prototype.initializeViewInformation = function () {
     document.getElementById('current-score').innerHTML = '0';
-    document.getElementById('action-counter').innerHTML = 'actions left: '
+    document.getElementById('action-counter').innerHTML = 'AP: '
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
     document.getElementById('removal-cost').innerHTML = 'Cost to remove a blocker: '
         + this.maze.removalCost + ' AP';
