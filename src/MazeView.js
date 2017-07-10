@@ -29,11 +29,14 @@ export default function MazeView(id, seed) {
     this.svgPathDrawer = new SvgPathDrawer(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
     this.element.appendChild(this.svgPathDrawer.getElement());
 
+    // this.setTileSize();
     this.redrawAll();
 
     window.addEventListener('resize', function() {
+        // // reset tile size every time the window resizes
+        // this.setTileSize();
         // Redraw the SVG path every time the window resizes
-        this.drawPath(self.lastPath);
+        this.drawPath(this.lastPath);
     }.bind(this));
 
     this.traceBtn.addEventListener("click", function() {
@@ -108,6 +111,23 @@ MazeView.prototype.styleBtns = function() {
     }
 };
 
+MazeView.prototype.setTileSize = function() {
+
+    var yDimension = ( window.innerHeight -200 ) / this.maze.ysize;
+    var xDimension = ( window.innerWidth -100 ) / this.maze.xsize;
+    console.log('x: ' + xDimension)
+    console.log('y: ' + yDimension)
+
+    var tileDimension = xDimension > yDimension ? yDimension : xDimension;
+
+    var tiles = document.querySelectorAll('.tile_wrapper');
+
+    for (var i = 0; i< tiles.length; i++) {
+        tiles[i].style.height = tileDimension + 'px';
+        tiles[i].style.width = tileDimension + 'px';
+    }
+};
+
 MazeView.prototype.setupTile = function(point) {
     var mazeTile = this.maze.maze[point.y][point.x];
     var tileWrapper = this.tileElements[point.y][point.x];
@@ -128,14 +148,6 @@ MazeView.prototype.setupTile = function(point) {
         tileTextElement.innerHTML = text;
         tileWrapper.appendChild(tileTextElement);
     }
-
-    var xDimension = ( window.innerHeight - 75 ) / this.maze.ysize;
-    var yDimension = window.innerWidth / this.maze.xsize;
-
-    var tileDimension = xDimension > yDimension ? yDimension : xDimension;
-
-    // tileWrapper.style.height = tileDimension + 'px';
-    // tileWrapper.style.width = tileDimension + 'px';
 
     var tileElement = tileWrapper.querySelector('.tile');
     if (waypointIndex >= 0) {
@@ -181,7 +193,7 @@ MazeView.prototype.drawPath = function(path) {
             var boundingRect = tileElement.getBoundingClientRect();
 
             var center = new Point(boundingRect.left + boundingRect.width / 2.0,
-                                    boundingRect.top + boundingRect.height / 2.0);
+                boundingRect.top + boundingRect.height / 2.0);
             center.x -= containerBoundingRect.left;
             center.y -= containerBoundingRect.top;
 
