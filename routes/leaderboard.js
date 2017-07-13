@@ -1,7 +1,23 @@
 import express from 'express';
 import ScoreModel from '../database/ScoreModel'
+import SeedUtil from './maze-functions/generate-seed'
 
 var router = express.Router();
+
+var shouldReturnSolution = function(seed)
+{
+    var date = SeedUtil.seedToDate(seed);
+    if (date === null) {
+        return true;
+    }
+
+    // Increment to next day so today compares to false
+    date.setDate(date.getDate() + 1);
+    
+    var now = new Date();
+    console.log(now, date);
+    return date < now;
+}
 
 /* gets json with leaderboard stats */
 router.get('/:seed', function(req, res, next) {
@@ -35,6 +51,10 @@ router.get('/:seed', function(req, res, next) {
         'score': 1,
         '_id': 0,
     };
+
+    if (shouldReturnSolution(req.params.seed)) {
+        projection['solution'] = 1;
+    }
 
     var scoreQuery = ScoreModel.find(query, projection, options, function(error, scores) {
         if (error) {

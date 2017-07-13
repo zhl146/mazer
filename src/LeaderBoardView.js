@@ -1,11 +1,18 @@
 
 import MazeService from './MazeService';
 
-export default function LeaderBoardView(seed, backgroundColor) {
+// Initializer.
+//  seed - The random seed of the maze for which we get the high scores.
+//  backgroundColor - Color to set the background, for styling.
+//  solutionDelegate - Object which must implement a function, `displaySolution`, which takes a list
+//      of points and displays the resulting maze.
+export default function LeaderBoardView(seed, backgroundColor, solutionDelegate) {
     this.seed = seed;
     this.backgroundColor = backgroundColor;
     this.leaderBoard = document.getElementById('leaderboard');
     this.initLeaderBoard();
+
+    this.solutionDelegate = solutionDelegate;
 }
 
 LeaderBoardView.prototype.initLeaderBoard = function() {
@@ -25,15 +32,32 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
     var topTen = document.getElementById('top-scores');
     var closeThree = document.getElementById('closest-scores');
 
-    var makeScore = function(rank, name, score) {
+    var makeScore = function(rank, scoreContainer) {
+        var score = scoreContainer.score;
+        var name = scoreContainer.name;
+        var solution = scoreContainer.solution;
+
         var scoreContainer = document.createElement('div');
         var rankEl = document.createElement('span');
         var rankText = document.createTextNode(rank);
         rankEl.appendChild(rankText);
 
         var nameEl = document.createElement('span');
-        var nameText = document.createTextNode(name);
-        nameEl.appendChild(nameText);
+        if (solution === undefined) {
+            var nameText = document.createTextNode(name);
+            nameEl.appendChild(nameText);
+        } else {
+            var nameLink = document.createElement('a');
+            nameLink.classList.add('solution-link');
+            nameEl.appendChild(nameLink);
+            var nameText = document.createTextNode(name);
+            nameLink.appendChild(nameText);
+
+            nameLink.addEventListener('click', function() {
+                this.solutionDelegate.displaySolution(solution);
+                this.hide();
+            }.bind(this));
+        }
 
         var scoreEl = document.createElement('span');
         var valueText = document.createTextNode(score);
@@ -45,15 +69,15 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
         scoreContainer.classList.add('score');
 
         return scoreContainer;
-    }
+    }.bind(this);
 
     for (var i = 0; i < topTenScores.length; i++) {
-        var score = makeScore(i+1, topTenScores[i].name, topTenScores[i].score);
+        var score = makeScore(i+1, topTenScores[i]);
         topTen.appendChild(score);
     }
 
     for (var i = 0; i < closeThreeScores.length; i++) {
-        var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i].name, closeThreeScores[i].score);
+        var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i]);
         closeThree.appendChild(score);
     }
 };

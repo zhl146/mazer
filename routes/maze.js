@@ -1,6 +1,6 @@
 import express from 'express';
 
-import generateSeed from './maze-functions/generate-seed';
+import SeedUtil from './maze-functions/generate-seed';
 import ScoreModel from '../database/ScoreModel';
 
 import Score from '../shared/Score';
@@ -30,6 +30,10 @@ router.post('/check', function(req, res, next) {
     var scoreCalculator = new Score(baseMaze);
     var score = scoreCalculator.calculateScore(maze);
 
+    if (!solution.name) {
+        solution.name = "Anonymous";
+    }
+
     // First search for duplicates
     ScoreModel.find({
         'name': solution.name,
@@ -42,7 +46,7 @@ router.post('/check', function(req, res, next) {
         }
 
         var scoreModel = new ScoreModel();
-        scoreModel.name = (solution.name ? solution.name : "Anonymous");
+        scoreModel.name = solution.name;
         scoreModel.score = score;
         scoreModel.date = solution.seed;
         scoreModel.solution = solution.diffPoints;
@@ -64,8 +68,7 @@ router.post('/check', function(req, res, next) {
 
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
-    var seed = generateSeed();
-    console.log(seed);
+    var seed = SeedUtil.dateToSeed(new Date());
     res.send(JSON.stringify({ 'seed': seed }));
 });
 

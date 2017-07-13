@@ -46,10 +46,17 @@ export default function MazeView(id, seed) {
     this.svgPathDrawer.introAnimation();
 }
 
-MazeView.prototype.resetMaze = function() {
+MazeView.prototype.resetMaze = function(diffPoints) {
     this.maze = new Maze(this.seed);
+
+    if (diffPoints) {
+        for (var i = 0; i < diffPoints.length; i++) {
+            this.maze.doActionOnTile(diffPoints[i]);
+        }
+    }
+
     this.redrawAll();
-    this.updateScore(0);
+    this.updateScore(this.scoreCalculator.calculateScore(this.maze));
     this.updateActionsUsed();
 };
 
@@ -334,4 +341,8 @@ MazeView.prototype.togglePathDrawingMode = function() {
 
     var nextPathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
     this.traceBtn.innerHTML = SvgPathDrawer.PathDrawingMode.toString(nextPathMode);
+};
+
+MazeView.prototype.displaySolution = function(diffPoints) {
+    this.resetMaze(diffPoints);
 };
