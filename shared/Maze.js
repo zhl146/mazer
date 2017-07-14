@@ -269,7 +269,7 @@ Maze.prototype.doActionOnTile = function(point) {
 };
 
 Maze.prototype.operationCostForActionOnTile = function(tile) {
-    var operationCost = 0;
+    let operationCost = 0;
     if (tile.userPlaced) {
         if (tile.type === Tile.Type.Blocker) {
             operationCost = -1
@@ -289,28 +289,23 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
 };
 
 Maze.prototype.generateBlockers = function() {
-    let i;
     const seedPoints = this.generateSeedPoints();
-    const seedDecayFactor = [];
-    for (i = 0; i < seedPoints.length; i++) {
-        seedDecayFactor[i] = this.generateRandomIntBetween(2, 10) / 10;
+    let seedDecayFactor;
 
-        for (let j = 0; j < this.unusedPoints.length; j++) {
-            const seedPoint = seedPoints[i];
-            let exponent = seedDecayFactor[i];
-            const distance = seedPoint.calculateDistance(this.unusedPoints[j]);
-            const threshold = Math.exp(- exponent * distance);
+    seedPoints.forEach( (seedPoint) => {
+        seedDecayFactor = this.generateRandomIntBetween(2, 10) / 10;
+        this.unusedPoints.forEach( (unusedPoint) => {
+            const distance = seedPoint.calculateDistance(unusedPoint);
+            const threshold = Math.exp( -seedDecayFactor * distance );
             if ( this.random() < threshold ) {
-                this.blockerPoints.push(this.unusedPoints.splice(j, 1)[0]);
+                this.blockerPoints.push(unusedPoint);
+                this.unusedPoints.removePoint(unusedPoint);
             }
-        }
-    }
+        })
+    });
 
-    this.blockerPoints.push(...seedPoints);
-    for (i = 0; i < this.blockerPoints.length; i++) {
-        const point = this.blockerPoints[i];
-        this.setBlocker(point);
-    }
+    seedPoints.forEach( (point) => this.blockerPoints.push(point) );
+    this.blockerPoints.forEach( (point) => this.setBlocker(point) );
 };
 
 Maze.prototype.generateSeedPoints = function() {

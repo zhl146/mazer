@@ -4,8 +4,8 @@ export default function Point(x, y) {
 };
 
 Point.prototype.calculateDistance = function ( point ) {
-    var xDiff = this.x - point.x;
-    var yDiff = this.y - point.y;
+    const xDiff = this.x - point.x;
+    const yDiff = this.y - point.y;
     return Math.sqrt(xDiff*xDiff + yDiff*yDiff);
 };
 
@@ -26,8 +26,8 @@ Point.prototype.setG = function(cost) {
 };
 
 Point.prototype.setH = function(endPoint) {
-    var xDiff = Math.abs( endPoint.x - this.x );
-    var yDiff = Math.abs( endPoint.y - this.y );
+    const xDiff = Math.abs(endPoint.x - this.x);
+    const yDiff = Math.abs(endPoint.y - this.y);
     this.h = 7 * (xDiff + yDiff);
 };
 
@@ -36,12 +36,12 @@ Point.prototype.setF = function() {
 };
 
 Point.prototype.getAdjacent = function(maze, endpoint) {
-    var pointArray = [];
-    var newPoint;
-    var self = this;
+    const pointArray = [];
+    let newPoint;
+    const self = this;
 
-    var addPoint = function(newPoint, isDiagonal) {
-        if ( maze.isPassable(newPoint) ) {
+    const addPoint = function ( newPoint, isDiagonal ) {
+        if (maze.isPassable(newPoint)) {
             newPoint.setParent(self);
             newPoint.setG(isDiagonal ? 14 : 10);
             newPoint.setH(endpoint);
