@@ -1,10 +1,9 @@
+const debug = true;
 
-var debug = false;
+const debugEndpoint = 'http://localhost:3000';
+const prodEndpoint = 'https://zhenlu.info/maze';
 
-var debugEndpoint = 'http://localhost:3000';
-var prodEndpoint = 'https://zhenlu.info/maze';
-
-export default function MazeService(apiLocation) {
+export default function MazeService( apiLocation ) {
     if (apiLocation !== undefined) {
         this.apiLocation = apiLocation;
         return;
@@ -17,56 +16,56 @@ export default function MazeService(apiLocation) {
     }
 };
 
-MazeService.prototype.getScores = function(seed, start, length) {
-    var path = '/leaderboard/' + seed + '?start=' + start + '&length=' + length;
-    var promise = this.makeApiPromise(path, "GET", null);
+MazeService.prototype.getScores = function ( seed, start, length ) {
+    const path = '/leaderboard/' + seed + '?start=' + start + '&length=' + length;
+    let promise = this.makeApiPromise(path, "GET", null);
 
-    return promise.then(function(response) {
+    return promise.then(function ( response ) {
         return Promise.resolve(response.scores);
     });
-}
+};
 
-MazeService.prototype.submitSolution = function(seed, name, diffPoints) {
-    var data = {
+MazeService.prototype.submitSolution = function ( seed, name, diffPoints ) {
+    const data = {
         "seed": seed,
         "name": name,
         "diffPoints": diffPoints
     };
 
-    var path = '/maze/check';
-    var promise = this.makeApiPromise(path, "POST", data);
+    const path = '/maze/check';
+    let promise = this.makeApiPromise(path, "POST", data);
 
-    return promise.then(function(response) {
+    return promise.then(function ( response ) {
         return Promise.resolve(response.rank);
     });
-}
+};
 
-MazeService.prototype.getDailySeed = function() {
-    var path = '/maze';
-    var promise = this.makeApiPromise(path, "GET", null);
+MazeService.prototype.getDailySeed = function () {
+    const path = '/maze';
+    const promise = this.makeApiPromise(path, "GET", null);
 
-    return promise.then(function(response) {
+    return promise.then(function ( response ) {
         return Promise.resolve(response.seed);
     });
-}
+};
 
 // Makes a promise which sends an api call to the path using an HTTP method.
 //  path - Path to append to this.apiLocation.
 //  method - HTTP method.
 //  data - The data to send, in the form of a javascript object which is JSONified.
-MazeService.prototype.makeApiPromise = function(path, method, data) {
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
+MazeService.prototype.makeApiPromise = function ( path, method, data ) {
+    return new Promise(function ( resolve, reject ) {
+        const xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
 
-        var url = this.apiLocation + path;
+        const url = this.apiLocation + path;
         xhr.open(method, url, true);
 
         if (data !== null) {
             xhr.setRequestHeader("Content-Type", "application/json");
         }
 
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
                 resolve(xhr.response);
             } else {
@@ -75,15 +74,15 @@ MazeService.prototype.makeApiPromise = function(path, method, data) {
                     statusText: xhr.statusText
                 });
             }
-        }
+        };
 
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             reject({
                 status: xhr.status,
                 statusText: xhr.statusText
             });
-        }
+        };
 
         xhr.send(JSON.stringify(data));
     }.bind(this));
-}
+};
