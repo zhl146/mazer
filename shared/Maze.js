@@ -4,6 +4,7 @@ import Point from './Point';
 import Pathfinder from './Pathfinder';
 
 export default function Maze(seed) {
+    let i;
     this.random = seedrandom(seed);
     this.seed = seed;
 
@@ -72,7 +73,7 @@ export default function Maze(seed) {
     }
 
     // connect vertexes with path to create a random protected path between the start and end
-    for (var i = 0; i < this.numPathVertexes - 1; i++) {
+    for (i = 0; i < this.numPathVertexes - 1; i++) {
         var pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i+1]);
         if (i !== 0) {
             // Shift so that the path so that it's continuous (end of previous equals
@@ -84,7 +85,7 @@ export default function Maze(seed) {
 
     // we shouldn't put anything where the protected path is
     // so they are removed from the unused points array
-    for (var i = 0; i < protectedPath.length; i++) {
+    for (i = 0; i < protectedPath.length; i++) {
         this.unusedPoints.removePoint(protectedPath[i]);
     }
 
@@ -143,28 +144,27 @@ Maze.tilesets = [
     }
 ];
 
-Maze.prototype.isPassable = function(point)
-{
+Maze.prototype.isPassable = (point) => {
     return this.contains(point) &&
         this.maze[point.y][point.x].isPassable();
 };
 
-Maze.prototype.isModifiable = function(point) {
+Maze.prototype.isModifiable = (point) => {
     return this.contains(point) &&
         this.waypoints.indexOfPoint(point) < 0;
 };
 
-Maze.prototype.contains = function(point) {
+Maze.prototype.contains = (point) => {
     return point.x >= 0 && point.y >= 0 &&
         point.x < this.xsize && point.y < this.ysize;
 };
 
-Maze.prototype.generateNewPoint = function() {
+Maze.prototype.generateNewPoint = () => {
     var randomPointIndex = this.generateRandomBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
-Maze.prototype.generateEmptyMaze = function() {
+Maze.prototype.generateEmptyMaze = () => {
     var maze =[];
     for (var y = 0; y < this.ysize; y++) {
         var row = [];
@@ -176,7 +176,7 @@ Maze.prototype.generateEmptyMaze = function() {
     this.maze = maze
 };
 
-Maze.prototype.findPath = function() {
+Maze.prototype.findPath = () => {
     var path = [];
 
     for (var i = 0; i < this.waypoints.length - 1; i++) {
@@ -187,11 +187,11 @@ Maze.prototype.findPath = function() {
     return path;
 };
 
-Maze.prototype.setBlocker = function(point) {
+Maze.prototype.setBlocker = (point) => {
     this.maze[point.y][point.x].type = Tile.Type.Blocker;
 };
 
-Maze.prototype.getUserChanges = function(userMaze) {
+Maze.prototype.getUserChanges = (userMaze) => {
     var diffPoints = [];
     var changedMaze = userMaze.maze;
 
@@ -208,12 +208,11 @@ Maze.prototype.getUserChanges = function(userMaze) {
     return diffPoints;
 };
 
-Maze.prototype.generateRandomBetween = function(min, max) {
+Maze.prototype.generateRandomBetween = (min, max) => {
     return this.random() * ( max - min ) + min;
 };
 
-Maze.prototype.generateMazeParams = function() {
-
+Maze.prototype.generateMazeParams = () => {
     this.tileset = Maze.tilesets[Math.floor(this.generateRandomBetween(0, 3))];
 
     this.xsize = Math.floor(this.generateRandomBetween(15, 40));
@@ -247,7 +246,7 @@ Maze.prototype.generateMazeParams = function() {
 
 // Flips the tile type. Returns true for success, false for failure.
 // only use for user actions because it changes the userPlaced flag
-Maze.prototype.doActionOnTile = function(point) {
+Maze.prototype.doActionOnTile = (point) => {
     if (!this.isModifiable(point)) {
         return false;
     }
@@ -269,7 +268,7 @@ Maze.prototype.doActionOnTile = function(point) {
     return true;
 };
 
-Maze.prototype.operationCostForActionOnTile = function(tile) {
+Maze.prototype.operationCostForActionOnTile = (tile) => {
     var operationCost = 0;
     if (tile.userPlaced) {
         if (tile.type === Tile.Type.Blocker) {
@@ -289,7 +288,7 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
     return operationCost
 };
 
-Maze.prototype.generateBlockers = function() {
+Maze.prototype.generateBlockers = () => {
     var seedPoints = this.generateSeedPoints();
     var seedDecayFactor = [];
     for (var i = 0; i < seedPoints.length; i++) {
@@ -313,7 +312,7 @@ Maze.prototype.generateBlockers = function() {
     }
 };
 
-Maze.prototype.generateSeedPoints = function() {
+Maze.prototype.generateSeedPoints = () => {
     var seedPoints = [];
     for (var i = 0; i < this.blockerSeeds; i++) {
          seedPoints.push(this.generateNewPoint())
@@ -323,7 +322,7 @@ Maze.prototype.generateSeedPoints = function() {
 
 
 // extra array functions to test arrays with points
-Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
+Array.prototype.pointIsAtLeastThisFar = (point, distance) => {
 
     for (var i = 0; i < this.length; i++) {
         if ( this[i].calculateDistance(point) < distance ) {
@@ -333,11 +332,11 @@ Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
     return true;
 };
 
-Array.prototype.containsPoint = function(obj) {
+Array.prototype.containsPoint = (obj) => {
     return ( this.indexOfPoint(obj) >= 0 );
 };
 
-Array.prototype.indexOfPoint = function(obj) {
+Array.prototype.indexOfPoint = (obj) => {
     var i = this.length;
     while (i--) {
         if (this[i].x === obj.x && this[i].y === obj.y) {
@@ -347,7 +346,7 @@ Array.prototype.indexOfPoint = function(obj) {
     return -1;
 };
 
-Array.prototype.removePoint = function(point) {
+Array.prototype.removePoint = (point) => {
     var i = this.length;
     while (i--) {
         if (this[i].x === point.x && this[i].y === point.y) {
@@ -355,4 +354,4 @@ Array.prototype.removePoint = function(point) {
         }
     }
     return -1;
-}
+};

@@ -1,5 +1,5 @@
 
-var debug = true;
+var debug = false;
 
 var debugEndpoint = 'http://localhost:3000';
 var prodEndpoint = 'https://zhenlu.info/maze';
