@@ -327,30 +327,27 @@ Maze.prototype.generateSeedPoints = function() {
 
 
 // extra array functions to test arrays with points
+
+
 Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
-
-    for (let i = 0; i < this.length; i++) {
-        if ( this[i].calculateDistance(point) < distance ) {
-            return false;
-        }
-    }
-    return true;
+    // every only returns true only if every element in the tested array pasts to callback function test
+    return this.every( (pointInArray) => pointInArray.calculateDistance(point) > distance );
 };
 
-Array.prototype.containsPoint = function(obj) {
-    return ( this.indexOfPoint(obj) >= 0 );
+Array.prototype.containsPoint = function(pointToCheck) {
+    return ( this.indexOfPoint(pointToCheck) >= 0 );
 };
 
-Array.prototype.indexOfPoint = function(obj) {
+Array.prototype.indexOfPoint = function(pointToFind) {
     let i = this.length;
     while (i--) {
-        if (this[i].x === obj.x && this[i].y === obj.y) {
+        if (this[i].x === pointToFind.x && this[i].y === pointToFind.y) {
             return i;
         }
     }
     return -1;
 };
 
-Array.prototype.removePoint = function(point) {
-    this.filter( (pointInArray) => pointInArray.x !== point.x && pointInArray.y !== point.y);
+Array.prototype.removePoint = function(pointToRemove) {
+    this.filter( (pointInArray) => pointInArray.x !== pointToRemove.x && pointInArray.y !== pointToRemove.y);
 };
