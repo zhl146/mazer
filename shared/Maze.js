@@ -232,7 +232,7 @@ Maze.prototype.generateMazeParams = function() {
 
     this.actionPoints = Math.floor(10 + this.generateRandomIntBetween(5, 15) / 10 * Math.sqrt(size));
 
-    this.removalCost = Math.floor(this.generateRandomIntBetween(2, 10));
+    this.removalCost = Math.floor(this.generateRandomIntBetween(2, 5));
 
     // this creates a 1-D list of all points on our maze
     let newPoint;
