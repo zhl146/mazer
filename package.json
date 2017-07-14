@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "start": "babel-node --inspect --presets es2015 -- ./bin/www",
+    "start": "webpack && babel-node --inspect --presets es2015 -- ./bin/www",
     "start-dev": "webpack-dev-server"
   },
   "dependencies": {

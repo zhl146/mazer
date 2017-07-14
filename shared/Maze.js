@@ -164,20 +164,16 @@ Maze.prototype.contains = function(point) {
 };
 
 Maze.prototype.generateNewPoint = function() {
+    // apparently JS rounds non integer indexes when accessing arrays
     const randomPointIndex = this.generateRandomBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
 Maze.prototype.generateEmptyMaze = function() {
-    const maze = [];
-    for (let y = 0; y < this.ysize; y++) {
-        const row = [];
-        for (let x = 0; x < this.xsize; x++) {
-            row.push(new Tile(Tile.Type.Empty));
-        }
-        maze.push(row);
-    }
-    this.maze = maze
+    this.maze = [].createArrayofLength(this.ysize)
+        .map( () => [].createArrayofLength(this.xsize)
+                .map( () => new Tile(Tile.Type.Empty) )
+        );
 };
 
 Maze.prototype.findPath = function() {
@@ -238,7 +234,7 @@ Maze.prototype.generateMazeParams = function() {
 
     this.removalCost = Math.floor(this.generateRandomBetween(2, 10));
 
-    // this creates a list of all points on our maze
+    // this creates a 1-D list of all points on our maze
     let newPoint;
     for (let row = 0; row < this.ysize; row++) {
         for (let col = 0; col < this.xsize; col++) {
@@ -319,12 +315,21 @@ Maze.prototype.generateBlockers = function() {
 
 Maze.prototype.generateSeedPoints = function() {
     const seedPoints = [];
-    for (let i = 0; i < this.blockerSeeds; i++) {
+    while( seedPoints.length < this.blockerSeeds ) {
         seedPoints.push(this.generateNewPoint())
     }
     return seedPoints;
 };
 
+
+// extra array functions
+
+// creates a zero'ed array of desired length
+Array.prototype.createArrayofLength =function(desiredLength) {
+    let newArray = [];
+    newArray.length = desiredLength;
+    return newArray.fill(0);
+};
 
 // extra array functions to test arrays with points
 
