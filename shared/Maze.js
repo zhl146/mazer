@@ -87,9 +87,7 @@ export default function Maze(seed) {
 
     // we shouldn't put anything where the protected path is
     // so they are removed from the unused points array
-    for (i = 0; i < protectedPath.length; i++) {
-        this.unusedPoints.removePoint(protectedPath[i]);
-    }
+    protectedPath.forEach( (point) => this.unusedPoints.removePoint(protectedPath[i]) );
 
     // Select random vertices to delete, excluding start and end
     while (pathVertices.length > this.numWaypoints + 2) {
@@ -165,7 +163,7 @@ Maze.prototype.contains = function(point) {
 
 Maze.prototype.generateNewPoint = function() {
     // apparently JS rounds non integer indexes when accessing arrays
-    const randomPointIndex = this.generateRandomBetween(0, this.unusedPoints.length - 1);
+    const randomPointIndex = this.generateRandomIntBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
@@ -208,31 +206,33 @@ Maze.prototype.getUserChanges = function(userMaze) {
     return diffPoints;
 };
 
-Maze.prototype.generateRandomBetween = function(min, max) {
-    return this.random() * ( max - min ) + min;
+Maze.prototype.generateRandomIntBetween = function(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(this.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
 };
 
 Maze.prototype.generateMazeParams = function() {
-    this.tileset = Maze.tilesets[Math.floor(this.generateRandomBetween(0, 3))];
+    this.tileset = Maze.tilesets[this.generateRandomIntBetween(0, 3)];
 
-    this.xsize = Math.floor(this.generateRandomBetween(15, 40));
-    this.ysize = Math.floor(this.generateRandomBetween(15, 40));
+    this.xsize = Math.floor(this.generateRandomIntBetween(15, 40));
+    this.ysize = Math.floor(this.generateRandomIntBetween(15, 40));
 
     const size = this.xsize * this.ysize;
 
-    this.blockerSeeds = this.generateRandomBetween(15, size / 50);
+    this.blockerSeeds = this.generateRandomIntBetween(15, Math.floor(size / 50) );
 
-    this.numWaypoints = 0;
-    this.numPathVertexes = Math.floor(this.generateRandomBetween(.6, 1) * Math.sqrt(size));
+    this.numWaypoints = 1;
+    this.numPathVertexes = this.generateRandomIntBetween(.6, 1) / 10 * Math.sqrt(size);
     for (let i = 0; i < this.numPathVertexes / 5; i++) {
         if (this.random() > 0.6) {
             this.numWaypoints++;
         }
     }
 
-    this.actionPoints = Math.floor(10 + this.generateRandomBetween(0.5, 1.5) * Math.sqrt(size));
+    this.actionPoints = Math.floor(10 + this.generateRandomIntBetween(5, 15) / 10 * Math.sqrt(size));
 
-    this.removalCost = Math.floor(this.generateRandomBetween(2, 10));
+    this.removalCost = Math.floor(this.generateRandomIntBetween(2, 10));
 
     // this creates a 1-D list of all points on our maze
     let newPoint;
@@ -293,7 +293,7 @@ Maze.prototype.generateBlockers = function() {
     const seedPoints = this.generateSeedPoints();
     const seedDecayFactor = [];
     for (i = 0; i < seedPoints.length; i++) {
-        seedDecayFactor[i] = this.generateRandomBetween(.2, 1);
+        seedDecayFactor[i] = this.generateRandomIntBetween(2, 10) / 10;
 
         for (let j = 0; j < this.unusedPoints.length; j++) {
             const seedPoint = seedPoints[i];
