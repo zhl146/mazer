@@ -13,6 +13,10 @@ Point.prototype.copy = function() {
   return new Point(this.x, this.y);
 };
 
+Point.prototype.matches = function ( pointToCompare ) {
+    return ( this.x === pointToCompare.x && this.y === pointToCompare.y );
+};
+
 Point.prototype.setParent = function(parentPoint) {
     this.parent = parentPoint;
 };

@@ -339,15 +339,12 @@ Array.prototype.containsPoint = function(pointToCheck) {
 };
 
 Array.prototype.indexOfPoint = function(pointToFind) {
-    let i = this.length;
-    while (i--) {
-        if (this[i].x === pointToFind.x && this[i].y === pointToFind.y) {
-            return i;
-        }
-    }
-    return -1;
+    // findIndex method returns index of the first element in the array that satisfies the the callback
+    // otherwise returns -1
+    return this.findIndex( (pointInArray) => pointInArray.matches(pointToFind) );
 };
 
 Array.prototype.removePoint = function(pointToRemove) {
-    this.filter( (pointInArray) => pointInArray.x !== pointToRemove.x && pointInArray.y !== pointToRemove.y);
+    // returns a new array with elements that match the callback
+    this.filter( (pointInArray) => !pointInArray.matches(pointToRemove) );
 };
