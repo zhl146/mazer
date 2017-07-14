@@ -146,29 +146,29 @@ Maze.tilesets = [
     }
 ];
 
-Maze.prototype.isPassable = (point) => {
+Maze.prototype.isPassable = function(point) {
     return this.contains(point) &&
         this.maze[point.y][point.x].isPassable();
 };
 
-Maze.prototype.isModifiable = (point) => {
+Maze.prototype.isModifiable = function(point) {
     return this.contains(point) &&
         this.waypoints.indexOfPoint(point) < 0;
 };
 
-Maze.prototype.contains = (point) => {
+Maze.prototype.contains = function(point) {
     return point.x >= 0 &&
         point.y >= 0 &&
         point.x < this.xsize &&
         point.y < this.ysize;
 };
 
-Maze.prototype.generateNewPoint = () => {
+Maze.prototype.generateNewPoint = function() {
     const randomPointIndex = this.generateRandomBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
-Maze.prototype.generateEmptyMaze = () => {
+Maze.prototype.generateEmptyMaze = function() {
     const maze = [];
     for (let y = 0; y < this.ysize; y++) {
         const row = [];
@@ -180,7 +180,7 @@ Maze.prototype.generateEmptyMaze = () => {
     this.maze = maze
 };
 
-Maze.prototype.findPath = () => {
+Maze.prototype.findPath = function() {
     const path = [];
 
     for (let i = 0; i < this.waypoints.length - 1; i++) {
@@ -191,11 +191,11 @@ Maze.prototype.findPath = () => {
     return path;
 };
 
-Maze.prototype.setBlocker = (point) => {
+Maze.prototype.setBlocker = function(point) {
     this.maze[point.y][point.x].type = Tile.Type.Blocker;
 };
 
-Maze.prototype.getUserChanges = (userMaze) => {
+Maze.prototype.getUserChanges = function(userMaze) {
     const diffPoints = [];
     const changedMaze = userMaze.maze;
 
@@ -212,11 +212,11 @@ Maze.prototype.getUserChanges = (userMaze) => {
     return diffPoints;
 };
 
-Maze.prototype.generateRandomBetween = (min, max) => {
+Maze.prototype.generateRandomBetween = function(min, max) {
     return this.random() * ( max - min ) + min;
 };
 
-Maze.prototype.generateMazeParams = () => {
+Maze.prototype.generateMazeParams = function() {
     this.tileset = Maze.tilesets[Math.floor(this.generateRandomBetween(0, 3))];
 
     this.xsize = Math.floor(this.generateRandomBetween(15, 40));
@@ -250,7 +250,7 @@ Maze.prototype.generateMazeParams = () => {
 
 // Flips the tile type. Returns true for success, false for failure.
 // only use for user actions because it changes the userPlaced flag
-Maze.prototype.doActionOnTile = (point) => {
+Maze.prototype.doActionOnTile = function(point) {
     if (!this.isModifiable(point)) {
         return false;
     }
@@ -272,7 +272,7 @@ Maze.prototype.doActionOnTile = (point) => {
     return true;
 };
 
-Maze.prototype.operationCostForActionOnTile = (tile) => {
+Maze.prototype.operationCostForActionOnTile = function(tile) {
     var operationCost = 0;
     if (tile.userPlaced) {
         if (tile.type === Tile.Type.Blocker) {
@@ -292,7 +292,7 @@ Maze.prototype.operationCostForActionOnTile = (tile) => {
     return operationCost
 };
 
-Maze.prototype.generateBlockers = () => {
+Maze.prototype.generateBlockers = function() {
     let i;
     const seedPoints = this.generateSeedPoints();
     const seedDecayFactor = [];
@@ -317,7 +317,7 @@ Maze.prototype.generateBlockers = () => {
     }
 };
 
-Maze.prototype.generateSeedPoints = () => {
+Maze.prototype.generateSeedPoints = function() {
     const seedPoints = [];
     for (let i = 0; i < this.blockerSeeds; i++) {
         seedPoints.push(this.generateNewPoint())
@@ -327,7 +327,7 @@ Maze.prototype.generateSeedPoints = () => {
 
 
 // extra array functions to test arrays with points
-Array.prototype.pointIsAtLeastThisFar = (point, distance) => {
+Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
 
     for (let i = 0; i < this.length; i++) {
         if ( this[i].calculateDistance(point) < distance ) {
@@ -337,11 +337,11 @@ Array.prototype.pointIsAtLeastThisFar = (point, distance) => {
     return true;
 };
 
-Array.prototype.containsPoint = (obj) => {
+Array.prototype.containsPoint = function(obj) {
     return ( this.indexOfPoint(obj) >= 0 );
 };
 
-Array.prototype.indexOfPoint = (obj) => {
+Array.prototype.indexOfPoint = function(obj) {
     let i = this.length;
     while (i--) {
         if (this[i].x === obj.x && this[i].y === obj.y) {
@@ -351,6 +351,6 @@ Array.prototype.indexOfPoint = (obj) => {
     return -1;
 };
 
-Array.prototype.removePoint = (point) => {
+Array.prototype.removePoint = function(point) {
     this.filter( (pointInArray) => pointInArray.x !== point.x && pointInArray.y !== point.y);
 };
