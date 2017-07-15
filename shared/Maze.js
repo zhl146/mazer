@@ -148,16 +148,21 @@ Maze.tilesets = [
     }
 ];
 
+// make sure that the point is in the bounds
+// and make sure that it is empty
 Maze.prototype.isPassable = function(point) {
     return this.contains(point) &&
         this.maze[point.y][point.x].isPassable();
 };
 
+// make sure that the point is in the bounds
+// and make sure that it's not a waypoint (waypoints shouldn't be messed with)
 Maze.prototype.isModifiable = function(point) {
     return this.contains(point) &&
-        this.waypoints.indexOfPoint(point) < 0;
+        !this.waypoints.containsPoint(point);
 };
 
+// makes sure that the point is in the bounds of the maze
 Maze.prototype.contains = function(point) {
     return point.x >= 0 &&
         point.y >= 0 &&
@@ -165,11 +170,13 @@ Maze.prototype.contains = function(point) {
         point.y < this.ysize;
 };
 
+// takes a point from the list of unused points, removes it from the list and returns it
 Maze.prototype.generateNewPoint = function() {
     const randomPointIndex = this.generateRandomIntBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
+// initializes a xsize X ysize maze of empty tiles
 Maze.prototype.generateEmptyMaze = function() {
     this.maze = this.createArrayofLength(this.ysize)
         .map( () => this.createArrayofLength(this.xsize)
@@ -177,6 +184,7 @@ Maze.prototype.generateEmptyMaze = function() {
         );
 };
 
+// invokes pathfinder to find all paths between waypoints
 Maze.prototype.findPath = function() {
     const path = [];
 
@@ -188,10 +196,12 @@ Maze.prototype.findPath = function() {
     return path;
 };
 
+// change a maze tile to blocker type
 Maze.prototype.setBlocker = function(point) {
     this.maze[point.y][point.x].type = Tile.Type.Blocker;
 };
 
+// calculates all points that changed and the operation to change them
 Maze.prototype.getUserChanges = function(userMaze) {
     const diffPoints = [];
     const changedMaze = userMaze.maze;
@@ -209,12 +219,14 @@ Maze.prototype.getUserChanges = function(userMaze) {
     return diffPoints;
 };
 
+// generates a random int inclusive of min and max
 Maze.prototype.generateRandomIntBetween = function(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(this.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
 };
 
+// generates the maze parameters that define how the maze will look
 Maze.prototype.generateMazeParams = function() {
     this.tileset = Maze.tilesets[this.generateRandomIntBetween(0, 3)];
 
@@ -271,6 +283,7 @@ Maze.prototype.doActionOnTile = function(point) {
     return true;
 };
 
+// calculates the operation cost to do an action on a tile
 Maze.prototype.operationCostForActionOnTile = function(tile) {
     let operationCost = 0;
     if (tile.userPlaced) {
@@ -291,6 +304,8 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
     return operationCost
 };
 
+// generates a list of tiles that should have blockers placed on them
+// then changes the tile types to blocker
 Maze.prototype.generateBlockers = function() {
     const seedPoints = this.generateSeedPoints();
     let seedDecayFactor;
@@ -311,6 +326,8 @@ Maze.prototype.generateBlockers = function() {
     this.blockerPoints.forEach( (point) => this.setBlocker(point) );
 };
 
+// gets some random points to place as seed blockers
+// the closer a tile is to a seed, the higher the probability of placing a blocker on it
 Maze.prototype.generateSeedPoints = function() {
     const seedPoints = [];
     while( seedPoints.length < this.blockerSeeds ) {
@@ -319,10 +336,12 @@ Maze.prototype.generateSeedPoints = function() {
     return seedPoints;
 };
 
+// returns an array with the point removed from it
 Maze.prototype.removePointInArray = function(array, pointToRemove) {
     return array.filter( (pointInArray) => !pointInArray.matches(pointToRemove) );
 };
 
+// creates an 0'ed array of the desired length
 Maze.prototype.createArrayofLength = function(desiredLength) {
     let newArray = [];
     newArray.length = desiredLength;
