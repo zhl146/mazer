@@ -65,21 +65,23 @@ export default function Maze(seed) {
 
     // generate start/end/waypoints
     // they must be at least 2 distance apart to be accepted
+    let savedPoints = [];
     while ( pathVertices.length < this.numPathVertexes ) {
         newPoint = this.generateNewPoint();
         if (pathVertices.pointIsAtLeastThisFar(newPoint, 2) ) {
             pathVertices.push(newPoint);
         } else {
-            this.unusedPoints.push(newPoint);
+            savedPoints.push(newPoint);
         }
     }
+    // we rejected some points in the previous step; make sure we put them back on the unused points array
+    savedPoints.forEach( (point) => this.unusedPoints.push(point) );
 
     // connect vertexes with path to create a random protected path between the start and end
     for (i = 0; i < this.numPathVertexes - 1; i++) {
         const pathSegment = this.pathfinder.findPath(pathVertices[i], pathVertices[i + 1]);
         if (i !== 0) {
-            // Shift so that the path so that it's continuous (end of previous equals
-            // start of next)
+            // Shift so that the path so that it's continuous (end of previous equals start of next)
             pathSegment.shift();
         }
         protectedPath.push(...pathSegment);
@@ -87,7 +89,9 @@ export default function Maze(seed) {
 
     // we shouldn't put anything where the protected path is
     // so they are removed from the unused points array
-    protectedPath.forEach( (point) => this.unusedPoints.removePoint(protectedPath[i]) );
+    protectedPath.forEach( (point) => {
+        this.unusedPoints = this.removePointInArray(this.unusedPoints, point);
+    });
 
     // Select random vertices to delete, excluding start and end
     while (pathVertices.length > this.numWaypoints + 2) {
@@ -162,14 +166,13 @@ Maze.prototype.contains = function(point) {
 };
 
 Maze.prototype.generateNewPoint = function() {
-    // apparently JS rounds non integer indexes when accessing arrays
     const randomPointIndex = this.generateRandomIntBetween(0, this.unusedPoints.length - 1);
     return this.unusedPoints.splice(randomPointIndex, 1)[0];
 };
 
 Maze.prototype.generateEmptyMaze = function() {
-    this.maze = [].createArrayofLength(this.ysize)
-        .map( () => [].createArrayofLength(this.xsize)
+    this.maze = this.createArrayofLength(this.ysize)
+        .map( () => this.createArrayofLength(this.xsize)
                 .map( () => new Tile(Tile.Type.Empty) )
         );
 };
@@ -223,7 +226,7 @@ Maze.prototype.generateMazeParams = function() {
     this.blockerSeeds = this.generateRandomIntBetween(15, Math.floor(size / 50) );
 
     this.numWaypoints = 1;
-    this.numPathVertexes = this.generateRandomIntBetween(.6, 1) / 10 * Math.sqrt(size);
+    this.numPathVertexes = Math.floor( this.generateRandomIntBetween(6, 10) / 10 * Math.sqrt(size) );
     for (let i = 0; i < this.numPathVertexes / 5; i++) {
         if (this.random() > 0.6) {
             this.numWaypoints++;
@@ -316,18 +319,17 @@ Maze.prototype.generateSeedPoints = function() {
     return seedPoints;
 };
 
+Maze.prototype.removePointInArray = function(array, pointToRemove) {
+    return array.filter( (pointInArray) => !pointInArray.matches(pointToRemove) );
+};
 
-// extra array functions
-
-// creates a zero'ed array of desired length
-Array.prototype.createArrayofLength =function(desiredLength) {
+Maze.prototype.createArrayofLength = function(desiredLength) {
     let newArray = [];
     newArray.length = desiredLength;
     return newArray.fill(0);
 };
 
 // extra array functions to test arrays with points
-
 
 Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
     // every only returns true only if every element in the tested array pasts to callback function test
