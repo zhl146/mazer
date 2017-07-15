@@ -8,8 +8,10 @@ import SvgPathDrawer from './SvgPathDrawer';
 import MazeService from './MazeService';
 import Util from './Util';
 
-export default function MazeView(id, seed) {
+export default function MazeView(id, seed, mazeService) {
     this.seed = seed;
+    // will probably refactor out later, but this will work for now
+    this.mazeService = mazeService;
     console.log("SEED: " + this.seed);
 
     this.maze = new Maze(this.seed);
@@ -50,7 +52,7 @@ MazeView.prototype.resetMaze = function(diffPoints) {
     this.maze = new Maze(this.seed);
 
     if (diffPoints) {
-        for (var i = 0; i < diffPoints.length; i++) {
+        for (let i = 0; i < diffPoints.length; i++) {
             this.maze.doActionOnTile(diffPoints[i]);
         }
     }
@@ -61,8 +63,8 @@ MazeView.prototype.resetMaze = function(diffPoints) {
 };
 
 MazeView.prototype.redrawAll = function() {
-    for (var y = 0; y < this.tileElements.length; y++) {
-        for (var x = 0; x < this.tileElements[y].length; x++) {
+    for (let y = 0; y < this.tileElements.length; y++) {
+        for (let x = 0; x < this.tileElements[y].length; x++) {
             this.setupTile(new Point(x, y));
         }
     }
@@ -72,29 +74,29 @@ MazeView.prototype.redrawAll = function() {
 };
 
 MazeView.prototype.generateTileElements = function() {
-    for (var y = 0; y < this.maze.maze.length; y++) {
-        var rowContainer = document.createElement('div');
+    for (let y = 0; y < this.maze.maze.length; y++) {
+        const rowContainer = document.createElement('div');
         rowContainer.className = "tile_container";
 
         this.tileElements.push([]);
 
-        for (var x = 0; x < this.maze.maze[y].length; x++) {
-            var point = new Point(x,y);
+        for (let x = 0; x < this.maze.maze[y].length; x++) {
+            const point = new Point(x, y);
 
-            var tileWrapper = document.createElement('div');
+            const tileWrapper = document.createElement('div');
             tileWrapper.className = "tile_wrapper";
 
-            var tileElement = document.createElement('div');
+            const tileElement = document.createElement('div');
             tileElement.className = "tile";
 
-            var tileOverlay = document.createElement('div');
+            const tileOverlay = document.createElement('div');
             tileOverlay.className = "tile_tint_overlay";
 
-            var tileTextElement = document.createElement('div');
+            const tileTextElement = document.createElement('div');
             tileTextElement.className = "tile_text absolute_center";
 
             (function(self, point) {
-                var pointCapture = point.copy();
+                const pointCapture = point.copy();
                 tileOverlay.addEventListener("mousedown", function(mouseEvent) {
                     self.tileClicked(mouseEvent, pointCapture);
                 });
@@ -113,41 +115,41 @@ MazeView.prototype.generateTileElements = function() {
 };
 
 MazeView.prototype.styleBtns = function() {
-    var buttons = document.querySelectorAll('.maze-btn');
-    for (var i = 0; i < buttons.length; i++) {
+    const buttons = document.querySelectorAll('.maze-btn');
+    for (let i = 0; i < buttons.length; i++) {
         buttons[i].style.backgroundColor = this.maze.tileset.colors.groundNatural;
     }
 };
 
 MazeView.prototype.setTileSize = function() {
 
-    var headerHeight = document.getElementById('resource-container').offsetHeight;
-    var footerHeight = document.getElementById('bottom-container').offsetHeight;
+    const headerHeight = document.getElementById('resource-container').offsetHeight;
+    let footerHeight = document.getElementById('bottom-container').offsetHeight;
 
-    var yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
-    var xDimension = ( window.innerWidth - 20 ) / this.maze.xsize;
+    const yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
+    const xDimension = ( window.innerWidth - 20 ) / this.maze.xsize;
     // console.log('x: ' + xDimension);
     // console.log('y: ' + yDimension);
 
-    var tileDimension = xDimension > yDimension ? yDimension : xDimension;
+    const tileDimension = xDimension > yDimension ? yDimension : xDimension;
 
-    var tiles = document.querySelectorAll('.tile_wrapper');
+    const tiles = document.querySelectorAll('.tile_wrapper');
 
-    for (var i = 0; i< tiles.length; i++) {
+    for (let i = 0; i< tiles.length; i++) {
         tiles[i].style.height = tileDimension + 'px';
         tiles[i].style.width = tileDimension + 'px';
     }
 };
 
 MazeView.prototype.setupTile = function(point) {
-    var mazeTile = this.maze.maze[point.y][point.x];
-    var tileWrapper = this.tileElements[point.y][point.x];
+    const mazeTile = this.maze.maze[point.y][point.x];
+    const tileWrapper = this.tileElements[point.y][point.x];
 
-    var waypointIndex = this.maze.waypoints.indexOfPoint(point);
+    const waypointIndex = this.maze.waypoints.indexOfPoint(point);
     if (waypointIndex >= 0) {
-        var tileTextElement = tileWrapper.querySelector('.tile_text');
+        const tileTextElement = tileWrapper.querySelector('.tile_text');
 
-        var text = "";
+        let text = "";
         if (waypointIndex === 0) {
             text = "S";
         } else if (waypointIndex === this.maze.waypoints.length - 1) {
@@ -160,7 +162,7 @@ MazeView.prototype.setupTile = function(point) {
         tileWrapper.appendChild(tileTextElement);
     }
 
-    var tileElement = tileWrapper.querySelector('.tile');
+    const tileElement = tileWrapper.querySelector('.tile');
     if (waypointIndex >= 0) {
         tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
         tileWrapper.className = "tile_wrapper";
@@ -190,20 +192,20 @@ MazeView.prototype.setupTile = function(point) {
 
 MazeView.prototype.drawPath = function(path) {
     // Translate the tile path into relative screen coords
-    var svgPath = [];
+    const svgPath = [];
 
-    var containerBoundingRect = this.element.getBoundingClientRect();
+    const containerBoundingRect = this.element.getBoundingClientRect();
 
-    for (var i = 0; i < path.length; i++) {
-        var svgSegment = [];
+    for (let i = 0; i < path.length; i++) {
+        const svgSegment = [];
 
-        for (var j = 0; j < path[i].length; j++) {
-            var point = path[i][j];
+        for (let j = 0; j < path[i].length; j++) {
+            const point = path[i][j];
 
-            var tileElement = this.tileElements[point.y][point.x];
-            var boundingRect = tileElement.getBoundingClientRect();
+            const tileElement = this.tileElements[point.y][point.x];
+            const boundingRect = tileElement.getBoundingClientRect();
 
-            var center = new Point(boundingRect.left + boundingRect.width / 2.0,
+            const center = new Point(boundingRect.left + boundingRect.width / 2.0,
                 boundingRect.top + boundingRect.height / 2.0);
             center.x -= containerBoundingRect.left;
             center.y -= containerBoundingRect.top;
@@ -225,8 +227,8 @@ MazeView.prototype.debug_showGTrackers = function(i) {
         return;
     }
 
-    for (var y = 0; y < this.tileElements.length; y++) {
-        for (var x = 0; x < this.tileElements[y].length; x++) {
+    for (let y = 0; y < this.tileElements.length; y++) {
+        for (let x = 0; x < this.tileElements[y].length; x++) {
             this.tileElements[y][x].querySelector('.tile_text').innerHTML = this.maze.pathfinder.lastGTracker[i][y][x];
         }
     }
@@ -238,8 +240,8 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
     }
 
     // If the path is blocked at any point, do not allow the user to place the tile
-    var path = this.maze.findPath();
-    var invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path);
+    const path = this.maze.findPath();
+    const invalidPathSegmentIndex = this.findInvalidPathSegmentIndex(path);
     if (invalidPathSegmentIndex >= 0) {
         // Undo and flash blocked path
         this.svgPathDrawer.flashInvalidPathSegment(invalidPathSegmentIndex);
@@ -264,7 +266,7 @@ MazeView.prototype.tileClicked = function(mouseEvent, point) {
 };
 
 MazeView.prototype.findInvalidPathSegmentIndex = function(path) {
-    for (var i = 0; i < path.length; i++) {
+    for (let i = 0; i < path.length; i++) {
         if (path[i].length === 0) {
             return i;
         }
@@ -278,12 +280,12 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
         return true;
     }
 
-    for (var i = 0; i < pathA.length; i++) {
+    for (let i = 0; i < pathA.length; i++) {
         if (pathA[i].length !== pathB[i].length) {
             return true;
         }
 
-        for (var j = 0; j < pathA[i].length; j++) {
+        for (let j = 0; j < pathA[i].length; j++) {
             if (pathA[i][j].x !== pathB[i][j].x || pathA[i][j].y !== pathB[i][j].y) {
                 return true;
             }
@@ -294,30 +296,31 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
 };
 
 MazeView.prototype.updateActionsUsed = function() {
-    var actionString = 'AP: ' + (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
-    document.getElementById('action-counter').innerHTML = actionString;
+    document.getElementById('action-counter').innerHTML = 'AP: ' +
+        (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
 };
 
 MazeView.prototype.updateScore = function (score) {
-    var scoreCounter = document.getElementById('current-score');
-    var currentScore = scoreCounter.innerHTML;
+    const scoreCounter = document.getElementById('current-score');
+    const currentScore = scoreCounter.innerHTML;
 
-    var myObject = {
+    const myObject = {
         score: currentScore,
     };
 
-    var JSobjectProp = anime({
+    const JSobjectProp = anime({
         targets: myObject,
         score: score,
         easing: 'easeInOutQuad',
         round: 1,
-        update: function() {
+        update: function () {
             scoreCounter.innerHTML = myObject.score;
         }
     });
 };
 
 MazeView.prototype.initializeViewInformation = function () {
+    this.updateTopScore();
     document.getElementById('current-score').innerHTML = '0';
     document.getElementById('action-counter').innerHTML = 'AP: '
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
@@ -328,18 +331,22 @@ MazeView.prototype.initializeViewInformation = function () {
 
 MazeView.prototype.submitSolution = function(name) {
     // generate user actions to recreate the current maze
-    var diffPoints = this.baseMaze.getUserChanges(this.maze);
-    var mazeService = new MazeService();
+    const diffPoints = this.baseMaze.getUserChanges(this.maze);
+    this.updateTopScore();
+    return this.mazeService.submitSolution(this.maze.seed, name, diffPoints);
+};
 
-    return mazeService.submitSolution(this.maze.seed, name, diffPoints);
+MazeView.prototype.updateTopScore = function() {
+    this.mazeService.getScores(this.seed, 0, 1)
+        .then( (scoreArray) => document.getElementById('top-score').innerHTML = scoreArray[0].score)
 };
 
 MazeView.prototype.togglePathDrawingMode = function() {
-    var pathMode = this.svgPathDrawer.pathDrawingMode;
+    let pathMode = this.svgPathDrawer.pathDrawingMode;
     pathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
     this.svgPathDrawer.setMode(pathMode);
 
-    var nextPathMode = (pathMode+1)%SvgPathDrawer.PathDrawingMode.Count;
+    const nextPathMode = (pathMode + 1) % SvgPathDrawer.PathDrawingMode.Count;
     this.traceBtn.innerHTML = SvgPathDrawer.PathDrawingMode.toString(nextPathMode);
 };
 

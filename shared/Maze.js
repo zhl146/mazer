@@ -84,7 +84,7 @@ export default function Maze(seed) {
             // Shift so that the path so that it's continuous (end of previous equals start of next)
             pathSegment.shift();
         }
-        protectedPath.push(...pathSegment);
+        pathSegment.forEach( (point) => protectedPath.push(point));
     }
 
     // we shouldn't put anything where the protected path is
