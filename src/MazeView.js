@@ -332,7 +332,6 @@ MazeView.prototype.initializeViewInformation = function () {
 MazeView.prototype.submitSolution = function(name) {
     // generate user actions to recreate the current maze
     const diffPoints = this.baseMaze.getUserChanges(this.maze);
-    this.updateTopScore();
     return this.mazeService.submitSolution(this.maze.seed, name, diffPoints);
 };
 

@@ -59,7 +59,8 @@ const initView = function ( seed ) {
     usernamePopup.submitBtn.addEventListener("click", function () {
         mazeView.submitSolution(usernamePopup.input.value)
             .then(
-                function ( rank ) {
+                ( rank ) => {
+                    mazeView.updateTopScore();
                     usernamePopup.hide();
                     leaderboard.fillScores(rank);
                     leaderboard.show();
