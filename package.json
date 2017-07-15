@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build-client": "webpack",
     "start": "webpack && babel-node --inspect --presets es2015 -- ./bin/www",
-    "start-dev": "webpack-dev-server"
+    "start-dev": "webpack-dev-server",
+    "clean": "rm -rf build && mkdir build && mkdir build/shared",
+    "build-server": "babel --presets es2015 . -d build --ignore public,src,node_modules,package.json,webpack.config.js",
+    "build": "npm run clean && npm run build-server"
+
   },
   "dependencies": {
     "animejs": "^2.0.2",
