@@ -8,6 +8,8 @@ import MazeService from './MazeService';
 //      of points and displays the resulting maze.
 export default function LeaderBoardView(seed, backgroundColor, solutionDelegate) {
     this.seed = seed;
+    this.playerRank = null;
+
     this.backgroundColor = backgroundColor;
     this.leaderBoard = document.getElementById('leaderboard');
     this.initLeaderBoard();
@@ -68,6 +70,11 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
         scoreContainer.appendChild(scoreEl);
         scoreContainer.classList.add('score');
 
+        // differentiate the newest score
+        if ( rank === this.playerRank ) {
+            scoreContainer.style.background = 'rgba(0,255,75,.3)';
+        }
+
         return scoreContainer;
     }.bind(this);
 
@@ -76,13 +83,21 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
         topTen.appendChild(score);
     }
 
-    for (var i = 0; i < closeThreeScores.length; i++) {
-        var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i]);
-        closeThree.appendChild(score);
+    // don't show redundant scores
+    //closethree will only show if you are 11th or lower
+    if (closeThreeStartRank > 8) {
+        const dividerDiv =  document.createElement('div');
+        dividerDiv.classList.add('leaderboard-divider');
+        closeThree.appendChild(dividerDiv);
+        for (var i = 0; i < closeThreeScores.length; i++) {
+            var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i]);
+            closeThree.appendChild(score);
+        }
     }
 };
 
 LeaderBoardView.prototype.fillScores = function(rank) {
+    this.playerRank = rank;
     var mazeService = new MazeService();
     
     // subtract 2 from rank because start is zero-indexed

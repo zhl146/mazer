@@ -175,6 +175,7 @@ body {
 }
 
 .score {
+  margin: 5px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -184,9 +185,9 @@ body {
   }
 }
 
-.divider {
+.leaderboard-divider {
   height: 0;
-  margin: 25px;
+  margin: 25px 0;
   width: 100%;
   border-bottom: 1px solid black;
 }
