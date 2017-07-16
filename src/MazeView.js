@@ -17,10 +17,12 @@ export default function MazeView(id, seed) {
     this.scoreCalculator = new Score(this.baseMaze);
 
     this.tileElements = [];
+    this.contentContainer = document.getElementById('content');
     this.element = document.getElementById(id);
     this.submitBtn = document.getElementById('submit-btn');
     this.resetBtn = document.getElementById('reset-btn');
     this.traceBtn = document.getElementById('trace-btn');
+    this.helpBtn = document.getElementById('help-btn');
 
     this.initializeViewInformation();
 
@@ -31,11 +33,13 @@ export default function MazeView(id, seed) {
     this.element.appendChild(this.svgPathDrawer.getElement());
 
     this.setTileSize();
+    this.setContentSize();
     this.redrawAll();
 
     window.addEventListener('resize', function() {
         // reset tile size every time the window resizes
         this.setTileSize();
+        this.setContentSize();
         // Redraw the SVG path every time the window resizes
         this.drawPath(this.lastPath);
     }.bind(this));
@@ -113,11 +117,21 @@ MazeView.prototype.generateTileElements = function() {
     }
 };
 
-MazeView.prototype.styleBtns = function() {
-    const buttons = document.querySelectorAll('.maze-btn');
-    for (let i = 0; i < buttons.length; i++) {
-        buttons[i].style.backgroundColor = this.maze.tileset.colors.groundNatural;
-    }
+MazeView.prototype.applyPaletteBackground = function() {
+    const buttons = document.querySelectorAll('.default-background');
+    buttons.forEach( (buttonElement) => buttonElement.style.backgroundColor = this.maze.tileset.colors.groundNatural )
+};
+
+MazeView.prototype.setContentSize = function() {
+    const headerHeight = document.getElementById('resource-container').offsetHeight;
+    let footerHeight = document.getElementById('bottom-container').offsetHeight;
+    const yDimension = ( window.innerHeight - headerHeight - footerHeight - 70) / this.maze.ysize;
+    const xDimension = ( window.innerWidth - 20 ) / this.maze.xsize;
+
+    const tileDimension = xDimension > yDimension ? yDimension : xDimension;
+    const contentWidth = tileDimension * this.maze.xsize;
+
+    this.contentContainer.style.width = contentWidth;
 };
 
 MazeView.prototype.setTileSize = function() {
@@ -294,9 +308,15 @@ MazeView.prototype.pathsDiffer = function(pathA, pathB) {
     return false;
 };
 
+MazeView.prototype.toggleHelp = function() {
+    let displayStyle = document.getElementById('help-container').style.display;
+    displayStyle = displayStyle !== 'block'? 'block' : 'none';
+    document.getElementById('help-container').style.display = displayStyle;
+};
+
 MazeView.prototype.updateActionsUsed = function() {
-    document.getElementById('action-counter').innerHTML = 'AP: ' +
-        (this.maze.actionPoints - this.maze.actionsUsed) + '/' + this.maze.actionPoints;
+    document.getElementById('action-counter').innerHTML = (this.maze.actionPoints - this.maze.actionsUsed) +
+        '/' + this.maze.actionPoints;
 };
 
 MazeView.prototype.updateScore = function (score) {
@@ -320,12 +340,13 @@ MazeView.prototype.updateScore = function (score) {
 MazeView.prototype.initializeViewInformation = function () {
     this.updateTopScore();
     setInterval(() => this.updateTopScore(), 30000);
+    document.getElementById('help-action-points').innerHTML = this.maze.actionPoints;
     document.getElementById('current-score').innerHTML = '0';
-    document.getElementById('action-counter').innerHTML = 'AP: '
-        + this.maze.actionPoints + '/' + this.maze.actionPoints;
+    document.getElementById('action-counter').innerHTML = this.maze.actionPoints + '/' + this.maze.actionPoints;
+    document.getElementById('help-removal-cost').innerHTML = this.maze.removalCost;
     document.getElementById('removal-cost').innerHTML = 'Cost to remove a blocker: '
         + this.maze.removalCost + ' AP';
-    this.styleBtns();
+    this.applyPaletteBackground();
 };
 
 MazeView.prototype.submitSolution = function(name) {

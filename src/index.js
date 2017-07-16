@@ -58,6 +58,10 @@ const initView = function ( seed ) {
         mazeView.resetMaze();
     });
 
+    mazeView.helpBtn.addEventListener("click", function () {
+        mazeView.toggleHelp();
+    });
+
     usernamePopup.submitBtn.addEventListener("click", function () {
         mazeView.submitSolution(usernamePopup.input.value)
             .then(

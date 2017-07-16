@@ -216,7 +216,7 @@ Maze.prototype.generateMazeParams = function() {
         'name': 'randomlyGeneratedTileset',
         "colors": {
             'groundNatural': blockColors[2],
-            'groundUser': blockColors[7],
+            'groundUser': blockColors[0],
             'blockerNatural': blockColors[1],
             'blockerUser': blockColors[3],
         },

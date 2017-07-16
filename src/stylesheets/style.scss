@@ -40,6 +40,11 @@ body {
   background-color: $blockerColor_Natural;
   color: black;
   padding: 5px 10px;
+  cursor: pointer;
+}
+
+.maze-btn:hover {
+  color: grey
 }
 
 .content {
@@ -241,4 +246,57 @@ button {
     > button {
         flex: 1 1 auto;
     }
+}
+
+#help-container {
+  display: none;
+  padding: 15px;
+}
+
+#help-btn {
+  margin-right: 30px;
+  background-color: lightgrey;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.help-btn-text {
+  font-weight: 600;
+}
+
+#help-btn:hover {
+  color: grey;
+}
+
+.bottom-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.top-score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.player-score-container {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+}
+
+.action-points-container {
+  display: flex;
+  flex-direction: column;
+  text-align: end;
+}
+
+.high-score {
+  text-align: center;
+  color: rgb(220, 0, 0);
 }

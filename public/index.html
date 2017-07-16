@@ -5,30 +5,47 @@
 <body>
 <div id="content" class="content">
     <div id="resource-container">
-        <div>
-            <span>TOP SCORE: </span>
-            <span id="top-score"></span>
-        </div>
-        <div>
-            <span>SCORE: </span>
+        <div class="player-score-container">
+            <span>Player 1</span>
             <span id="current-score"></span>
         </div>
-        <span id="action-counter"></span>
+        <div class="top-score-container">
+            <span class="high-score">HIGH SCORE</span>
+            <span id="top-score"></span>
+        </div>
+        <div class="action-points-container">
+            <span>ACTIONS</span>
+            <span id="action-counter"></span>
+        </div>
     </div>
 
     <div id="maze_container"></div>
 
     <div id="bottom-container">
-        <div id="info-container">
-            <p>Cost to add a blocker: 1 AP</p>
-            <p id="removal-cost"></p>
+        <div class="bottom-left">
+            <button id="help-btn" class="maze-btn default-background">
+                <span class="help-btn-text">?</span>
+            </button>
+            <div id="info-container">
+                <p>Cost to add a blocker: 1 AP</p>
+                <p id="removal-cost"></p>
+            </div>
         </div>
         <div>
-            <button id="trace-btn" class="maze-btn">TRACE</button>
-            <button id="reset-btn" class="maze-btn">RESET</button>
-            <button id="submit-btn" class="maze-btn">SUBMIT</button>
+            <button id="trace-btn" class="maze-btn default-background">TRACE</button>
+            <button id="reset-btn" class="maze-btn default-background">RESET</button>
+            <button id="submit-btn" class="maze-btn default-background">SUBMIT</button>
         </div>
     </div>
+
+    <div id="help-container">
+        <p>Make the longest maze between S and E to beat the high score!</p>
+        <p>The path must always link to all way-points in numerical order.</p>
+        <p>You have <span id="help-action-points"></span> action points (AP) to spend.</p>
+        <p>It costs 1 AP to place a blocker on an empty tile. You can always undo this for free.</p>
+        <p>It costs <span id="help-removal-cost"></span> AP to remove a blocker that you didn't place.</p>
+    </div>
+
 </div>
 
 <div id="username-popup" class="modal-overlay inactive">
