@@ -6,12 +6,10 @@ import Score from '../shared/Score';
 
 import SvgPathDrawer from './SvgPathDrawer';
 import MazeService from './MazeService';
-import Util from './Util';
 
 export default function MazeView(id, seed) {
     this.seed = seed;
     this.mazeService = new MazeService();
-    console.log("SEED: " + this.seed);
 
     this.maze = new Maze(this.seed);
     this.baseMaze = new Maze(this.seed);
@@ -314,9 +312,8 @@ MazeView.prototype.updateScore = function (score) {
         score: score,
         easing: 'easeInOutQuad',
         round: 1,
-        update: function () {
-            scoreCounter.innerHTML = myObject.score;
-        }
+        duration: 300,
+        update: () => scoreCounter.innerHTML = myObject.score
     });
 };
 

@@ -2,7 +2,6 @@
 import anime from 'animejs';
 
 export default function SvgPathDrawer(containerBoundingRect, segmentCount, colors) {
-    console.log(colors)
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
     svgElement.setAttribute('width', '100%');
@@ -121,7 +120,7 @@ SvgPathDrawer.prototype.startRunningPath = function() {
     for (var i = 0; i < this.pathElements.length; i++) {
         (function() {
             var pathElement = this.pathElements[i];
-            var duration = 3*totalPathLength;
+            var duration = 1.5*totalPathLength;
 
             var dashArray = traceLength + ',' + (totalPathLength-traceLength);
             pathElement.setAttribute('stroke-dasharray', dashArray);
