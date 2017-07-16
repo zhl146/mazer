@@ -43,8 +43,7 @@ const getMazeSeed = function () {
 };
 
 const initView = function ( seed ) {
-    const mazeService = new MazeService();
-    const mazeView = new MazeView('maze_container', seed, mazeService);
+    const mazeView = new MazeView('maze_container', seed);
     const leaderboard = new LeaderBoardView(seed, mazeView.maze.tileset.colors.groundNatural, mazeView);
     const usernamePopup = new UsernamePopupView(mazeView.maze.tileset.colors.groundNatural);
 

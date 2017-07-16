@@ -8,10 +8,9 @@ import SvgPathDrawer from './SvgPathDrawer';
 import MazeService from './MazeService';
 import Util from './Util';
 
-export default function MazeView(id, seed, mazeService) {
+export default function MazeView(id, seed) {
     this.seed = seed;
-    // will probably refactor out later, but this will work for now
-    this.mazeService = mazeService;
+    this.mazeService = new MazeService();
     console.log("SEED: " + this.seed);
 
     this.maze = new Maze(this.seed);
@@ -320,7 +319,7 @@ MazeView.prototype.updateScore = function (score) {
 };
 
 MazeView.prototype.initializeViewInformation = function () {
-    this.updateTopScore();
+    setInterval(()=> this.updateTopScore(), 30000);
     document.getElementById('current-score').innerHTML = '0';
     document.getElementById('action-counter').innerHTML = 'AP: '
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
@@ -337,7 +336,15 @@ MazeView.prototype.submitSolution = function(name) {
 
 MazeView.prototype.updateTopScore = function() {
     this.mazeService.getScores(this.seed, 0, 1)
-        .then( (scoreArray) => document.getElementById('top-score').innerHTML = scoreArray[0].score)
+        .then( (scoreArray) => {
+            let score;
+            if (scoreArray) {
+                score = scoreArray[0].score
+            } else {
+                score = 0;
+            }
+            document.getElementById('top-score').innerHTML = score;
+        })
 };
 
 MazeView.prototype.togglePathDrawingMode = function() {
