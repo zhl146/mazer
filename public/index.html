@@ -6,7 +6,7 @@
 <div id="content" class="content">
     <div id="resource-container">
         <div class="player-score-container">
-            <span>Player 1</span>
+            <span>SCORE</span>
             <span id="current-score"></span>
         </div>
         <div class="top-score-container">
@@ -19,7 +19,15 @@
         </div>
     </div>
 
-    <div id="maze_container"></div>
+    <div id="maze_container">
+        <div id="help-container">
+            <p>Make the longest maze between S and E to beat the high score!</p>
+            <p>The path must always link to all way-points in numerical order.</p>
+            <p>You have <span id="help-action-points"></span> action points (AP) to spend.</p>
+            <p>It costs 1 AP to place a blocker on an empty tile. You can always undo this for free.</p>
+            <p>It costs <span id="help-removal-cost"></span> AP to remove a blocker that you didn't place.</p>
+        </div>
+    </div>
 
     <div id="bottom-container">
         <div class="bottom-left">
@@ -36,14 +44,6 @@
             <button id="reset-btn" class="maze-btn default-background">RESET</button>
             <button id="submit-btn" class="maze-btn default-background">SUBMIT</button>
         </div>
-    </div>
-
-    <div id="help-container">
-        <p>Make the longest maze between S and E to beat the high score!</p>
-        <p>The path must always link to all way-points in numerical order.</p>
-        <p>You have <span id="help-action-points"></span> action points (AP) to spend.</p>
-        <p>It costs 1 AP to place a blocker on an empty tile. You can always undo this for free.</p>
-        <p>It costs <span id="help-removal-cost"></span> AP to remove a blocker that you didn't place.</p>
     </div>
 
 </div>

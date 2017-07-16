@@ -194,31 +194,39 @@ Maze.prototype.generateMazeParams = function() {
     const colorScheme = new ColorScheme;
     const hue = this.generateRandomIntBetween(0, 359);
 
-    const blockColors = colorScheme.from_hue(hue)
-        .scheme('tetrade')
-        .variation('pastel')
+    const mazeColors = colorScheme.from_hue(hue)
+        .scheme('contrast')
+        .variation('pale')
         .colors()
         .map( (color) => '#' + color);
 
-    let pathColors = colorScheme.from_hue(hue)
-        .scheme('tetrade')
+    const generatedPathColors = colorScheme.from_hue(hue)
+        .scheme('contrast')
         .variation('hard')
         .colors()
-        .slice(4);
+        .splice(4)
+        .map( (color) => '#' + color);
 
-    pathColors.splice(2,1);
-    pathColors.splice(5,1);
-    pathColors.splice(8,1);
+    const basePathColor = generatedPathColors[0];
 
-    pathColors = pathColors.map( (color) => '#' + color);
+    function shadeColor2(color, percent) {
+        var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+        return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+    }
+
+    const pathColors = [];
+
+    for (let i = -.4; i <= .8; i+=.2) {
+        pathColors.push(shadeColor2(basePathColor, i))
+    }
 
     this.tileset = {
         'name': 'randomlyGeneratedTileset',
         "colors": {
-            'groundNatural': blockColors[2],
-            'groundUser': blockColors[0],
-            'blockerNatural': blockColors[1],
-            'blockerUser': blockColors[3],
+            'groundNatural': mazeColors[2],
+            'groundUser': mazeColors[0],
+            'blockerNatural': mazeColors[3],
+            'blockerUser': mazeColors[1],
         },
         "pathColors": pathColors
     };

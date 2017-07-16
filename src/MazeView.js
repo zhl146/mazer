@@ -163,15 +163,20 @@ MazeView.prototype.setupTile = function(point) {
         const tileTextElement = tileWrapper.querySelector('.tile_text');
 
         let text = "";
+        let size = "";
         if (waypointIndex === 0) {
             text = "S";
+            size = '1.4em'
         } else if (waypointIndex === this.maze.waypoints.length - 1) {
             text = "E";
+            size = '1.4em';
         } else {
             text = "" + waypointIndex;
+            size = '1.1em';
         }
 
         tileTextElement.innerHTML = text;
+        tileTextElement.style.fontSize = size;
         tileWrapper.appendChild(tileTextElement);
     }
 

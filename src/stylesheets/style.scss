@@ -250,8 +250,13 @@ button {
 }
 
 #help-container {
+  position: absolute;
+  z-index: 4;
+  bottom: 5px;
+  left: 5px;
   display: none;
   padding: 15px;
+  background-color: white;
 }
 
 #help-btn {
@@ -274,6 +279,7 @@ button {
 }
 
 .bottom-left {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
