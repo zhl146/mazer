@@ -1,4 +1,4 @@
-const debug = false;
+const debug = true;
 
 const debugEndpoint = 'http://localhost:3000';
 const prodEndpoint = 'https://zhenlu.info/maze';

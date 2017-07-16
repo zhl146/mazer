@@ -4,18 +4,18 @@ import anime from 'animejs';
 const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
 
 export default function SvgPathDrawer(containerBoundingRect, segmentCount) {
-    var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+    var svgElement = document.createElementNS("http://www.js.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
     svgElement.setAttribute('width', '100%');
     svgElement.setAttribute('height', '100%');
 
-    var innerElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+    var innerElement = document.createElementNS("http://www.js.w3.org/2000/svg", 'g');
     innerElement.setAttribute('class', 'svg-paths svg-paths-dashed');
     svgElement.appendChild(innerElement);
 
     var pathElements = [];
     for (var i = 0; i < segmentCount; i++) {
-        var pathElement = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        var pathElement = document.createElementNS("http://www.js.w3.org/2000/svg", 'path');
         pathElement.setAttribute('stroke', colors[i%colors.length]);
 
         innerElement.appendChild(pathElement);
