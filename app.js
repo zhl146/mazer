@@ -9,7 +9,6 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import compression from 'compression';
 
-import index from './routes/index';
 import users from './routes/users';
 import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
