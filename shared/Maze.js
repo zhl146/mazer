@@ -3,6 +3,8 @@ import Tile from './Tile';
 import Point from './Point';
 import Pathfinder from './Pathfinder';
 
+const ColorScheme = require('color-scheme');
+
 export default function Maze(seed) {
     let i;
     this.random = seedrandom(seed);
@@ -228,7 +230,23 @@ Maze.prototype.generateRandomIntBetween = function(min, max) {
 
 // generates the maze parameters that define how the maze will look
 Maze.prototype.generateMazeParams = function() {
-    this.tileset = Maze.tilesets[this.generateRandomIntBetween(0, 3)];
+    const colorScheme = new ColorScheme;
+    const hue = this.generateRandomIntBetween(0, 359);
+
+    const colors = colorScheme.from_hue(hue)
+        .scheme('triade')
+        .variation('pastel')
+        .colors();
+
+    this.tileset = {
+        'name': 'randomlyGeneratedTileset',
+        "colors": {
+            'groundNatural': '#' + colors[2],
+            'groundUser': '#' + colors[7],
+            'blockerNatural': '#' + colors[1],
+            'blockerUser': '#' + colors[2],
+        }
+    };
 
     this.xsize = Math.floor(this.generateRandomIntBetween(15, 40));
     this.ysize = Math.floor(this.generateRandomIntBetween(15, 40));
