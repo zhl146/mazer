@@ -319,7 +319,8 @@ MazeView.prototype.updateScore = function (score) {
 };
 
 MazeView.prototype.initializeViewInformation = function () {
-    setInterval(()=> this.updateTopScore(), 30000);
+    this.updateTopScore();
+    setInterval(() => this.updateTopScore(), 30000);
     document.getElementById('current-score').innerHTML = '0';
     document.getElementById('action-counter').innerHTML = 'AP: '
         + this.maze.actionPoints + '/' + this.maze.actionPoints;
@@ -338,10 +339,10 @@ MazeView.prototype.updateTopScore = function() {
     this.mazeService.getScores(this.seed, 0, 1)
         .then( (scoreArray) => {
             let score;
-            if (scoreArray) {
-                score = scoreArray[0].score
+            if (scoreArray[0]) {
+                score = scoreArray[0].score;
             } else {
-                score = 0;
+                score = '0';
             }
             document.getElementById('top-score').innerHTML = score;
         })
