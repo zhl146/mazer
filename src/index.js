@@ -30,8 +30,11 @@ const generateRandomSeed = function () {
 const getMazeSeed = function () {
     const urlParamSeed = getUrlParameter("seed");
     if (urlParamSeed === "random") {
+        const loc = window.location.pathname;
+        const dir = loc.substring(0, loc.lastIndexOf('/'));
         const randomSeed = generateRandomSeed();
-        history.replaceState(null, "", "/?seed=" + randomSeed);
+
+        history.replaceState(null, "", dir + "/?seed=" + randomSeed);
 
         return Promise.resolve(randomSeed);
     } else if (urlParamSeed !== null) {
