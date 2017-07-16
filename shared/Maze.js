@@ -195,20 +195,20 @@ Maze.prototype.generateMazeParams = function() {
     const hue = this.generateRandomIntBetween(0, 359);
 
     const blockColors = colorScheme.from_hue(hue)
-        .scheme('triade')
+        .scheme('tetrade')
         .variation('pastel')
         .colors()
         .map( (color) => '#' + color);
 
     let pathColors = colorScheme.from_hue(hue)
-        .scheme('analogic')
-        .distance(1)
-        .add_complement('true')
+        .scheme('tetrade')
         .variation('hard')
         .colors()
-        .slice(8);
+        .slice(4);
 
     pathColors.splice(2,1);
+    pathColors.splice(5,1);
+    pathColors.splice(8,1);
 
     pathColors = pathColors.map( (color) => '#' + color);
 
