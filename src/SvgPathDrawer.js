@@ -1,9 +1,8 @@
 
 import anime from 'animejs';
 
-const colors = ['#849483', '#4e937a', '#b4656f', '#948392', '#c7f2a7'];
-
-export default function SvgPathDrawer(containerBoundingRect, segmentCount) {
+export default function SvgPathDrawer(containerBoundingRect, segmentCount, colors) {
+    console.log(colors)
     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
     svgElement.setAttribute('class', "path-container");
     svgElement.setAttribute('width', '100%');

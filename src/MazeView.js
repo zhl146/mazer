@@ -27,7 +27,9 @@ export default function MazeView(id, seed) {
     this.initializeViewInformation();
 
     this.generateTileElements();
-    this.svgPathDrawer = new SvgPathDrawer(this.element.getBoundingClientRect(), this.maze.waypoints.length - 1);
+    this.svgPathDrawer = new SvgPathDrawer(this.element.getBoundingClientRect(),
+        this.maze.waypoints.length - 1,
+        this.maze.tileset.pathColors);
     this.element.appendChild(this.svgPathDrawer.getElement());
 
     this.setTileSize();

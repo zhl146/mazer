@@ -111,45 +111,6 @@ export default function Maze(seed) {
     this.generateBlockers();
 };
 
-Maze.tilesets = [
-    {
-        'name': 'desert',
-        "colors": {
-            'groundNatural': 'sandybrown',
-            'groundUser': 'peru',
-            'blockerNatural': 'darkred',
-            'blockerUser': 'tomato',
-        }
-    },
-    {
-        'name': 'forest',
-        "colors": {
-            'groundNatural': '#8FCB9B',
-            'groundUser': '#636940',
-            'blockerNatural': '#0C8346',
-            'blockerUser': '#054A29',
-        }
-    },
-    {
-        'name': 'winter',
-        "colors": {
-            'groundNatural': 'rgb(240,240,240)',
-            'groundUser': '#BAA68D',
-            'blockerNatural': 'rgb(175,175,175)',
-            'blockerUser': 'rgb(75,75,75)',
-        }
-    },
-    {
-        'name': 'dark',
-        "colors": {
-            'groundNatural': '#689165',
-            'groundUser': '#748067',
-            'blockerNatural': '#436436',
-            'blockerUser': '#14281D',
-        }
-    }
-];
-
 // make sure that the point is in the bounds
 // and make sure that it is empty
 Maze.prototype.isPassable = function(point) {
@@ -233,20 +194,33 @@ Maze.prototype.generateMazeParams = function() {
     const colorScheme = new ColorScheme;
     const hue = this.generateRandomIntBetween(0, 359);
 
-    const colors = colorScheme.from_hue(hue)
+    const blockColors = colorScheme.from_hue(hue)
         .scheme('triade')
         .variation('pastel')
         .colors()
         .map( (color) => '#' + color);
 
+    let pathColors = colorScheme.from_hue(hue)
+        .scheme('analogic')
+        .distance(1)
+        .add_complement('true')
+        .variation('hard')
+        .colors()
+        .slice(8);
+
+    pathColors.splice(2,1);
+
+    pathColors = pathColors.map( (color) => '#' + color);
+
     this.tileset = {
         'name': 'randomlyGeneratedTileset',
         "colors": {
-            'groundNatural': colors[2],
-            'groundUser': colors[7],
-            'blockerNatural': colors[1],
-            'blockerUser': colors[3],
-        }
+            'groundNatural': blockColors[2],
+            'groundUser': blockColors[7],
+            'blockerNatural': blockColors[1],
+            'blockerUser': blockColors[3],
+        },
+        "pathColors": pathColors
     };
 
     this.xsize = Math.floor(this.generateRandomIntBetween(15, 40));
