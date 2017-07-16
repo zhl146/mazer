@@ -236,15 +236,16 @@ Maze.prototype.generateMazeParams = function() {
     const colors = colorScheme.from_hue(hue)
         .scheme('triade')
         .variation('pastel')
-        .colors();
+        .colors()
+        .map( (color) => '#' + color);
 
     this.tileset = {
         'name': 'randomlyGeneratedTileset',
         "colors": {
-            'groundNatural': '#' + colors[2],
-            'groundUser': '#' + colors[7],
-            'blockerNatural': '#' + colors[1],
-            'blockerUser': '#' + colors[2],
+            'groundNatural': colors[2],
+            'groundUser': colors[7],
+            'blockerNatural': colors[1],
+            'blockerUser': colors[3],
         }
     };
 
