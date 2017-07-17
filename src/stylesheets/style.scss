@@ -40,11 +40,6 @@ body {
   background-color: $blockerColor_Natural;
   color: black;
   padding: 5px 10px;
-  cursor: pointer;
-}
-
-.maze-btn:hover {
-  color: grey
 }
 
 .content {
@@ -306,4 +301,12 @@ button {
 .high-score {
   text-align: center;
   color: rgb(220, 0, 0);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  color: grey;
 }
