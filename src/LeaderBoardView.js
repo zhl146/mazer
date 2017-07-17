@@ -18,51 +18,54 @@ export default function LeaderBoardView(seed, backgroundColor, solutionDelegate)
 }
 
 LeaderBoardView.prototype.initLeaderBoard = function() {
-    var backBtn = document.getElementById('back-btn');
+    const backBtn = document.getElementById('back-btn');
     backBtn.addEventListener('click', function() {
         this.hide();
     }.bind(this));
 
-    var leaderboardBody = this.leaderBoard.firstElementChild;
+    const leaderboardBody = this.leaderBoard.firstElementChild;
     leaderboardBody.style.backgroundColor = this.backgroundColor;
 
 };
 
 LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeThreeScores, closeThreeStartRank) {
+    let i;
+    let score;
     this.clear();
 
-    var topTen = document.getElementById('top-scores');
-    var closeThree = document.getElementById('closest-scores');
+    const topTen = document.getElementById('top-scores');
+    const closeThree = document.getElementById('closest-scores');
 
-    var makeScore = function(rank, scoreContainer) {
-        var score = scoreContainer.score;
-        var name = scoreContainer.name;
-        var solution = scoreContainer.solution;
+    const makeScore = function ( rank, scoreValues ) {
+        const scoreNumber = scoreValues.score;
+        const nameText = scoreValues.name;
+        const solutionArray = scoreValues.solution;
 
-        var scoreContainer = document.createElement('div');
-        var rankEl = document.createElement('span');
-        var rankText = document.createTextNode(rank);
-        rankEl.appendChild(rankText);
+        const scoreContainer = document.createElement('div');
+        const rankEl = document.createElement('span');
+        const rankTextNode = document.createTextNode(rank);
+        rankEl.appendChild(rankTextNode);
 
-        var nameEl = document.createElement('span');
-        if (solution === undefined) {
-            var nameText = document.createTextNode(name);
-            nameEl.appendChild(nameText);
+        let nameTextNode;
+        const nameEl = document.createElement('span');
+        if (solutionArray === undefined) {
+            nameTextNode = document.createTextNode(nameText);
+            nameEl.appendChild(nameTextNode);
         } else {
-            var nameLink = document.createElement('a');
+            const nameLink = document.createElement('a');
             nameLink.classList.add('solution-link');
             nameEl.appendChild(nameLink);
-            var nameText = document.createTextNode(name);
-            nameLink.appendChild(nameText);
+            nameTextNode = document.createTextNode(nameText);
+            nameLink.appendChild(nameTextNode);
 
-            nameLink.addEventListener('click', function() {
+            nameLink.addEventListener('click', function () {
                 this.solutionDelegate.displaySolution(solution);
                 this.hide();
             }.bind(this));
         }
 
-        var scoreEl = document.createElement('span');
-        var valueText = document.createTextNode(score);
+        const scoreEl = document.createElement('span');
+        const valueText = document.createTextNode(scoreNumber);
         scoreEl.appendChild(valueText);
 
         scoreContainer.appendChild(rankEl);
@@ -71,15 +74,15 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
         scoreContainer.classList.add('score');
 
         // differentiate the newest score
-        if ( rank === this.playerRank ) {
+        if (rank === this.playerRank) {
             scoreContainer.style.background = 'rgba(0,255,75,.3)';
         }
 
         return scoreContainer;
     }.bind(this);
 
-    for (var i = 0; i < topTenScores.length; i++) {
-        var score = makeScore(i+1, topTenScores[i]);
+    for (i = 0; i < topTenScores.length; i++) {
+        score = makeScore(i + 1, topTenScores[i]);
         topTen.appendChild(score);
     }
 
@@ -89,8 +92,8 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
         const dividerDiv =  document.createElement('div');
         dividerDiv.classList.add('leaderboard-divider');
         closeThree.appendChild(dividerDiv);
-        for (var i = 0; i < closeThreeScores.length; i++) {
-            var score = makeScore(closeThreeStartRank+i+1, closeThreeScores[i]);
+        for (i = 0; i < closeThreeScores.length; i++) {
+            score = makeScore(closeThreeStartRank + i + 1, closeThreeScores[i]);
             closeThree.appendChild(score);
         }
     }
@@ -98,11 +101,11 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
 
 LeaderBoardView.prototype.fillScores = function(rank) {
     this.playerRank = rank;
-    var mazeService = new MazeService();
+    const mazeService = new MazeService();
     
     // subtract 2 from rank because start is zero-indexed
-    var promiseArr = [mazeService.getScores(this.seed, 0, 10),
-                      mazeService.getScores(this.seed, rank-2, 3)];
+    const promiseArr = [mazeService.getScores(this.seed, 0, 10),
+        mazeService.getScores(this.seed, rank - 2, 3)];
 
     return Promise.all(promiseArr)
         .then(function(values) {
@@ -121,8 +124,8 @@ LeaderBoardView.prototype.hide = function() {
 };
 
 LeaderBoardView.prototype.clear = function() {
-    var topTen = document.getElementById('top-scores');
-    var closeThree = document.getElementById('closest-scores');
+    const topTen = document.getElementById('top-scores');
+    const closeThree = document.getElementById('closest-scores');
 
     while (topTen.hasChildNodes()) {
         topTen.removeChild(topTen.lastChild);
