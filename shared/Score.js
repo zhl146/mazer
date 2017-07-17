@@ -1,6 +1,7 @@
 
 export default function Score(baseMaze) {
-    var defaultPath = baseMaze.findPath()
+    this.maze = baseMaze;
+    const defaultPath = baseMaze.findPath();
     this.baseScore = Math.floor(this.calculatePathLength(defaultPath)*100);
 }
 
@@ -8,24 +9,23 @@ export default function Score(baseMaze) {
 // a problem applying the user's actions (cheating or bug).
 Score.prototype.calculateScore = function(maze) {
     // use the new maze to calculate the user's submitted path
-    var adjustedPath = maze.findPath();
+    const adjustedPath = maze.findPath();
 
-    var unadjustedScore = Math.floor(this.calculatePathLength(adjustedPath)*100);
-    var adjustedScore = unadjustedScore - this.baseScore;
-
-    return adjustedScore
+    const unadjustedScore = Math.floor(this.calculatePathLength(adjustedPath)*100);
+    return unadjustedScore - this.baseScore;
 };
 
 Score.prototype.calculatePathLength = function(path) {
-    var pathLength = 0;
-    for (var i = 0; i < path.length; i++) {
-        var currentPoint = path[i][0];
-        for (var j = 1; j < path[i].length; j++) {
-            var nextPoint = path[i][j];
-            var xDiff = currentPoint.x - nextPoint.x;
-            var yDiff = currentPoint.y - nextPoint.y;
-            var distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
-            pathLength = pathLength + distance;
+    let pathLength = 0;
+    for (let i = 0; i < path.length; i++) {
+        let currentPoint = path[i][0];
+        for (let j = 1; j < path[i].length; j++) {
+            const nextPoint = path[i][j];
+            const xDiff = currentPoint.x - nextPoint.x;
+            const yDiff = currentPoint.y - nextPoint.y;
+            const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+            const adjustedDistance = this.maze.getScoreMod(currentPoint) * distance;
+            pathLength = pathLength + adjustedDistance;
             currentPoint = nextPoint;
         }
     }

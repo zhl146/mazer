@@ -123,7 +123,7 @@ body {
 }
 
 #bottom-container {
-  margin: 10px 0;
+  margin: 10px;
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
@@ -253,7 +253,7 @@ button {
   position: absolute;
   z-index: 4;
   bottom: 5px;
-  left: 5px;
+  left: 15px;
   display: none;
   padding: 15px;
   background-color: white;

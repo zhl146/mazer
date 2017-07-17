@@ -33,7 +33,7 @@ export default function MazeView(id, seed) {
     this.element.appendChild(this.svgPathDrawer.getElement());
 
     this.setTileSize();
-    this.setContentSize();
+    //this.setContentSize();
     this.redrawAll();
 
     window.addEventListener('resize', function() {
@@ -206,6 +206,28 @@ MazeView.prototype.setupTile = function(point) {
             tileElement.className = "tile tile_walkable_natural";
         }
     }
+
+    // visualize bonus scoring zones
+
+    function blendColors(c0, c1, p) {
+        const f=parseInt(c0.slice(1),16),t=parseInt(c1.slice(1),16),R1=f>>16,G1=f>>8&0x00FF,B1=f&0x0000FF,R2=t>>16,G2=t>>8&0x00FF,B2=t&0x0000FF;
+        return "#"+(0x1000000+(Math.round((R2-R1)*p)+R1)*0x10000+(Math.round((G2-G1)*p)+G1)*0x100+(Math.round((B2-B1)*p)+B1)).toString(16).slice(1);
+    }
+
+    if (this.maze.getScoreMod(point) > 1) {
+        // blend the normal background color with red - higher multiplier means more red blended
+        tileWrapper.style.backgroundColor = blendColors(this.maze.tileset.colors.groundNatural,
+            '#FF0000',
+            this.maze.getScoreMod(point)/10);
+        if (this.maze.isScoreZoneCenter(point)) {
+            const tileTextElement = tileWrapper.querySelector('.tile_text');
+            tileTextElement.innerHTML = this.maze.getScoreMod(point) + 'X';
+            tileTextElement.style.fontSize = '1em';
+            tileWrapper.appendChild(tileTextElement);
+        }
+    }
+
+
 };
 
 MazeView.prototype.drawPath = function(path) {

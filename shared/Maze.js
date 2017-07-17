@@ -27,6 +27,8 @@ export default function Maze(seed) {
 
     this.blockerSeeds = 15;
 
+    this.numScoringZones = 0;
+
     // how many action points the user gets to spend
     // adding a blocker always costs 1
     this.actionPoints = 10;
@@ -55,6 +57,8 @@ export default function Maze(seed) {
     this.pathfinder = new Pathfinder(this);
 
     this.generateEmptyMaze();
+
+    this.generateScoreZones();
 
     // we need to have at least one valid path through the maze
     var protectedPath = [];
@@ -192,7 +196,7 @@ Maze.prototype.generateRandomIntBetween = function(min, max) {
 // generates the maze parameters that define how the maze will look
 Maze.prototype.generateMazeParams = function() {
     const colorScheme = new ColorScheme;
-    const hue = this.generateRandomIntBetween(0, 359);
+    const hue = this.generateRandomIntBetween(0, 359000) / 1000;
 
     const mazeColors = colorScheme.from_hue(hue)
         .scheme('contrast')
@@ -237,6 +241,8 @@ Maze.prototype.generateMazeParams = function() {
     const size = this.xsize * this.ysize;
 
     this.blockerSeeds = this.generateRandomIntBetween(15, Math.floor(size / 50) );
+
+    this.numScoringZones = this.generateRandomIntBetween(1, Math.floor(size / 300));
 
     this.numWaypoints = 1;
     this.numPathVertexes = Math.floor( this.generateRandomIntBetween(6, 10) / 10 * Math.sqrt(size) );
@@ -308,7 +314,8 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
 // generates a list of tiles that should have blockers placed on them
 // then changes the tile types to blocker
 Maze.prototype.generateBlockers = function() {
-    const seedPoints = this.generateSeedPoints();
+    // the closer a tile is to a seed, the higher the probability of placing a blocker on it
+    const seedPoints = this.generateSeedPoints(this.blockerSeeds);
     let seedDecayFactor;
 
     seedPoints.forEach( (seedPoint) => {
@@ -327,11 +334,10 @@ Maze.prototype.generateBlockers = function() {
     this.blockerPoints.forEach( (point) => this.setBlocker(point) );
 };
 
-// gets some random points to place as seed blockers
-// the closer a tile is to a seed, the higher the probability of placing a blocker on it
-Maze.prototype.generateSeedPoints = function() {
+// gets some random points to place as seeds
+Maze.prototype.generateSeedPoints = function(numSeeds) {
     const seedPoints = [];
-    while( seedPoints.length < this.blockerSeeds ) {
+    while( seedPoints.length < numSeeds ) {
         seedPoints.push(this.generateNewPoint())
     }
     return seedPoints;
@@ -347,6 +353,47 @@ Maze.prototype.createArrayofLength = function(desiredLength) {
     let newArray = [];
     newArray.length = desiredLength;
     return newArray.fill(0);
+};
+
+Maze.prototype.getScoreMod = function(point) {
+    return this.maze[point.y][point.x].scoreMod;
+};
+
+Maze.prototype.generateScoreZones = function() {
+    const scoreSeeds = this.generateSeedPoints(this.numScoringZones);
+    const scoreSizeArray = [];
+
+    scoreSeeds.forEach( (seed) => {
+        scoreSizeArray.push( this.generateRandomIntBetween(2, 6) );
+        this.setScoreZoneCenter(seed);
+    });
+    for (let i = 0; i < scoreSeeds.length; i++) {
+        this.expandScoreZone(scoreSizeArray[i], 7 - scoreSizeArray[i], scoreSeeds[i]);
+    }
+};
+
+Maze.prototype.expandScoreZone = function(zoneSize, zoneModifier, seedPoint) {
+    for (let rowOffset = -zoneSize; rowOffset <= zoneSize; rowOffset++ ) {
+        let absoluteColumn = ( zoneSize - Math.abs(rowOffset) );
+        for (let columnOffset = -absoluteColumn; columnOffset <= absoluteColumn; columnOffset++) {
+            const newPoint = new Point(seedPoint.x + rowOffset, seedPoint.y + columnOffset);
+            if (this.contains(newPoint)) {
+                this.incrementScoreZone(newPoint, zoneModifier);
+            }
+        }
+    }
+};
+
+Maze.prototype.isScoreZoneCenter = function (point) {
+    return this.maze[point.y][point.x].scoreZoneCenter;
+};
+
+Maze.prototype.incrementScoreZone = function(point, amount) {
+    this.maze[point.y][point.x].scoreMod += amount;
+};
+
+Maze.prototype.setScoreZoneCenter = function(point) {
+    this.maze[point.y][point.x].scoreZoneCenter = true;
 };
 
 // extra array functions to test arrays with points
