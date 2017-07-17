@@ -24,7 +24,8 @@ Score.prototype.calculatePathLength = function(path) {
             const xDiff = currentPoint.x - nextPoint.x;
             const yDiff = currentPoint.y - nextPoint.y;
             const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-            const adjustedDistance = this.maze.getScoreMod(currentPoint) * distance;
+            const avgScoreMod = ( this.maze.getScoreMod(currentPoint) + this.maze.getScoreMod(nextPoint) ) / 2;
+            const adjustedDistance = avgScoreMod * distance;
             pathLength = pathLength + adjustedDistance;
             currentPoint = nextPoint;
         }
