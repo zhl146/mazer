@@ -1,10 +1,8 @@
 import express from 'express';
 import path from 'path';
-import favicon from 'serve-favicon';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-//import sassMiddleware from 'node-sass-middleware';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import compression from 'compression';
@@ -13,29 +11,21 @@ import users from './routes/users';
 import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 
-var database = mongoose.connect('mongodb://localhost/test');
+var database = mongoose.connect('mongodb://localhost/mazer_scores_DB');
 mongoose.Promise = Promise;
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+//app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(compression());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(sassMiddleware({
-//  src: path.join(__dirname, 'public'),
-//  dest: path.join(__dirname, 'public'),
-//  indentedSyntax: true, // true = .sass and false = .scss
-//  sourceMap: true
-//}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/users', users);
