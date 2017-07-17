@@ -157,7 +157,10 @@ MazeView.prototype.setTileSize = function() {
 MazeView.prototype.setupTile = function(point) {
     const mazeTile = this.maze.maze[point.y][point.x];
     const tileWrapper = this.tileElements[point.y][point.x];
+    const tileElement = tileWrapper.querySelector('.tile');
 
+    // check type of tile
+    // set tile style based on type
     const waypointIndex = this.maze.waypoints.indexOfPoint(point);
     if (waypointIndex >= 0) {
         const tileTextElement = tileWrapper.querySelector('.tile_text');
@@ -175,17 +178,18 @@ MazeView.prototype.setupTile = function(point) {
             size = '1.1em';
         }
 
+        // if it is, then set text on it
         tileTextElement.innerHTML = text;
         tileTextElement.style.fontSize = size;
         tileWrapper.appendChild(tileTextElement);
-    }
 
-    const tileElement = tileWrapper.querySelector('.tile');
-    if (waypointIndex >= 0) {
+        // set background color and style
         tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
         tileWrapper.className = "tile_wrapper";
         tileElement.className = "tile tile_waypoint";
-    } else if (!mazeTile.isPassable()) {
+    }
+    // tile is blocked
+    else if (!mazeTile.isPassable()) {
         tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundNatural;
         tileWrapper.className = "tile_wrapper";
         if (mazeTile.userPlaced) {
@@ -195,7 +199,9 @@ MazeView.prototype.setupTile = function(point) {
             tileElement.style.backgroundColor = this.maze.tileset.colors.blockerNatural;
             tileElement.className = "tile tile_unwalkable_natural";
         }
-    } else {
+    }
+    // tile is not blocked
+    else {
         if (mazeTile.userPlaced) {
             tileWrapper.style.backgroundColor = this.maze.tileset.colors.groundUser;
             tileWrapper.className = "tile_wrapper";
@@ -209,16 +215,23 @@ MazeView.prototype.setupTile = function(point) {
 
     // visualize bonus scoring zones
 
-    function blendColors(c0, c1, p) {
-        const f=parseInt(c0.slice(1),16),t=parseInt(c1.slice(1),16),R1=f>>16,G1=f>>8&0x00FF,B1=f&0x0000FF,R2=t>>16,G2=t>>8&0x00FF,B2=t&0x0000FF;
-        return "#"+(0x1000000+(Math.round((R2-R1)*p)+R1)*0x10000+(Math.round((G2-G1)*p)+G1)*0x100+(Math.round((B2-B1)*p)+B1)).toString(16).slice(1);
+    function shadeBlend(p,c0,c1) {
+        const n=p<0?p*-1:p,u=Math.round,w=parseInt;
+        if(c0.length>7){
+            const f=c0.split(","),t=(c1?c1:p<0?"rgb(0,0,0)":"rgb(255,255,255)").split(","),R=w(f[0].slice(4)),G=w(f[1]),B=w(f[2]);
+            return "rgb("+(u((w(t[0].slice(4))-R)*n)+R)+","+(u((w(t[1])-G)*n)+G)+","+(u((w(t[2])-B)*n)+B)+")"
+        }else{
+            const f=w(c0.slice(1),16),t=w((c1?c1:p<0?"#000000":"#FFFFFF").slice(1),16),R1=f>>16,G1=f>>8&0x00FF,B1=f&0x0000FF;
+            return "#"+(0x1000000+(u(((t>>16)-R1)*n)+R1)*0x10000+(u(((t>>8&0x00FF)-G1)*n)+G1)*0x100+(u(((t&0x0000FF)-B1)*n)+B1)).toString(16).slice(1)
+        }
     }
 
     if (this.maze.getScoreMod(point) > 1) {
-        // blend the normal background color with red - higher multiplier means more red blended
-        tileWrapper.style.backgroundColor = blendColors(this.maze.tileset.colors.groundNatural,
-            '#FF0000',
-            this.maze.getScoreMod(point)/10);
+        // blend whatever background color it already has with red - higher multiplier means more red blended
+        tileWrapper.style.backgroundColor = shadeBlend(this.maze.getScoreMod(point) / 10,
+            tileWrapper.style.backgroundColor,
+            'rgb(255,0,0');
+
         if (this.maze.isScoreZoneCenter(point)) {
             const tileTextElement = tileWrapper.querySelector('.tile_text');
             tileTextElement.innerHTML = this.maze.getScoreMod(point) + 'X';
