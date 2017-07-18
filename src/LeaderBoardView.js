@@ -59,7 +59,7 @@ LeaderBoardView.prototype.addScoresToLeaderboard = function(topTenScores, closeT
             nameLink.appendChild(nameTextNode);
 
             nameLink.addEventListener('click', function () {
-                this.solutionDelegate.displaySolution(solution);
+                this.solutionDelegate.displaySolution(solutionArray);
                 this.hide();
             }.bind(this));
         }
