@@ -1,10 +1,10 @@
-var path = require('path');
+const path = require('path');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: './client/src/index.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'public'),
+        path: path.resolve(__dirname, 'client-dist'),
     },
 
     module: {
@@ -23,12 +23,13 @@ module.exports = {
     },
 
     devServer: {
-        contentBase: path.join(__dirname, 'public'),
+        contentBase: path.join(__dirname, 'client-dist'),
         proxy: {
             "/maze": {
                 target: "http://localhost:3000",
             }
         }
     }
+
 };
 

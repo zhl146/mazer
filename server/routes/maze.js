@@ -3,8 +3,8 @@ import express from 'express';
 import SeedUtil from './maze-functions/generate-seed';
 import ScoreModel from '../database/ScoreModel';
 
-import Score from '../shared/Score';
-import Maze from '../shared/Maze';
+import Score from '../../shared/Score';
+import Maze from '../../shared/Maze';
 
 var router = express.Router();
 

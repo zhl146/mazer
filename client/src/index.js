@@ -50,19 +50,13 @@ const initView = function ( seed ) {
     const leaderboard = new LeaderBoardView(seed, mazeView.maze.tileset.colors.groundNatural, mazeView);
     const usernamePopup = new UsernamePopupView(mazeView.maze.tileset.colors.groundNatural);
 
-    mazeView.submitBtn.addEventListener("click", function () {
-        usernamePopup.show();
-    });
+    mazeView.submitBtn.addEventListener("click", () => usernamePopup.show() );
 
-    mazeView.resetBtn.addEventListener("click", function () {
-        mazeView.resetMaze();
-    });
+    mazeView.resetBtn.addEventListener("click", () => mazeView.resetMaze() );
 
-    mazeView.helpBtn.addEventListener("click", function () {
-        mazeView.toggleHelp();
-    });
+    mazeView.helpBtn.addEventListener("click", () => mazeView.toggleHelp() );
 
-    usernamePopup.submitBtn.addEventListener("click", function () {
+    usernamePopup.submitBtn.addEventListener("click", () => {
         mazeView.submitSolution(usernamePopup.input.value)
             .then(
                 ( rank ) => {
@@ -75,7 +69,7 @@ const initView = function ( seed ) {
     });
 };
 
-window.onload = function() {
+window.onload = () => {
     getMazeSeed()
         .catch(function(error) {
             alert("Something went wrong! You can play locally, but score submission might not work. Error details: " + error);

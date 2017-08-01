@@ -1,8 +1,8 @@
 import anime from 'animejs';
 
-import Maze from '../shared/Maze';
-import Point from '../shared/Point';
-import Score from '../shared/Score';
+import Maze from '../../shared/Maze';
+import Point from '../../shared/Point';
+import Score from '../../shared/Score';
 
 import SvgPathDrawer from './SvgPathDrawer';
 import MazeService from './MazeService';
