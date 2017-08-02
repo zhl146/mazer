@@ -5,12 +5,12 @@ export default function UsernamePopupView(backgroundColor) {
 }
 
 UsernamePopupView.prototype.initPopup = function() {
-    var cancelBtn = document.getElementById('username-cancel-btn');
+    const cancelBtn = document.getElementById('username-cancel-btn');
     cancelBtn.addEventListener('click', function() {
         this.hide();
     }.bind(this));
 
-    var usernamePopupBody = this.usernamePopup.firstElementChild;
+    const usernamePopupBody = this.usernamePopup.firstElementChild;
     usernamePopupBody.style.backgroundColor = this.backgroundColor;
 
     this.submitBtn = document.getElementById('username-submit-btn');

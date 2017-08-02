@@ -396,6 +396,42 @@ Maze.prototype.setScoreZoneCenter = function(point) {
     this.maze[point.y][point.x].scoreZoneCenter = true;
 };
 
+Maze.prototype.getAdjacent = function(point) {
+    const self = this;
+    const pointArray = [];
+    const endPoint = self.waypoints[self.waypoints.length - 1];
+    let newPoint;
+
+    const addPoint = function ( newPoint, isDiagonal ) {
+        if (self.maze.isPassable(newPoint)) {
+            newPoint.setParent(self);
+            newPoint.setG(isDiagonal ? 14 : 10);
+            newPoint.setH(endPoint);
+            newPoint.setF();
+            pointArray.push(newPoint)
+        }
+    };
+
+    newPoint = new Point( point.x, point.y + 1 );
+    addPoint(newPoint, false);
+    newPoint = new Point( point.x + 1, point.y + 1 );
+    addPoint(newPoint, true);
+    newPoint = new Point( point.x + 1, point.y );
+    addPoint(newPoint, false);
+    newPoint = new Point( point.x + 1, point.y - 1 );
+    addPoint(newPoint, true);
+    newPoint = new Point( point.x, point.y - 1 );
+    addPoint(newPoint, false);
+    newPoint = new Point( point.x - 1, point.y - 1 );
+    addPoint(newPoint, true);
+    newPoint = new Point( point.x - 1, point.y );
+    addPoint(newPoint, false);
+    newPoint = new Point( point.x - 1, point.y + 1 );
+    addPoint(newPoint, true);
+
+    return pointArray;
+};
+
 // extra array functions to test arrays with points
 
 Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
