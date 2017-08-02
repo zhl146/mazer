@@ -2,6 +2,7 @@
 export default function Point(x, y) {
     this.x = x;
     this.y = y;
+    this.parent = null;
 };
 
 Point.prototype.calculateDistance = function ( point ) {
