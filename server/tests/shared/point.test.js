@@ -8,31 +8,31 @@ class PointTest {
     }
 
     valueStorageTest(assert){
-        let samplePoint = new Point.default(10, 10);
+        let samplePoint = new Point(10, 10);
         assert.equal(samplePoint.x, 10);
         assert.equal(samplePoint.y, 10);
         assert.end();
     }
 
     parentTest(assert){
-        let samplePointA = new Point.default(10, 10);
-        let samplePointB = new Point.default(10, 11);
+        let samplePointA = new Point(10, 10);
+        let samplePointB = new Point(10, 11);
         samplePointA.setParent(samplePointB);
         assert.equal(samplePointB.matches(samplePointA.parent), true);
         assert.end();
     }
 
     copyTest(assert){
-        let samplePointA = new Point.default(10, 10);
+        let samplePointA = new Point(10, 10);
         let samplePointB = samplePointA.copy();
         assert.equal(samplePointB.matches(samplePointA), true);
         assert.end();
     }
 
     setFGHTest(assert){
-        let samplePointA = new Point.default(10, 10);
+        let samplePointA = new Point(10, 10);
         samplePointA.g = 15;
-        let samplePointB = new Point.default(12, 12);
+        let samplePointB = new Point(12, 12);
         samplePointB.setParent(samplePointA);
         samplePointB.setG(10);
         samplePointB.setH(samplePointA);
