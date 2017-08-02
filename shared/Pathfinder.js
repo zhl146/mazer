@@ -1,5 +1,3 @@
-import Maze from './Maze';
-import Point from './Point';
 import BinaryHeap from './BinaryHeap';
 
 function PointSet()
@@ -39,6 +37,7 @@ export default function Pathfinder(maze)
 // returns an array of points as an ending path
 // return empty array if fails to find solution
 Pathfinder.prototype.findPath = function(start, end) {
+    const currentPoint = openSet.pop();
     if (!this.maze.isPassable(start)) {
         console.log("Start point is impassable", start);
         return [];
@@ -53,18 +52,18 @@ Pathfinder.prototype.findPath = function(start, end) {
     start.f = 0;
 
     // list of tiles that have been explored
-    var closedSet = new PointSet();
+    const closedSet = new PointSet();
 
     // list of tiles to explore
-    var openSet = new BinaryHeap( function(point) {
+    let openSet = new BinaryHeap(function ( point ) {
         return point.f;
     });
 
-    var gTracker = new Array(this.maze.ysize);
+    const gTracker = new Array(this.maze.ysize);
 
-    for ( var i = 0; i < this.maze.ysize; i++ ) {
+    for (let i = 0; i < this.maze.ysize; i++ ) {
         gTracker[i] = new Array(this.maze.xsize);
-        for (var j = 0; j < this.maze.xsize; j++) {
+        for (let j = 0; j < this.maze.xsize; j++) {
             gTracker[i][j] = -1;
         }
     }
@@ -73,10 +72,9 @@ Pathfinder.prototype.findPath = function(start, end) {
     openSet.push(start);
     gTracker[start.y][start.x] = 0;
 
-    var counter = 0;
+    let counter = 0;
     while ( openSet.size() ) {
 
-        var currentPoint = openSet.pop();
         if ( counter >= 2000) { break;}
         counter ++;
 
@@ -86,13 +84,13 @@ Pathfinder.prototype.findPath = function(start, end) {
 
         closedSet.add(currentPoint);
 
-        for ( var neighbor of currentPoint.getAdjacent( this.maze, end ) ) {
+        for ( const neighbor of this.maze.getAdjacent( currentPoint ) ) {
             if (closedSet.has(neighbor)) {
                 continue;
             }
 
-            var neighborG = gTracker[neighbor.y][neighbor.x];
-            var currentG = gTracker[currentPoint.y][currentPoint.x];
+            const neighborG = gTracker[neighbor.y][neighbor.x];
+            const currentG = gTracker[currentPoint.y][currentPoint.x];
 
             if (neighborG < 0) {
                 openSet.push(neighbor);
@@ -113,8 +111,8 @@ Pathfinder.prototype.findPath = function(start, end) {
         return [];
     }
 
-    var path = [];
-    var node = currentPoint;
+    const path = [];
+    let node = currentPoint;
     path.unshift(node);
     while (node.parent) {
         path.unshift(node.parent);
