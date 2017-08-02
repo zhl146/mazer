@@ -68,11 +68,3 @@ const initView = function ( seed ) {
             )
     });
 };
-
-window.onload = () => {
-    getMazeSeed()
-        .catch(function(error) {
-            alert("Something went wrong! You can play locally, but score submission might not work. Error details: " + error);
-            return Promise.resolve(Math.random());
-        }).then(initView);
-};
