@@ -37,7 +37,7 @@ export default function Pathfinder(maze)
 // returns an array of points as an ending path
 // return empty array if fails to find solution
 Pathfinder.prototype.findPath = function(start, end) {
-    const currentPoint = openSet.pop();
+    
     if (!this.maze.isPassable(start)) {
         console.log("Start point is impassable", start);
         return [];
@@ -74,7 +74,7 @@ Pathfinder.prototype.findPath = function(start, end) {
 
     let counter = 0;
     while ( openSet.size() ) {
-
+        const currentPoint = openSet.pop();
         if ( counter >= 2000) { break;}
         counter ++;
 

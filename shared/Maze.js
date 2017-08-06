@@ -106,6 +106,7 @@ export default function Maze(seed) {
     }
 
     // the leftover points are the waypoints
+    console.log("Maze currently has this as pathVerticies: "+JSON.stringify(pathVertices));
     this.waypoints = pathVertices;
 
     // ------------------------------------------------------
@@ -149,6 +150,14 @@ Maze.prototype.generateEmptyMaze = function() {
         .map( () => this.createArrayofLength(this.xsize)
                 .map( () => new Tile(Tile.Type.Empty) )
         );
+
+    // this.maze = []
+    // for (let row=0; row<this.ysize; row++){ //iterate the y index needed
+    //     for (let col=0; col<this.xsize; col++){ //iterate the x index needed
+    //         this.maze.push(new Tile(0)); // 0 is type empty
+    //     }
+    // }
+
 };
 
 // invokes pathfinder to find all paths between waypoints

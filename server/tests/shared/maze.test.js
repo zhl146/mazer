@@ -1,13 +1,13 @@
 "use strict";
 let test = require('tape');
-let Mazer = require('../../../shared/Mazer');
+let Mazer = require('../../../shared/Maze');
 
-class MazerTest {
+class MazeTest {
     constructor(){
 
     }
 
-    mazerConstructorTest(assert){
+    mazeConstructorTest(assert){
         let testMaze1 = new Mazer.default(3000);
         let testMaze2 = new Mazer.default(3000);
         assert.equal(testMaze1.random != null, true);
@@ -16,9 +16,9 @@ class MazerTest {
     }
 
     unitTests(){
-        test('testing the constructor for mazer', this.mazerConstructorTest);
+        test('testing the constructor for mazer', this.mazeConstructorTest);
         
     }
 }
 
-module.exports = MazerTest;
+module.exports = MazeTest;
