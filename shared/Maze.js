@@ -403,7 +403,7 @@ Maze.prototype.getAdjacent = function(startPoint, endPoint) {
     let newPoint;
 
     const addPoint = function ( newPoint, isDiagonal ) {
-        if (self.maze.isPassable(newPoint)) {
+        if (self.isPassable(newPoint)) {
             newPoint.setParent(self);
             newPoint.setG(isDiagonal ? 14 : 10);
             newPoint.setH(endPoint);
