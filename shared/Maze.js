@@ -150,14 +150,6 @@ Maze.prototype.generateEmptyMaze = function() {
         .map( () => this.createArrayofLength(this.xsize)
                 .map( () => new Tile(Tile.Type.Empty) )
         );
-
-    // this.maze = []
-    // for (let row=0; row<this.ysize; row++){ //iterate the y index needed
-    //     for (let col=0; col<this.xsize; col++){ //iterate the x index needed
-    //         this.maze.push(new Tile(0)); // 0 is type empty
-    //     }
-    // }
-
 };
 
 // invokes pathfinder to find all paths between waypoints
@@ -405,10 +397,9 @@ Maze.prototype.setScoreZoneCenter = function(point) {
     this.maze[point.y][point.x].scoreZoneCenter = true;
 };
 
-Maze.prototype.getAdjacent = function(point) {
+Maze.prototype.getAdjacent = function(startPoint, endPoint) {
     const self = this;
     const pointArray = [];
-    const endPoint = self.waypoints[self.waypoints.length - 1];
     let newPoint;
 
     const addPoint = function ( newPoint, isDiagonal ) {
@@ -421,21 +412,21 @@ Maze.prototype.getAdjacent = function(point) {
         }
     };
 
-    newPoint = new Point( point.x, point.y + 1 );
+    newPoint = new Point( startPoint.x, startPoint.y + 1 );
     addPoint(newPoint, false);
-    newPoint = new Point( point.x + 1, point.y + 1 );
+    newPoint = new Point( startPoint.x + 1, startPoint.y + 1 );
     addPoint(newPoint, true);
-    newPoint = new Point( point.x + 1, point.y );
+    newPoint = new Point( startPoint.x + 1, startPoint.y );
     addPoint(newPoint, false);
-    newPoint = new Point( point.x + 1, point.y - 1 );
+    newPoint = new Point( startPoint.x + 1, startPoint.y - 1 );
     addPoint(newPoint, true);
-    newPoint = new Point( point.x, point.y - 1 );
+    newPoint = new Point( startPoint.x, startPoint.y - 1 );
     addPoint(newPoint, false);
-    newPoint = new Point( point.x - 1, point.y - 1 );
+    newPoint = new Point( startPoint.x - 1, startPoint.y - 1 );
     addPoint(newPoint, true);
-    newPoint = new Point( point.x - 1, point.y );
+    newPoint = new Point( startPoint.x - 1, startPoint.y );
     addPoint(newPoint, false);
-    newPoint = new Point( point.x - 1, point.y + 1 );
+    newPoint = new Point( startPoint.x - 1, startPoint.y + 1 );
     addPoint(newPoint, true);
 
     return pointArray;

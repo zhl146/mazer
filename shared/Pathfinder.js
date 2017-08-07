@@ -84,7 +84,7 @@ Pathfinder.prototype.findPath = function(start, end) {
 
         closedSet.add(currentPoint);
 
-        for ( const neighbor of this.maze.getAdjacent( currentPoint ) ) {
+        for ( const neighbor of this.maze.getAdjacent( currentPoint, end ) ) {
             if (closedSet.has(neighbor)) {
                 continue;
             }
