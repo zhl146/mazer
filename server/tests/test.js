@@ -1,5 +1,12 @@
 
-let pt = require('./shared/point.test.js');
-let ptm = new pt();
+let unitTests = [];
+let _ = require('lodash');
+unitTests.push(new(require('./shared/point.test.js')));
+unitTests.push(new(require('./shared/maze.test.js')));
 
-ptm.unitTests();
+
+_.forEach(unitTests,function(unitTest){
+    unitTest.unitTests();
+})
+
+
