@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build-client": "webpack",
-    "test": "webpack && babel-node --inspect --presets es2015 -- ./server/tests/test",
-    "start": "webpack && babel-node --inspect --presets es2015 -- ./bin/www",
+    "test": " babel-node --inspect --presets es2015 -- ./server/tests/test",
+    "start": "babel-node --inspect --presets es2015 -- ./bin/www",
     "start-dev": "webpack-dev-server",
     "clean": "rm -rf server-dist && mkdir server-dist && mkdir server-dist/shared",
     "build-server": "babel --presets es2015 . -d server-dist --ignore client,client-dist,server-dist,spec,node_modules,package.json,webpack.config.js",
@@ -14,16 +14,17 @@
   "dependencies": {
     "animejs": "^2.0.2",
     "body-parser": "^1.17.2",
-    "cookie-parser": "^1.4.3",
-    "cors": "^2.8.3",
-    "express": "^4.15.3",
-    "mongodb": "^2.2.30",
-    "mongoose": "=4.10.8",
-    "morgan": "^1.8.2",
-    "sass": "^1.0.0-beta.1",
-    "seedrandom": "^2.4.3",
     "color-scheme": "^1.0.0",
-    "compression": "^1.7.0"
+    "compression": "^1.7.0",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
+    "express": "^4.15.4",
+    "mazer-shared": "^1.0.5",
+    "mongoose": "=4.10.8",
+    "mongodb": "^2.2.31",
+    "morgan": "^1.8.2",
+    "sass": "^1.0.0-beta.2",
+    "seedrandom": "^2.4.3"
   },
   "devDependencies": {
     "babel-core": "^6.25.0",

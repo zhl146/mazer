@@ -3,18 +3,16 @@ import express from 'express';
 import SeedUtil from './maze-functions/generate-seed';
 import ScoreModel from '../database/ScoreModel';
 
-import Score from '../../shared/Score';
-import Maze from '../../shared/Maze';
+import Shared from 'mazer-shared';
 
 var router = express.Router();
 
 /* validates a user solution and does stuff */
-/* turn this into a post later */
 router.post('/check', function(req, res, next) {
     var solution = req.body;
 
-    var baseMaze = new Maze(solution.seed);
-    var maze = new Maze(solution.seed);
+    var baseMaze = Shared.Maze(solution.seed);
+    var maze = Shared.Maze(solution.seed);
 
     // apply user's changes to the maze
     // should make the maze the same as the one the user submitted
@@ -27,7 +25,7 @@ router.post('/check', function(req, res, next) {
         }
     }
 
-    var scoreCalculator = new Score(baseMaze);
+    var scoreCalculator = Shared.Score(baseMaze);
     var score = scoreCalculator.calculateScore(maze);
 
     if (!solution.name) {
