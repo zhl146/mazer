@@ -2,19 +2,24 @@ import express from 'express';
 import path from 'path';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import compression from 'compression';
-
 import users from './routes/users';
 import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
+import bodyParser from 'body-parser';
 
-var database = mongoose.connect('mongodb://localhost/mazer_scores_DB');
+let database = mongoose.connect('mongodb://mongo/mazer_scores_DB');
 mongoose.Promise = Promise;
 
-var app = express();
+let app = express();
+app.use(function (err, req, res, next) {
+    console.log(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,15 +28,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(logger('dev'));
 app.use(compression());
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/users', users);
 app.use('/maze', maze);
 app.use('/leaderboard', leaderboard);
-
 
 // catch 404 and forward to error handler
 /*app.use(function(req, res, next) {

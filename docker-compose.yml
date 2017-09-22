@@ -1,0 +1,12 @@
+version: "3"
+services:
+  mazer-server:
+    build: .
+    links:
+      - mongo
+    ports:
+      - "3000:3000"
+  mongo:
+    image: mongo
+    volumes:
+      - "/db/data:/data/db"

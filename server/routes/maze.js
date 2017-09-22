@@ -1,58 +1,40 @@
 import express from 'express';
-
 import SeedUtil from './maze-functions/generate-seed';
 import ScoreModel from '../database/ScoreModel';
-
-import Shared from 'mazer-shared';
+import { createMaze } from 'mazer-shared';
 
 var router = express.Router();
 
 /* validates a user solution and does stuff */
 router.post('/check', function(req, res, next) {
-    var solution = req.body;
 
-    var baseMaze = Shared.Maze(solution.seed);
-    var maze = Shared.Maze(solution.seed);
-
-    // apply user's changes to the maze
-    // should make the maze the same as the one the user submitted
-    for (var i = 0; i < solution.diffPoints.length; i++ ) {
-        var result = maze.doActionOnTile(solution.diffPoints[i]);
-        if (result === false) {
-            // Invalid action
-            res.status(400).json({ 'error' : 'u r cheater' });
-            return;
-        }
-    }
-
-    var scoreCalculator = Shared.Score(baseMaze);
-    var score = scoreCalculator.calculateScore(maze);
-
-    if (!solution.name) {
-        solution.name = "Anonymous";
-    }
-
+    let submission = req.body;
+    let baseMaze = createMaze(submission.seed);
+    let valid = baseMaze.applyUserChanges(submission.solution);
+    let score = baseMaze.score;
+    console.log(submission);
+    if(!valid) res.status(400).json({'problem':'u r a cheat!'});
     // First search for duplicates
     ScoreModel.find({
-        'name': solution.name,
+        'name': submission.user,
         'score': score,
-        'date': solution.seed, 
+        'date': submission.seed,
     }).then(existingScore => {
         if (existingScore.length > 0) {
             // Return the already-existing score to prevent spamming
             return Promise.resolve(existingScore[0]);
         }
 
-        var scoreModel = new ScoreModel();
-        scoreModel.name = solution.name;
+        let scoreModel = new ScoreModel();
+        scoreModel.name = submission.user;
         scoreModel.score = score;
-        scoreModel.date = solution.seed;
-        scoreModel.solution = solution.diffPoints;
+        scoreModel.date = submission.seed;
+        scoreModel.solution = submission.solution;
 
         return scoreModel.save();
     }).then(savedScore => {
         return ScoreModel.count({
-            'date': solution.seed,
+            'date': submission.seed,
             'score': { '$gte': savedScore.score }
         });
     }).then(rank => {
