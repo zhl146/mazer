@@ -21,6 +21,8 @@ router.post('/check', async function(req, res, next) {
 
         scoreModel = (scoreModel.length === 0? new ScoreModel: scoreModel[0]);
 
+        if(scoreModel.score && scoreModel.score > submission.score) res.send(200);
+
         scoreModel.name = submission.name;
         scoreModel.email = submission.email;
         scoreModel.score = score;
@@ -36,7 +38,6 @@ router.post('/check', async function(req, res, next) {
     } catch(error) {
         res.status(500).json({ 'error': error });
     }
-
 });
 
 /* should return a json describing the current maze */
