@@ -21,20 +21,22 @@ router.post('/check', async function(req, res, next) {
 
         scoreModel = (scoreModel.length === 0? new ScoreModel: scoreModel[0]);
 
-        if(scoreModel.score && scoreModel.score > submission.score) res.send(200);
+        if(scoreModel.score && scoreModel.score < submission.score) {
+            res.send(200);
+        }else {
+            scoreModel.name = submission.name;
+            scoreModel.email = submission.email;
+            scoreModel.score = score;
+            scoreModel.date = submission.seed;
+            scoreModel.solution = submission.solution;
 
-        scoreModel.name = submission.name;
-        scoreModel.email = submission.email;
-        scoreModel.score = score;
-        scoreModel.date = submission.seed;
-        scoreModel.solution = submission.solution;
-
-        let savedScore = await scoreModel.save();
-        let rank = await ScoreModel.count({
-            'date': submission.seed,
-            'score': { '$gte': savedScore.score }
-        });
-        res.json({ 'rank': rank });
+            let savedScore = await scoreModel.save();
+            let rank = await ScoreModel.count({
+                'date': submission.seed,
+                'score': {'$gte': savedScore.score}
+            });
+            res.json({'rank': rank});
+        }
     } catch(error) {
         res.status(500).json({ 'error': error });
     }
