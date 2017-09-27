@@ -4,15 +4,14 @@
   "private": true,
   "scripts": {
     "build-client": "webpack",
-    "test": " babel-node --inspect --presets es2015 -- ./server/tests/test",
-    "start": "babel-node --inspect --presets es2015 -- ./bin/www",
+    "test": " babel-node --inspect --presets env -- ./server/tests/test",
+    "start": "babel-node --inspect --presets env -- ./bin/www",
     "start-dev": "webpack-dev-server",
     "clean": "rm -rf server-dist && mkdir server-dist && mkdir server-dist/shared",
     "build-server": "babel --presets es2015 . -d server-dist --ignore client,client-dist,server-dist,spec,node_modules,package.json,webpack.config.js",
     "build": "npm run clean && npm run build-server"
   },
   "dependencies": {
-    "animejs": "^2.0.2",
     "body-parser": "^1.18.2",
     "color-scheme": "^1.0.0",
     "compression": "^1.7.0",
@@ -29,14 +28,7 @@
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
-    "babel-preset-es2015": "^6.24.1",
-    "css-loader": "^0.28.4",
-    "lodash": "^4.17.4",
-    "node-sass": "^4.5.3",
-    "sass-loader": "^6.0.6",
-    "style-loader": "^0.18.2",
-    "tape": "^4.8.0",
-    "webpack": "^3.1.0",
-    "webpack-dev-server": "^2.5.1"
+    "babel-preset-env": "^1.6.0",
+    "tape": "^4.8.0"
   }
 }
