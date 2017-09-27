@@ -5,7 +5,7 @@ services:
     links:
       - mongo
     ports:
-      - "3000:3000"
+      - "4000:3000"
   mongo:
     image: mongo
     volumes:

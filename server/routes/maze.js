@@ -6,44 +6,37 @@ import { createMaze } from 'mazer-shared';
 var router = express.Router();
 
 /* validates a user solution and does stuff */
-router.post('/check', function(req, res, next) {
+router.post('/check', async function(req, res, next) {
+    try{
+        let submission = req.body;
+        let baseMaze = createMaze(submission.seed);
+        let valid = baseMaze.applyUserChanges(submission.solution);
+        let score = baseMaze.score;
+        console.log(submission);
+        if(!valid) res.status(400).json({'problem':'u r a cheat!'});
+        // First search for duplicates
+        let scoreModel = await ScoreModel.find({
+            'email': submission.email
+        });
 
-    let submission = req.body;
-    let baseMaze = createMaze(submission.seed);
-    let valid = baseMaze.applyUserChanges(submission.solution);
-    let score = baseMaze.score;
-    console.log(submission);
-    if(!valid) res.status(400).json({'problem':'u r a cheat!'});
-    // First search for duplicates
-    ScoreModel.find({
-        'name': submission.user,
-        'score': score,
-        'date': submission.seed,
-    }).then(existingScore => {
-        if (existingScore.length > 0) {
-            // Return the already-existing score to prevent spamming
-            return Promise.resolve(existingScore[0]);
-        }
+        scoreModel = (scoreModel.length === 0? new ScoreModel: scoreModel[0]);
 
-        let scoreModel = new ScoreModel();
-        scoreModel.name = submission.user;
+        scoreModel.name = submission.name;
+        scoreModel.email = submission.email;
         scoreModel.score = score;
         scoreModel.date = submission.seed;
         scoreModel.solution = submission.solution;
 
-        return scoreModel.save();
-    }).then(savedScore => {
-        return ScoreModel.count({
+        let savedScore = await scoreModel.save();
+        let rank = await ScoreModel.count({
             'date': submission.seed,
             'score': { '$gte': savedScore.score }
         });
-    }).then(rank => {
         res.json({ 'rank': rank });
-    }).catch(error => {
-        if (error) {
-            res.status(500).json({ 'error': error });
-        }
-    });
+    } catch(error) {
+        res.status(500).json({ 'error': error });
+    }
+
 });
 
 /* should return a json describing the current maze */
