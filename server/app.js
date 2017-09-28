@@ -9,8 +9,24 @@ import users from './routes/users';
 import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 import bodyParser from 'body-parser';
+import sleep from 'sleep';
 
-let database = mongoose.connect('mongodb://localhost/mazer_scores_DB');
+const uri = (process.env.RUNTIME? 'mongodb':'localhost');
+let success = true;
+let database = null;
+for(let i=0; i<5; i++){
+    try {
+        console.log("HI, sleeping before connecting to the DB!");
+        sleep.sleep(5);
+        if(database) { console.log("connected to the DB");  break; }
+        database = mongoose.connect('mongodb://' +uri+'/mazer_scores_DB', { server: { reconnectTries: 10 } }).catch((ex) => { console.log(ex); });
+    }catch(ex){
+        console.log(ex);
+    }
+}
+
+if(!database) throw Error("Could not connect to MongoDB!");
+
 mongoose.Promise = Promise;
 
 let app = express();

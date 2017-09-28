@@ -5,8 +5,15 @@ services:
     links:
       - mongo
     ports:
-      - "4000:3000"
+      - "4000:4000"
+    environment:
+      - RUNTIME="DOCKER"
   mongo:
     image: mongo
     volumes:
       - "/db/data:/data/db"
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/zenbrain --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 12
