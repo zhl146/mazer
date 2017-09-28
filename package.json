@@ -7,7 +7,7 @@
     "test": " babel-node --inspect --presets env -- ./server/tests/test",
     "start": "babel-node --inspect --presets env -- ./server/bin/www",
     "clean": "rm -rf build && mkdir build",
-    "build": "clean && babel --presets env . -d build --ignore build,spec,node_modules,package.json"
+    "build": "npm run clean && babel --presets env . -d build --ignore build,spec,node_modules,package.json"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
