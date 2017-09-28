@@ -10,7 +10,7 @@ import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 import bodyParser from 'body-parser';
 
-let database = mongoose.connect('mongodb://mongo/mazer_scores_DB');
+let database = mongoose.connect('mongodb://localhost/mazer_scores_DB');
 mongoose.Promise = Promise;
 
 let app = express();
