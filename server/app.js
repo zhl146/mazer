@@ -10,6 +10,10 @@ import maze from './routes/maze';
 import leaderboard from './routes/leaderboard';
 import bodyParser from 'body-parser';
 import sleep from 'sleep';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
+
+
 
 const uri = (process.env.RUNTIME? 'mongodb':'localhost');
 let success = true;
@@ -52,7 +56,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/users', users);
 app.use('/maze', maze);
 app.use('/leaderboard', leaderboard);
-
+app.use('/mazer-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // catch 404 and forward to error handler
 /*app.use(function(req, res, next) {
   var err = new Error('Not Found');
