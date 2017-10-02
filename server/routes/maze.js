@@ -10,7 +10,7 @@ router.post("/check", async function(req, res, next) {
         //on cheating return 400
         res.status(400).json();
     } catch (error) {
-        res.status(500).json({ error: error });
+        res.status(500).json({ error: error, status: "failed", rank: null });
     }
 });
 
