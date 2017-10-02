@@ -2,12 +2,12 @@ import SeedUtil from './maze-functions/generate-seed';
 import ScoreModel from '../database/ScoreModel';
 import { createMaze } from 'mazer-shared';
 
-const mazeController = (submission) => {
+const controllerPOST = async (submission) => {
     let baseMaze = createMaze(submission.seed);
     let valid = baseMaze.applyUserChanges(submission.solution);
     let score = baseMaze.score;
     console.log(submission);
-    if(!valid) res.status(400).json({'problem':'u r a cheat!'});
+    if(!valid) return { error:true, status:'u r a cheat!', rank:null };
     // First search for duplicates
     let scoreModel = await ScoreModel.find({
         'email': submission.email
@@ -20,8 +20,7 @@ const mazeController = (submission) => {
             'date': submission.seed,
             'score': {'$gte': score}
         });
-        res.json({'rank': rank});
-        return;
+        return { error:false, status:'success', rank:rank };
     }
 
     scoreModel.name = submission.name;
@@ -35,5 +34,14 @@ const mazeController = (submission) => {
         'date': submission.seed,
         'score': {'$gte': savedScore.score}
     });
-    res.json({'rank': rank});
-}
+    return { error:false, status:'success', rank:rank };
+};
+
+const controllerGET = () => {
+    return SeedUtil.dateToSeed(new Date());
+};
+
+export default {
+    POST: controllerPOST,
+    GET: controllerGET
+};

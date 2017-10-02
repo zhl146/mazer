@@ -16,7 +16,6 @@ const shouldReturnSolution = function(seed)
 };
 
 const leaderboardController = async (start, seed, length=undefined) => {
-
     if (start === undefined || start < 0) {
         start = 0;
     }
