@@ -16,12 +16,12 @@ router.post('/check', async function(req, res, next) {
 
 /* should return a json describing the current maze */
 router.get('/', function(req, res, next) {
-  try {
-      let seed = mazeController.GET();
-      res.send(JSON.stringify({'seed': seed}));
-  }catch(error){
-      res.status(500).json({ 'error': error });
-  }
+    try {
+        let seed = mazeController.GET();
+        res.send(JSON.stringify({'seed': seed}));
+    }catch(error){
+        res.status(500).json({ 'error': error });
+    }
 });
 
 export default router;

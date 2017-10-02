@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "precommit": "lint-staged",
     "build-client": "webpack",
     "test": " babel-node --inspect --presets env -- ./tests/test",
     "start": "babel-node --inspect --presets env -- ./bin/www",
     "start-docker": "babel-node --inspect --presets env -- ./bin/www",
     "clean": "rm -rf build && mkdir build",
     "build": "npm run clean && babel --presets env . -d build --ignore build,spec,node_modules,package.json"
+  },
+  "lint-staged": {
+    "gitDir": "../",
+    "*.{js,json,css}": [
+      "prettier --no-verify --write --tab-width 4",
+      "git add"
+    ]
   },
   "dependencies": {
     "body-parser": "^1.18.2",
@@ -28,6 +36,8 @@
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-preset-env": "^1.6.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.2.3",
     "tape": "^4.8.0"
   }
 }

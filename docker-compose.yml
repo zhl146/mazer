@@ -8,6 +8,11 @@ services:
       - "4000:4000"
     environment:
       - RUNTIME="DOCKER"
+    healthcheck:
+      test: curl 127.0.0.1:4000/maze/
+      interval: 60s
+      timeout: 10s
+      retries: 5
   mongo:
     image: mongo
     volumes:
