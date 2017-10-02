@@ -1,13 +1,15 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
+mongoose.Promise = global.Promise;
 
 var scoreSchema = mongoose.Schema({
     name: String,
-    email: {type: String, index: {unique: true, dropDups: true}},
+    email: { type: String, index: { unique: true, dropDups: true } },
     score: Number,
     date: String,
     solution: Array
 });
 
-var ScoreModel = mongoose.model('ScoreModel', scoreSchema);
+var ScoreModel = mongoose.model("ScoreModel", scoreSchema);
 
 export default ScoreModel;

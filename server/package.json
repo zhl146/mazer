@@ -5,7 +5,8 @@
     "scripts": {
         "precommit": "lint-staged",
         "build-client": "webpack",
-        "test": " tape -r babel-register tests/*.test.js --inspect",
+        "test":
+            " tape -r babel-register -r babel-polyfill tests/*.test.js --inspect",
         "start": "babel-node --inspect --presets env -- ./bin/www",
         "start-docker": "babel-node --inspect --presets env -- ./bin/www",
         "clean": "rm -rf build && mkdir build",
@@ -32,6 +33,7 @@
         "morgan": "^1.8.2",
         "seedrandom": "^2.4.3",
         "sleep": "^5.1.1",
+        "sleep-promise": "^2.0.0",
         "swagger-ui-express": "^2.0.8"
     },
     "devDependencies": {
