@@ -1,5 +1,6 @@
-import mazeController from "../controllers/leaderboardController";
-import test from "tape";
+import "babel-polyfill";
+import leaderboardController from "../controllers/leaderboardController";
+import test from "tape-async";
 import ScoreModel from "../database/ScoreModel";
 
 test("the leaderboard controller should successfully fetch scores", async assert => {
@@ -8,7 +9,6 @@ test("the leaderboard controller should successfully fetch scores", async assert
         scoremodel.name = "pms" + i.toString();
         scoremodel.email = "pms" + i.toString() + "@gmail.com";
         scoremodel.score = i;
-        git;
         scoremodel.date = "testseed";
         scoremodel.solution = JSON.stringify([]);
         let savedScore = await scoremodel.save();
@@ -26,6 +26,4 @@ test("the leaderboard controller should successfully fetch scores", async assert
     assert.deepEqual(scores[1].score, 7);
     assert.deepEqual(scores[2].score, 6);
     assert.deepEqual(scores[2].score, 5);
-
-    assert.end();
 });
