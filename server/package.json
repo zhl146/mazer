@@ -5,7 +5,7 @@
     "scripts": {
         "precommit": "lint-staged",
         "build-client": "webpack",
-        "test": " babel-node --inspect --presets env -- ./tests/test",
+        "test": " tape -r babel-register ./server/tests/*.test.js --inspect",
         "start": "babel-node --inspect --presets env -- ./bin/www",
         "start-docker": "babel-node --inspect --presets env -- ./bin/www",
         "clean": "rm -rf build && mkdir build",
@@ -15,10 +15,7 @@
     "lint-staged": {
         "gitDir": "../",
         "linters": {
-            "*.{js,json,css}": [
-                "prettier --no-verify --write --tab-width 4",
-                "git add"
-            ]
+            "*.{js,json,css}": ["prettier --write --tab-width 4", "git add"]
         }
     },
     "dependencies": {

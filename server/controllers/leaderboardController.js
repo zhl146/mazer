@@ -1,8 +1,7 @@
-import ScoreModel from '../database/ScoreModel';
-import SeedUtil from './maze-functions/generate-seed';
+import ScoreModel from "../database/ScoreModel";
+import SeedUtil from "./maze-functions/generate-seed";
 
-const shouldReturnSolution = function(seed)
-{
+const shouldReturnSolution = function(seed) {
     let date = SeedUtil.seedToDate(seed);
     if (date === null) {
         return true;
@@ -15,7 +14,7 @@ const shouldReturnSolution = function(seed)
     return date < now;
 };
 
-const leaderboardController = async (start, seed, length=undefined) => {
+const leaderboardController = async (start, seed, length = undefined) => {
     if (start === undefined || start < 0) {
         start = 0;
     }
@@ -27,28 +26,30 @@ const leaderboardController = async (start, seed, length=undefined) => {
     }
 
     let query = {
-        'date': seed,
+        date: seed
     };
 
     let options = {
-        'skip': start,
-        'limit': length,
-        'sort': {
-            'score': -1
-        },
+        skip: start,
+        limit: length,
+        sort: {
+            score: -1
+        }
     };
 
     let projection = {
-        'name': 1,
-        'score': 1,
-        '_id': 0,
+        name: 1,
+        score: 1,
+        _id: 0
     };
 
     if (shouldReturnSolution(seed)) {
-        projection['solution'] = 1;
+        projection["solution"] = 1;
     }
 
-    return await ScoreModel.find(query, projection, options);
+    return await ScoreModel.find(query, projection, options).sort({
+        score: "desc"
+    });
 };
 
 export default leaderboardController;
