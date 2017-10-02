@@ -13,8 +13,6 @@ import sleep from 'sleep';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json';
 
-
-
 const uri = (process.env.RUNTIME? 'mongodb':'localhost');
 let success = true;
 let database = null;
@@ -39,8 +37,6 @@ app.use(function (err, req, res, next) {
     res.status(500).send('Something broke!');
 });
 
-
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 //app.set('view engine', 'jade');
@@ -52,7 +48,6 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/users', users);
 app.use('/maze', maze);
 app.use('/leaderboard', leaderboard);
