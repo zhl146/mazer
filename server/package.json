@@ -1,43 +1,47 @@
 {
-  "name": "mazer",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "precommit": "lint-staged",
-    "build-client": "webpack",
-    "test": " babel-node --inspect --presets env -- ./tests/test",
-    "start": "babel-node --inspect --presets env -- ./bin/www",
-    "start-docker": "babel-node --inspect --presets env -- ./bin/www",
-    "clean": "rm -rf build && mkdir build",
-    "build": "npm run clean && babel --presets env . -d build --ignore build,spec,node_modules,package.json"
-  },
-  "lint-staged": {
-    "gitDir": "../",
-    "*.{js,json,css}": [
-      "prettier --no-verify --write --tab-width 4",
-      "git add"
-    ]
-  },
-  "dependencies": {
-    "body-parser": "^1.18.2",
-    "color-scheme": "^1.0.0",
-    "compression": "^1.7.0",
-    "cookie-parser": "^1.4.3",
-    "cors": "^2.8.4",
-    "express": "^4.15.4",
-    "mazer-shared": "0.0.39",
-    "mongodb": "^2.2.31",
-    "mongoose": "=4.10.8",
-    "morgan": "^1.8.2",
-    "seedrandom": "^2.4.3",
-    "sleep": "^5.1.1",
-    "swagger-ui-express": "^2.0.8"
-  },
-  "devDependencies": {
-    "babel-core": "^6.25.0",
-    "babel-preset-env": "^1.6.0",
-    "husky": "^0.14.3",
-    "lint-staged": "^4.2.3",
-    "tape": "^4.8.0"
-  }
+    "name": "mazer",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "precommit": "lint-staged",
+        "build-client": "webpack",
+        "test": " babel-node --inspect --presets env -- ./tests/test",
+        "start": "babel-node --inspect --presets env -- ./bin/www",
+        "start-docker": "babel-node --inspect --presets env -- ./bin/www",
+        "clean": "rm -rf build && mkdir build",
+        "build":
+            "npm run clean && babel --presets env . -d build --ignore build,spec,node_modules,package.json"
+    },
+    "lint-staged": {
+        "gitDir": "../",
+        "linters": {
+            "*.{js,json,css}": [
+                "prettier --no-verify --write --tab-width 4",
+                "git add"
+            ]
+        }
+    },
+    "dependencies": {
+        "body-parser": "^1.18.2",
+        "color-scheme": "^1.0.0",
+        "compression": "^1.7.0",
+        "cookie-parser": "^1.4.3",
+        "cors": "^2.8.4",
+        "express": "^4.15.4",
+        "mazer-shared": "0.0.39",
+        "mongodb": "^2.2.31",
+        "mongoose": "=4.10.8",
+        "morgan": "^1.8.2",
+        "seedrandom": "^2.4.3",
+        "sleep": "^5.1.1",
+        "swagger-ui-express": "^2.0.8"
+    },
+    "devDependencies": {
+        "babel-core": "^6.25.0",
+        "babel-preset-env": "^1.6.0",
+        "husky": "^0.14.3",
+        "lint-staged": "^4.2.3",
+        "prettier": "^1.7.3",
+        "tape": "^4.8.0"
+    }
 }
