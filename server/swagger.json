@@ -44,7 +44,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/maze/check": {
             "post": {
                 "tags": ["maze"],
                 "summary":

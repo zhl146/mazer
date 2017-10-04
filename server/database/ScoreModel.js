@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 mongoose.Promise = global.Promise;
 
-var scoreSchema = mongoose.Schema({
+let scoreSchema = mongoose.Schema({
     name: String,
     email: { type: String, index: { unique: true, dropDups: true } },
     score: Number,
@@ -10,6 +10,6 @@ var scoreSchema = mongoose.Schema({
     solution: Array
 });
 
-var ScoreModel = mongoose.model("ScoreModel", scoreSchema);
+let ScoreModel = mongoose.model("ScoreModel", scoreSchema);
 
 export default ScoreModel;

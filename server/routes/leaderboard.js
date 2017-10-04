@@ -12,6 +12,7 @@ router.get("/:seed", async function(req, res, next) {
         let seed = req.params.seed;
 
         let scores = await leaderboardController(start, seed, length);
+        console.log("hi, scores returned");
         if (!scores) {
             res.status(400).json({ error: "Out of bounds" });
         } else {
@@ -19,7 +20,8 @@ router.get("/:seed", async function(req, res, next) {
                 delete score["email"];
                 return score;
             });
-            res.json({ scores: scores });
+            console.log("scores is: ", scores);
+            res.status(200).json({ scores: scores });
         }
     } catch (ex) {
         console.log("Error");

@@ -6,9 +6,9 @@ let router = express.Router();
 router.post("/check", async function(req, res, next) {
     try {
         let submission = req.body;
-        let respsonse = mazeController.POST(submission);
+        let response = mazeController.POST(submission);
         //on cheating return 400
-        res.status(400).json();
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error, status: "failed", rank: null });
     }

@@ -14,7 +14,7 @@ const shouldReturnSolution = function(seed) {
     return date < now;
 };
 
-const leaderboardController = async (start, seed, length = undefined) => {
+const leaderboardController = async (start, seed, length) => {
     if (start === undefined || start < 0) {
         start = 0;
     }
@@ -46,10 +46,10 @@ const leaderboardController = async (start, seed, length = undefined) => {
     if (shouldReturnSolution(seed)) {
         projection["solution"] = 1;
     }
-
-    return await ScoreModel.find(query, projection, options).sort({
-        score: "desc"
-    });
+    console.log("about to begin");
+    let returnValue = await ScoreModel.find(query, projection, options);
+    console.log("returned");
+    return returnValue;
 };
 
 export default leaderboardController;

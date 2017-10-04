@@ -14,7 +14,7 @@ import swaggerDocument from "./swagger.json";
 
 mongoose.Promise = global.Promise;
 
-const uri = process.env.RUNTIME ? "mongodb" : "localhost";
+const uri = process.env.RUNTIME ? "mongo" : "localhost";
 let success = true;
 let database = null;
 for (let i = 0; i < 5; i++) {
