@@ -5,20 +5,23 @@ services:
     links:
       - mongo
     ports:
-      - "4000:4000"
+      - ${PORT}:${PORT}
     environment:
-      - RUNTIME="DOCKER"
+      - RUNTIME=$RUNTIME
+      - PORT=${PORT}
     healthcheck:
-      test: curl 127.0.0.1:4000/maze/
-      interval: 60s
+      test: curl 127.0.0.1:$PORT/maze/
+      interval: 10s
       timeout: 10s
       retries: 5
+    restart: unless-stopped
   mongo:
     image: mongo
     volumes:
       - "/db/data:/data/db"
-#    healthcheck:
-#      test: echo 'db.stats().ok'
-#      interval: 5s
-#      timeout: 5s
-#      retries: 12
+    healthcheck:
+      test: echo 'db.stats().ok'
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
