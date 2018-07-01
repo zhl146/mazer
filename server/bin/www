@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
-
+import mongoose from "mongoose";
 import app from '../app';
 import _debug from 'debug';
 import http from 'http';
@@ -16,21 +13,34 @@ var debug = _debug('mazer:server');
 
 var port = normalizePort(process.env.PORT || '3000');
 console.log("PORT: ", port);
-app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+const run = async () => {
+  mongoose.Promise = global.Promise
+  const uri = process.env.RUNTIME ? 'mongo' : 'localhost'
+  await mongoose
+  .connect("mongodb://" + uri + "/mazer_scores_DB", {
+    server: { reconnectTries: 10 }
+  })
 
-var server = http.createServer(app);
+  app.set('port', port);
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+  /**
+   * Create HTTP server.
+   */
+  
+  var server = http.createServer(app);
+  
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+  
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening(server));
+}
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+run()
+
 
 /**
  * Normalize a port into a number, string, or false.
@@ -85,10 +95,12 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 
-function onListening() {
+function onListening(server) {
+  return function (){
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
 }
