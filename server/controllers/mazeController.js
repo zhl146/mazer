@@ -6,33 +6,32 @@ const controllerPOST = async submission => {
     let baseMaze = createMaze(submission.seed);
     let valid = baseMaze.applyUserChanges(submission.solution);
     let score = baseMaze.score;
-    console.log(submission);
     if (!valid) return { error: true, status: "u r a cheat!", rank: null };
+
     // First search for duplicates
-    let scoreModel = await ScoreModel.find({
+    let matchingScores = await ScoreModel.find({
+        date: submission.seed,
         email: submission.email
     });
 
-    scoreModel = scoreModel.length === 0 ? new ScoreModel() : scoreModel[0];
+    let scoreModel =
+        matchingScores.length === 0 ? new ScoreModel() : matchingScores[0];
 
-    if (scoreModel.score && scoreModel.score >= score) {
-        let rank = await ScoreModel.count({
-            date: submission.seed,
-            score: { $gte: score }
-        });
-        return { error: false, status: "success", rank: rank };
+    if (scoreModel.score < score) {
+        console.log("Saving new score");
+
+        scoreModel.name = submission.name;
+        scoreModel.email = submission.email;
+        scoreModel.score = score;
+        scoreModel.date = submission.seed;
+        scoreModel.solution = submission.solution;
+
+        await scoreModel.save();
     }
 
-    scoreModel.name = submission.name;
-    scoreModel.email = submission.email;
-    scoreModel.score = score;
-    scoreModel.date = submission.seed;
-    scoreModel.solution = submission.solution;
-
-    let savedScore = await scoreModel.save();
     let rank = await ScoreModel.count({
         date: submission.seed,
-        score: { $gte: savedScore.score }
+        score: { $gte: scoreModel.score }
     });
     return { error: false, status: "success", rank: rank };
 };
