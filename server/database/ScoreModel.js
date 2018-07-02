@@ -4,7 +4,7 @@ mongoose.Promise = global.Promise;
 
 let scoreSchema = mongoose.Schema({
     name: String,
-    email: { type: String, index: { unique: true, dropDups: true } },
+    email: String,
     score: Number,
     date: String,
     solution: Array

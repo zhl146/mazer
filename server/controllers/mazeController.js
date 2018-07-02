@@ -17,16 +17,14 @@ const controllerPOST = async submission => {
     let scoreModel =
         matchingScores.length === 0 ? new ScoreModel() : matchingScores[0];
 
-    if (scoreModel.score < score) {
-        console.log("Saving new score");
-
+    if (!scoreModel.score || scoreModel.score <= score) {
         scoreModel.name = submission.name;
         scoreModel.email = submission.email;
         scoreModel.score = score;
         scoreModel.date = submission.seed;
         scoreModel.solution = submission.solution;
 
-        await scoreModel.save();
+        scoreModel = await scoreModel.save();
     }
 
     let rank = await ScoreModel.count({
