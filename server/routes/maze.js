@@ -1,4 +1,5 @@
 import express from "express";
+
 import mazeController from "../controllers/mazeController";
 let router = express.Router();
 
@@ -6,6 +7,7 @@ let router = express.Router();
 router.post("/check", async function(req, res, next) {
     try {
         let submission = req.body;
+
         let response = await mazeController.POST(submission);
         //on cheating return 400
         res.status(200).json(response);

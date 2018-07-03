@@ -1,5 +1,5 @@
-import ScoreModel from "../database/ScoreModel";
 import SeedUtil from "./maze-functions/generate-seed";
+import mongo from "../mongodb";
 
 const shouldReturnSolution = function(seed) {
     let date = SeedUtil.seedToDate(seed);
@@ -11,44 +11,38 @@ const shouldReturnSolution = function(seed) {
 
     let now = new Date();
     console.log(now, date);
+    console.log(date < now);
     return date < now;
 };
 
-const leaderboardController = async (start, seed, length) => {
-    if (start === undefined || start < 0) {
-        start = 0;
+const leaderboardController = async (skip, limit, seed, email) => {
+    if (skip === undefined || skip < 0) {
+        skip = 0;
     }
 
-    if (length === undefined) {
-        length = 10;
-    } else if (length > 100) {
-        length = 100;
+    if (limit === undefined) {
+        limit = 10;
+    } else if (limit > 100) {
+        limit = 100;
     }
 
-    let query = {
-        date: seed
-    };
+    const playerScore = await mongo.scores.findOne({ email, seed });
 
-    let options = {
-        skip: start,
-        limit: length,
-        sort: {
-            score: -1
-        }
-    };
-
-    let projection = {
-        name: 1,
-        score: 1,
-        _id: 0
-    };
+    console.log(playerScore);
 
     if (shouldReturnSolution(seed)) {
         projection["solution"] = 1;
     }
     console.log("about to begin");
-    let returnValue = await ScoreModel.find(query, projection, options);
-    console.log("returned");
+    let returnValue = await mongo.scores
+        .find({ seed })
+        .skip(skip)
+        .limit(limit)
+        .sort({ score: -1 })
+        .toArray();
+
+    console.log(returnValue);
+
     return returnValue;
 };
 

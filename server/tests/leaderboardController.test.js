@@ -1,6 +1,5 @@
 import leaderboardController from "../controllers/leaderboardController";
 import test from "tape-async";
-import ScoreModel from "../database/ScoreModel";
 import mongoose from "mongoose";
 
 const setup = async () => {
@@ -30,9 +29,12 @@ const teardown = async scores => {
 };
 
 test("the leaderboard controller should successfully fetch scores", async assert => {
-    await mongoose.connect("mongodb://localhost/mazer_scores_DB", {
-        server: { reconnectTries: 10 }
-    });
+    await mongoose.connect(
+        "mongodb://localhost/mazer_scores_DB",
+        {
+            server: { reconnectTries: 10 }
+        }
+    );
 
     const { scores, scores2 } = await setup();
 

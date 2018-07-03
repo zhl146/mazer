@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import mongoose from "mongoose";
 import app from '../app';
 import _debug from 'debug';
 import http from 'http';
+
+import mongo from '../mongodb'
 
 var debug = _debug('mazer:server');
 
@@ -15,12 +16,8 @@ var port = normalizePort(process.env.PORT || '3000');
 console.log("PORT: ", port);
 
 const run = async () => {
-  mongoose.Promise = global.Promise
   const uri = process.env.RUNTIME ? 'mongo' : 'localhost'
-  await mongoose
-  .connect("mongodb://" + uri + "/mazer_scores_DB", {
-    server: { reconnectTries: 10 }
-  })
+  await mongo.connect()
 
   app.set('port', port);
 
