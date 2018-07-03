@@ -5,5 +5,5 @@ const googleValidateUrl =
 
 export default async idToken => {
     const result = await axios.get(googleValidateUrl + idToken);
-    return result.data.email;
+    return result.data.sub;
 };

@@ -1,26 +1,39 @@
 import express from "express";
-import getEmailfromIdToken from "../controllers/getEmailFromIdToken";
 
-import leaderboardController from "../controllers/leaderboardController";
+import leaderboard from "../controllers/leaderboardController";
 
 let router = express.Router();
 
 /* gets json with leaderboard stats */
-router.post("/", async function(req, res, next) {
+router.post("/scores", async function(req, res, next) {
     try {
         const { body } = req;
-        const { skip, limit, seed, token } = body;
+        const { skip, limit, seed } = body;
 
-        const email = await getEmailfromIdToken(token);
-
-        let scores = await leaderboardController(skip, limit, seed, email);
+        let scores = await leaderboard.getScores(skip, limit, seed);
         if (!scores) {
             res.status(400).json({ error: "Out of bounds" });
         } else {
-            scores = scores.map(score => {
-                delete score["email"];
-                return score;
-            });
+            console.log("scores is: ", scores);
+            res.status(200).json({ scores: scores });
+        }
+    } catch (ex) {
+        console.log("Error");
+        console.log(ex);
+        res.status(500).json({ error: ex });
+    }
+});
+
+/* gets json with leaderboard stats */
+router.post("/range", async function(req, res, next) {
+    try {
+        const { body } = req;
+        const { userId, range, seed } = body;
+
+        let scores = await leaderboard.getScoresAround(userId, range, seed);
+        if (!scores) {
+            res.status(400).json({ error: "Out of bounds" });
+        } else {
             console.log("scores is: ", scores);
             res.status(200).json({ scores: scores });
         }

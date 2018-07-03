@@ -1,7 +1,7 @@
 import SeedUtil from "./maze-functions/generate-seed";
 import { createMaze } from "mazer-shared";
 import mongo from "../mongodb";
-import getEmailFromIdToken from "./getEmailFromIdToken";
+import getIdFromToken from "./getIdFromToken";
 
 const submitSolution = async submission => {
     let baseMaze = createMaze(submission.seed);
@@ -10,18 +10,18 @@ const submitSolution = async submission => {
     if (!valid) return { error: true, status: "u r a cheat!" };
     // First search for duplicates
 
-    const email = await getEmailFromIdToken(submission.token);
+    const userId = await getIdFromToken(submission.token);
 
     let matchingScore = await mongo.scores.findOne({
         seed: submission.seed,
-        email
+        userId
     });
 
     console.log("matching scores", matchingScore);
 
     const newScore = {
         name: submission.name,
-        email,
+        userId,
         score,
         seed: submission.seed,
         solution: submission.solution

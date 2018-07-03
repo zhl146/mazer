@@ -15,7 +15,7 @@ const shouldReturnSolution = function(seed) {
     return date < now;
 };
 
-const leaderboardController = async (skip, limit, seed, email) => {
+const getScores = async (skip, limit, seed) => {
     if (skip === undefined || skip < 0) {
         skip = 0;
     }
@@ -26,24 +26,44 @@ const leaderboardController = async (skip, limit, seed, email) => {
         limit = 100;
     }
 
-    const playerScore = await mongo.scores.findOne({ email, seed });
-
-    console.log(playerScore);
-
-    if (shouldReturnSolution(seed)) {
-        projection["solution"] = 1;
-    }
-    console.log("about to begin");
     let returnValue = await mongo.scores
         .find({ seed })
+        .sort({ score: -1 })
         .skip(skip)
         .limit(limit)
-        .sort({ score: -1 })
         .toArray();
-
-    console.log(returnValue);
 
     return returnValue;
 };
 
-export default leaderboardController;
+const getScoresAround = async (userId, range, seed) => {
+    if (range === undefined) {
+        range = 0;
+    } else if (range > 50) {
+        range = 50;
+    }
+
+    const playerScore = mongo.scores.findOne({
+        userId,
+        seed
+    });
+
+    const playerRank = mongo.scores.count({
+        seed,
+        score: { $gte: playerScore.score }
+    });
+
+    let returnValue = await mongo.scores
+        .find({ seed })
+        .sort({ score: -1 })
+        .skip(Math.max(playerRank - range, 0))
+        .limit(range * 2 + 1)
+        .toArray();
+
+    return returnValue;
+};
+
+export default {
+    getScores,
+    getScoresAround
+};
