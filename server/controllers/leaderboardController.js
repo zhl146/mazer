@@ -16,6 +16,8 @@ const shouldReturnSolution = function(seed) {
 
 const setRank = rank => R.set(R.lensProp("rank"), rank);
 const omitSolution = R.omit(["solution"]);
+const setMyRank = (rank, myRank) =>
+    myRank === rank ? R.set(R.lensProp("myScore"), true) : score => score;
 
 const getScores = async (skip, limit, seed) => {
     if (skip === undefined || skip < 0) {
@@ -85,11 +87,17 @@ const getScoresAround = async (userId, range, seed) => {
     console.log("fetched scores", scores);
 
     return shouldReturnSolution(seed)
-        ? scores.map((score, index) => setRank(index + startingRank)(score))
+        ? scores.map((score, index) =>
+              R.compose(
+                  setRank(index + startingRank),
+                  setMyRank(index + startingRank, playerRank)
+              )(score)
+          )
         : scores.map((score, index) =>
               R.compose(
                   omitSolution,
-                  setRank(index + startingRank)
+                  setRank(index + startingRank),
+                  setMyRank(index + startingRank, playerRank)
               )(score)
           );
 };
