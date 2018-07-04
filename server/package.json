@@ -33,6 +33,7 @@
         "mazer-shared": "0.0.39",
         "mongodb": "^3.1.0",
         "morgan": "^1.8.2",
+        "ramda": "^0.25.0",
         "seedrandom": "^2.4.3",
         "sleep": "^5.1.1",
         "sleep-promise": "^2.0.0",
