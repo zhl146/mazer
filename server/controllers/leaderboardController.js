@@ -40,11 +40,11 @@ const getScores = async (skip, limit, seed) => {
   console.log("db scores: ", scores);
 
   return shouldReturnSolution(seed)
-    ? scores.map((score, index) => setRank(index + 1)(score))
+    ? scores.map((score, index) => setRank(skip + index + 1)(score))
     : scores.map((score, index) =>
         R.compose(
           omitSolution,
-          setRank(index + 1)
+          setRank(skip + index + 1)
         )(score)
       );
 };
@@ -73,9 +73,9 @@ const getScoresAround = async (userId, range, seed) => {
     : null;
 
   console.log(("current rank", playerRank));
-  const startingRank = playerRank - range;
 
   const skip = Math.max(playerRank - range - 1, 0);
+  const startingRank = skip + 1;
 
   let scores = await mongo.scores
     .find({ seed })
