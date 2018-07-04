@@ -1,33 +1,33 @@
-import SeedUtil from "./maze-functions/generate-seed";
-import mongo from "../mongodb";
-import * as R from "ramda";
+import SeedUtil from './maze-functions/generate-seed'
+import mongo from '../mongodb'
+import * as R from 'ramda'
 
 const shouldReturnSolution = function(seed) {
-  let date = SeedUtil.seedToDate(seed);
+  let date = SeedUtil.seedToDate(seed)
   if (date === null) {
-    return true;
+    return true
   }
   // Increment to next day so today compares to false
-  date.setDate(date.getDate() + 1);
+  date.setDate(date.getDate() + 1)
 
-  let now = new Date();
-  return date < now;
-};
+  let now = new Date()
+  return date < now
+}
 
-const setRank = rank => R.set(R.lensProp("rank"), rank);
-const omitSolution = R.omit(["solution"]);
+const setRank = rank => R.set(R.lensProp('rank'), rank)
+const omitSolution = R.omit(['solution'])
 const setMyRank = (rank, myRank) =>
-  myRank === rank ? R.set(R.lensProp("myScore"), true) : score => score;
+  myRank === rank ? R.set(R.lensProp('myScore'), true) : score => score
 
 const getScores = async (skip, limit, seed) => {
   if (skip === undefined || skip < 0) {
-    skip = 0;
+    skip = 0
   }
 
   if (limit === undefined) {
-    limit = 10;
+    limit = 10
   } else if (limit > 100) {
-    limit = 100;
+    limit = 100
   }
 
   const scores = await mongo.scores
@@ -35,9 +35,9 @@ const getScores = async (skip, limit, seed) => {
     .sort({ score: -1 })
     .skip(skip)
     .limit(limit)
-    .toArray();
+    .toArray()
 
-  console.log("db scores: ", scores);
+  console.log('db scores: ', scores)
 
   return shouldReturnSolution(seed)
     ? scores.map((score, index) => setRank(index + 1)(score))
@@ -46,45 +46,45 @@ const getScores = async (skip, limit, seed) => {
           omitSolution,
           setRank(index + 1)
         )(score)
-      );
-};
+      )
+}
 
 const getScoresAround = async (userId, range, seed) => {
   if (range === undefined) {
-    range = 0;
+    range = 0
   } else if (range > 50) {
-    range = 50;
+    range = 50
   }
 
-  console.log(userId);
+  console.log(userId)
 
   const playerScore = await mongo.scores.findOne({
     userId,
-    seed
-  });
+    seed,
+  })
 
-  console.log(playerScore);
+  console.log(playerScore)
 
   const playerRank = playerScore
     ? await mongo.scores.countDocuments({
         seed,
-        score: { $gte: R.prop("score", playerScore) }
+        score: { $gte: R.prop('score', playerScore) },
       })
-    : null;
+    : null
 
-  console.log(("current rank", playerRank));
-  const startingRank = playerRank - range;
+  console.log(('current rank', playerRank))
+  const startingRank = playerRank - range
 
-  const skip = Math.max(playerRank - range - 1, 0);
+  const skip = Math.max(playerRank - range - 1, 0)
 
   let scores = await mongo.scores
     .find({ seed })
     .sort({ score: -1 })
     .skip(skip)
     .limit(range * 2 + 1)
-    .toArray();
+    .toArray()
 
-  console.log("fetched scores", scores);
+  console.log('fetched scores', scores)
 
   return shouldReturnSolution(seed)
     ? scores.map((score, index) =>
@@ -99,10 +99,10 @@ const getScoresAround = async (userId, range, seed) => {
           setRank(index + startingRank),
           setMyRank(index + startingRank, playerRank)
         )(score)
-      );
-};
+      )
+}
 
 export default {
   getScores,
-  getScoresAround
-};
+  getScoresAround,
+}
