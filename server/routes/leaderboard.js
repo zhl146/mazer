@@ -14,7 +14,7 @@ router.post("/scores", async function(req, res, next) {
         if (!scores) {
             res.status(400).json({ error: "Out of bounds" });
         } else {
-            console.log("scores is: ", scores);
+            console.log("top scores: ", scores);
             res.status(200).json({ scores: scores });
         }
     } catch (ex) {
@@ -34,7 +34,7 @@ router.post("/range", async function(req, res, next) {
         if (!scores) {
             res.status(400).json({ error: "Out of bounds" });
         } else {
-            console.log("scores is: ", scores);
+            console.log("closest scores: ", scores);
             res.status(200).json({ scores: scores });
         }
     } catch (ex) {
