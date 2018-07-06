@@ -1,9 +1,14 @@
-import axios from "axios";
+import { OAuth2Client } from 'google-auth-library'
 
-const googleValidateUrl =
-    "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=";
+const clientId = 'mazer-5422b'
+const client = new OAuth2Client(clientId)
 
 export default async idToken => {
-    const result = await axios.get(googleValidateUrl + idToken);
-    return result.data.sub;
-};
+  console.log('idToken:', idToken)
+  const ticket = await client.verifyIdToken({
+    idToken: idToken,
+    audience: clientId,
+  })
+
+  return ticket.payload.sub
+}
