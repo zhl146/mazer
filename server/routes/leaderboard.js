@@ -29,7 +29,6 @@ router.post('/range', async function(req, res, next) {
   try {
     const { body } = req
     const { userId, range, seed } = body
-    console.log('body', body)
 
     let scores = await leaderboard.getScoresAround(userId, range, seed)
     if (!scores) {

@@ -10,7 +10,7 @@ const submitSolution = async submission => {
   if (!valid) return { error: true, status: 'u r a cheat!' }
   // First search for duplicates
 
-  const userId = await getIdFromToken(submission.token).catch(console.error)
+  const userId = await getIdFromToken(submission.token)
 
   let matchingScore = await mongo.scores.findOne({
     seed: submission.seed,
