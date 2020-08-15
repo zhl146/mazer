@@ -12,19 +12,22 @@ const getConnectionPool = async () => {
 
   if (cachedPool) return cachedPool
 
-  const pool = MongoClient.connect(MONGO_URL, { auth })
+  const pool = MongoClient.connect(MONGO_URL, {
+    auth,
+    useUnifiedTopology: true,
+  })
   cachedPool = pool
   return pool
 }
 
-module.exports.test = async (event, context) => {
+const testHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const mongoPool = await getConnectionPool()
 
   const result = await mongoPool
-    .db('sample_airbnb')
-    .collection('listingsAndReviews')
+    .db('sample_mflix')
+    .collection('movies')
     .findOne()
 
   return {
@@ -32,3 +35,5 @@ module.exports.test = async (event, context) => {
     body: result,
   }
 }
+
+module.exports.test = testHandler
