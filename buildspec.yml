@@ -13,11 +13,10 @@ phases:
       - mkdir -p target/stg
       - mkdir target/prod
       - cd server
-      - serverless package --package ../target/stg --stage stg -v -r us-east-1
-      - serverless package --package ../target/prod --stage prod -v -r us-east-1
-
-    artifacts:
-      files:
-        - target/**/*
-        - serverless.yml
-        - deploy.sh
+      - serverless package --package ../target/stg --stage stg
+      - serverless package --package ../target/prod --stage prod
+artifacts:
+  files:
+    - target/**/*
+    - serverless.yml
+    - deploy.sh
