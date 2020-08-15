@@ -10,8 +10,6 @@ phases:
       - npm install --silent --no-progress
   build:
     commands:
-      - npm run-script lint
-      - npm run test
       - mkdir -p target/stg
       - mkdir target/prod
       - cd server
