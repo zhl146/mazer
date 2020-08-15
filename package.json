@@ -10,5 +10,8 @@
     "shared",
     "client",
     "server"
-  ]
+  ],
+  "devDependencies": {
+    "serverless": "^1.78.1"
+  }
 }

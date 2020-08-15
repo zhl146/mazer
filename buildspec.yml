@@ -1,0 +1,9 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install --no-progress --silent
+  build:
+    commands:
+      - npm run test
