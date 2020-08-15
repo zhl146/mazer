@@ -8,7 +8,7 @@ provider:
     STAGE: ${opt:stage}
 
 functions:
-  gimmetime:
+  test:
     handler: handler.test
     events:
       - http:
