@@ -8,5 +8,8 @@
     "ramda": "^0.25.0"
   },
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-bundle": "^2.0.0"
+  }
 }
