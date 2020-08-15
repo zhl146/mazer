@@ -1,0 +1,14 @@
+{
+  "name": "mazer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/zhl146/mazer.git",
+  "author": "zhl146 <zhl146@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "client",
+    "server"
+  ]
+}

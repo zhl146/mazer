@@ -1,0 +1,16 @@
+@font-face {
+  font-family: connection;
+  src: url(./ConnectionIii-Rj3W.otf);
+}
+
+body {
+  margin: 0;
+  font-family: connection;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.tile-hover:hover {
+  border: 1px solid black;
+  z-index: 99;
+}
