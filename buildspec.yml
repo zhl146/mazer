@@ -3,10 +3,10 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install --silent --no-progress -g npm
+      - npm install --silent --no-progress -g yarn
   pre_build:
     commands:
-      - npm install --silent --no-progress
+      - yarn install --silent
   build:
     commands:
       - mkdir -p target/stg
