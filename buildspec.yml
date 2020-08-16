@@ -18,3 +18,4 @@ artifacts:
     - target/**/*
     - serverless.yml
     - deploy.sh
+    - package.json
