@@ -1,4 +1,5 @@
 const MongoClient = require("mongodb").MongoClient;
+import { createGame } from "@mazer/shared";
 
 const { MONGO_URL, MONGO_USER, MONGO_PASSWORD } = process.env;
 
@@ -22,6 +23,8 @@ const getConnectionPool = async () => {
 
 const testHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
+
+  console.log(createGame);
 
   const mongoPool = await getConnectionPool();
 

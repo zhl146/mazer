@@ -4,3 +4,4 @@ node_modules
 *.swo
 bundle.js
 build
+.serverless
