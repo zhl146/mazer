@@ -8,9 +8,9 @@ const auth = {
   password: MONGO_PASSWORD,
 };
 
-const getConnectionPool = async () => {
-  let cachedPool;
+let cachedPool;
 
+const getConnectionPool = async () => {
   if (cachedPool) return cachedPool;
 
   const pool = MongoClient.connect(MONGO_URL, {
@@ -23,19 +23,22 @@ const getConnectionPool = async () => {
 
 const testHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
+  console.log(MONGO_URL, MONGO_USER);
 
-  console.log(createGame);
+  const newGame = createGame("derp");
 
-  const mongoPool = await getConnectionPool();
+  console.log(newGame);
 
-  const result = await mongoPool
-    .db("sample_mflix")
-    .collection("movies")
-    .findOne();
+  // const mongoPool = await getConnectionPool();
+
+  // const result = await mongoPool
+  //   .db("sample_mflix")
+  //   .collection("movies")
+  //   .findOne();
 
   return {
     statusCode: "200",
-    body: result,
+    body: newGame,
   };
 };
 
