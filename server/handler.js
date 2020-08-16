@@ -21,7 +21,7 @@ const { MONGO_URL, MONGO_USER } = process.env;
 //   return pool;
 // };
 
-const testHandler = async (event, context) => {
+export const test = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   console.log(MONGO_URL, MONGO_USER);
 
@@ -41,5 +41,3 @@ const testHandler = async (event, context) => {
     body: newGame,
   };
 };
-
-module.exports.test = testHandler;
