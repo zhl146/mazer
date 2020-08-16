@@ -24,8 +24,6 @@ const getConnectionPool = async () => {
 export const test = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
-  console.log(newGame);
-
   const mongoPool = await getConnectionPool();
 
   const result = await mongoPool
