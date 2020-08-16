@@ -1,4 +1,4 @@
-const MongoClient = require("mongodb").MongoClient;
+// const MongoClient = require("mongodb").MongoClient;
 import { createGame } from "@mazer/shared";
 
 const { MONGO_URL, MONGO_USER } = process.env;
