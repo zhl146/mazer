@@ -9,8 +9,9 @@ phases:
       - yarn install --silent
   build:
     commands:
+      - cd client
       - yarn run build
 
 artifacts:
   files:
-    - build/**/*
+    - client/build/**/*
