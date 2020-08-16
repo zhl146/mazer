@@ -12,7 +12,7 @@ provider:
 
 functions:
   test:
-    handler: handler.test
+    handler: server/handler.test
     events:
       - http:
           path: /test

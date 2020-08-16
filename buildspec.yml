@@ -4,8 +4,6 @@ phases:
   install:
     commands:
       - npm install --silent --no-progress -g npm
-      - npm install --silent --no-progress -g serverless
-      - npm install --silent --no-progress -g serverless-bundle
   pre_build:
     commands:
       - npm install --silent --no-progress
@@ -13,11 +11,8 @@ phases:
     commands:
       - mkdir -p target/stg
       - mkdir target/prod
-      - cd server
-      - cp deploy.sh ..
-      - cp serverless.yml ..
-      - serverless package --package ../target/stg --stage stg
-      - serverless package --package ../target/prod --stage prod
+      - npx serverless package --package target/stg --stage stg
+      - npx serverless package --package target/prod --stage prod
 artifacts:
   files:
     - target/**/*
