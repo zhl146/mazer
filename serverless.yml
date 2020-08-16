@@ -3,6 +3,11 @@ service: mazer-server
 plugins:
   - serverless-bundle
 
+custom:
+  bundle:
+    linting: false
+    packager: yarn
+
 provider:
   name: aws
   runtime: nodejs12.x
