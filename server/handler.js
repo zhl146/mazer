@@ -1,25 +1,25 @@
 const MongoClient = require("mongodb").MongoClient;
 import { createGame } from "@mazer/shared";
 
-const { MONGO_URL, MONGO_USER, MONGO_PASSWORD } = process.env;
+const { MONGO_URL, MONGO_USER } = process.env;
 
-const auth = {
-  user: MONGO_USER,
-  password: MONGO_PASSWORD,
-};
+// const auth = {
+//   user: MONGO_USER,
+//   password: MONGO_PASSWORD,
+// };
 
-let cachedPool;
+// let cachedPool;
 
-const getConnectionPool = async () => {
-  if (cachedPool) return cachedPool;
+// const getConnectionPool = async () => {
+//   if (cachedPool) return cachedPool;
 
-  const pool = MongoClient.connect(MONGO_URL, {
-    auth,
-    useUnifiedTopology: true,
-  });
-  cachedPool = pool;
-  return pool;
-};
+//   const pool = MongoClient.connect(MONGO_URL, {
+//     auth,
+//     useUnifiedTopology: true,
+//   });
+//   cachedPool = pool;
+//   return pool;
+// };
 
 const testHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
