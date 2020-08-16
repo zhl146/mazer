@@ -6,11 +6,16 @@
   "author": "zhl146 <zhl146@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "shared",
-    "client",
-    "server"
-  ],
+  "workspaces": {
+    "packages": [
+      "client",
+      "server",
+      "shared"
+    ],
+    "nohoist": [
+      "**/*"
+    ]
+  },
   "devDependencies": {
     "serverless": "^1.78.1",
     "serverless-bundle": "^2.0.0",
