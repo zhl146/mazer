@@ -11,11 +11,13 @@ phases:
     commands:
       - mkdir -p target/stg
       - mkdir target/prod
+      - cp server/serverless.yml .
+      - cp server/buildspec.deploy.yml .
       - npx serverless package --package target/stg --stage stg
       - npx serverless package --package target/prod --stage prod
 artifacts:
   files:
     - target/**/*
     - serverless.yml
-    - deploy.sh
+    - buildspec.deploy.yml
     - package.json

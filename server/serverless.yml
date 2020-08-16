@@ -22,7 +22,3 @@ functions:
       - http:
           path: /test
           method: get
-          request:
-            parameters:
-              querystrings:
-                tz: true

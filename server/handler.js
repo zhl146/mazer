@@ -1,4 +1,4 @@
-const MongoClient = require("mongodb").MongoClient;
+import { MongoClient } from "mongodb";
 
 const { MONGO_URL, MONGO_USER, MONGO_PASSWORD } = process.env;
 
