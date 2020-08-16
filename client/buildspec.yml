@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install --silent --no-progress -g yarn
+  pre_build:
+    commands:
+      - yarn install --silent
+  build:
+    commands:
+      - yarn run build
+
+artifacts:
+  files:
+    - build/**/*
