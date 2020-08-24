@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { PanZoom } from "react-easy-panzoom";
 
 import "./App.css";
 
 import Path from "./components/path";
 import Tile from "./components/tile";
-import ZoomControllerUI from "./components/zoomUi";
 import ManaBar from "./components/manaBar";
+import ScoreBar from "./components/topBar";
 
 import { usePathError } from "./hooks";
-
 import {
   createGame,
   verifyOperations,
@@ -46,21 +44,9 @@ const App = () => {
 
   const [touched, setTouched] = useState();
 
-  // const panZoomRef = useRef(null);
-
   const [layer1Canvas, setLayer1Canvas] = useCanvas();
   const [layer2Canvas, setLayer2Canvas] = useCanvas();
   const [layer3Canvas, setLayer3Canvas] = useCanvas();
-
-  // const zoomIn = () => panZoomRef.current && panZoomRef.current.zoomIn();
-
-  // const zoomOut = () => panZoomRef.current && panZoomRef.current.zoomOut();
-
-  // const center = () => panZoomRef.current && panZoomRef.current.autoCenter();
-
-  // useEffect(() => {
-  //   panZoomRef.current && panZoomRef.current.autoCenter();
-  // }, [panZoomRef]);
 
   const initGameState = (newGame) => {
     setGeneratedGame(newGame);
@@ -149,7 +135,7 @@ const App = () => {
           border: "1px solid grey",
         }}
       >
-        <div
+        {/* <div
           style={{
             display: "flex",
             justifyContent: "center",
@@ -158,7 +144,8 @@ const App = () => {
           }}
         >
           <div>{`score: ${counters.score}`}</div>
-        </div>
+        </div> */}
+        <ScoreBar score={counters.score}></ScoreBar>
         <div
           style={{
             position: "relative",
@@ -236,7 +223,6 @@ const App = () => {
           maxActionPoints={generatedGame.maxActionPoints}
           actionPointsRemaining={counters.actionPointsRemaining}
         ></ManaBar>
-        {/* <button onClick={resetGame}>Reset</button> */}
       </div>
     </div>
   );
