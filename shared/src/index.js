@@ -27,3 +27,6 @@ export const findMazePath = _findMazePath;
 
 export const forEachTile = _forEachTile;
 export const copyTiles = _copyTiles;
+
+export const GOOGLE_CLIENT_ID =
+  "919109587151-j9eh6uspq6l2fph2va9t846l8t53nu0r.apps.googleusercontent.com";
