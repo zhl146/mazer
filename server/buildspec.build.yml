@@ -13,6 +13,7 @@ phases:
       - mkdir target/prod
       - cp server/serverless.yml .
       - cp server/buildspec.deploy.yml .
+      - cp server/deploy.package.json .
       - npx serverless package --package target/stg --stage stg
       - npx serverless package --package target/prod --stage prod
 artifacts:
@@ -20,4 +21,4 @@ artifacts:
     - target/**/*
     - serverless.yml
     - buildspec.deploy.yml
-    - package.json
+    - deploy.package.json

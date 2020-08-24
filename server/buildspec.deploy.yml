@@ -4,6 +4,7 @@ phases:
   install:
     commands:
       - npm install --silent --no-progress -g yarn
+      - mv deploy.package.json package.json
   pre_build:
     commands:
       - yarn install --silent

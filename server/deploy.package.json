@@ -1,0 +1,11 @@
+{
+  "name": "@mazer/server",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "serverless": "^1.78.1",
+    "serverless-bundle": "^2.0.0"
+  },
+  "main": "index.js",
+  "license": "MIT"
+}
