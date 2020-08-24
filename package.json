@@ -17,6 +17,7 @@
     "husky": "^0.14.3",
     "prettier": "^2.0.5",
     "serverless": "^1.78.1",
-    "serverless-bundle": "^2.0.0"
+    "serverless-bundle": "^2.0.0",
+    "serverless-offline": "^6.5.0"
   }
 }
