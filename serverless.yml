@@ -1,0 +1,25 @@
+service: mazer-server
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom:
+  bundle:
+    linting: false
+    packager: yarn
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 128 # optional, in MB, default is 1024
+  # environment:
+  #   STAGE: ${opt:stage}
+
+functions:
+  test:
+    handler: server/src/index.test
+    events:
+      - http:
+          path: /test
+          method: post
