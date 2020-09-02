@@ -13,8 +13,6 @@ provider:
   name: aws
   runtime: nodejs12.x
   memorySize: 128 # optional, in MB, default is 1024
-  # environment:
-  #   STAGE: ${opt:stage}
 
 functions:
   test:
