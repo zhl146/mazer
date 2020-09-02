@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import "./App.css";
-import "nes.css/css/nes.min.css";
 
 import Path from "./components/path";
 import Tile from "./components/tile";
