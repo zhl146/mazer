@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import "./App.css";
+import "nes.css/css/nes.min.css";
 
 import Path from "./components/path";
 import Tile from "./components/tile";
@@ -163,22 +164,22 @@ const App = () => {
             <div style={{ zIndex: 10 }}>
               {tiles
                 ? tiles.map((row, y) => (
-                    <div style={{ display: "flex", height: tileSize }} key={y}>
-                      {row.map((tile, x) => (
-                        <div onClick={toggleTile(tile)} key={`${x},${y}`}>
-                          <Tile
-                            tileSize={tileSize}
-                            touched={touched[y][x]}
-                            {...surroundingBlockers(tiles, tile)}
-                            {...tile}
-                            layer1Canvas={layer1Canvas}
-                            layer2Canvas={layer2Canvas}
-                            layer3Canvas={layer3Canvas}
-                          ></Tile>
-                        </div>
-                      ))}
-                    </div>
-                  ))
+                  <div style={{ display: "flex", height: tileSize }} key={y}>
+                    {row.map((tile, x) => (
+                      <div onClick={toggleTile(tile)} key={`${x},${y}`}>
+                        <Tile
+                          tileSize={tileSize}
+                          touched={touched[y][x]}
+                          {...surroundingBlockers(tiles, tile)}
+                          {...tile}
+                          layer1Canvas={layer1Canvas}
+                          layer2Canvas={layer2Canvas}
+                          layer3Canvas={layer3Canvas}
+                        ></Tile>
+                      </div>
+                    ))}
+                  </div>
+                ))
                 : null}
             </div>
             <canvas
