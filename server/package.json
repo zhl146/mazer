@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "date-fns": "^2.15.0",
     "esm": "^3.2.25",
+    "google-auth-library": "^6.0.6",
     "mongodb": "^3.6.0",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "unique-names-generator": "^4.3.0"
   },
   "main": "index.js",
   "license": "MIT"
