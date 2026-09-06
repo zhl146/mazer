@@ -1,0 +1,1487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Mazer</title>
+<meta name="theme-color" content="#0f1219">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@700;800;900&display=swap">
+<style>
+:root {
+  --ink: #0f1219;
+  --panel: #171c28;
+  --panel-2: #1f2534;
+  --line: #2b3346;
+  --text: #eef1f7;
+  --muted: #8f97ad;
+  --accent: #ffb347;
+  --accent-ink: #2a1a05;
+  --energy: #5aa9ff;
+  --danger: #ff5470;
+  --good: #5be3a5;
+  --radius: 14px;
+  --dock-h: 72px;
+  --font-display: "Bungee", "Arial Black", Impact, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--ink); color: var(--text);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.4;
+  overflow: hidden; overscroll-behavior: none; touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#app {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* ---- HUD ---- */
+.hud {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 14px 6px;
+}
+.hud-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wordmark { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.04em; color: var(--accent); line-height: 1; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 10px; font-size: 12.5px; color: var(--muted); font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chip b { color: var(--text); font-weight: 800; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex: none; }
+.hud-score { text-align: right; flex: none; }
+.hud-score .label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+.score {
+  font-family: var(--font-display); font-size: 30px; line-height: 1; color: var(--text);
+  font-variant-numeric: tabular-nums; transition: transform 0.12s;
+}
+.score.bump { transform: scale(1.08); }
+.best { font-size: 12px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.best b { color: var(--accent); }
+
+/* ---- energy bar ---- */
+.energy {
+  position: relative; margin: 2px 14px 8px; height: 22px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--line); overflow: hidden;
+}
+.energy-fill {
+  position: absolute; inset: 0; width: 100%; transform-origin: left;
+  background: linear-gradient(90deg, #3d7dff, var(--energy));
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+}
+.energy-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; font-weight: 900; letter-spacing: 0.06em; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.5); font-variant-numeric: tabular-nums;
+}
+.energy.low .energy-fill { background: linear-gradient(90deg, #d13a55, var(--danger)); }
+
+/* ---- board ---- */
+.board {
+  position: relative; flex: 1; min-height: 0; overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #1b2130 0%, var(--ink) 70%);
+}
+.board canvas { display: block; touch-action: none; }
+.board.shake { animation: shake 0.35s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+}
+.toast {
+  position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 20px);
+  background: rgba(15,18,25,.92); border: 1px solid var(--line); color: var(--text);
+  padding: 8px 14px; border-radius: 999px; font-weight: 800; font-size: 13px;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; white-space: nowrap;
+  max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.error { border-color: var(--danger); color: #ffb3c0; }
+.toast.good { border-color: var(--good); color: #c8ffe6; }
+.zoom-btns { position: absolute; right: 10px; bottom: 10px; display: none; flex-direction: column; gap: 6px; }
+@media (hover: hover) and (pointer: fine) { .zoom-btns { display: flex; } }
+.zoom-btns button {
+  width: 36px; height: 36px; border-radius: 10px; background: rgba(23,28,40,.85);
+  border: 1px solid var(--line); color: var(--text); font-weight: 900; font-size: 16px;
+}
+
+/* ---- dock ---- */
+.dock {
+  height: var(--dock-h); display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+  padding: 8px 10px 6px; background: var(--panel); border-top: 1px solid var(--line);
+}
+.dock button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-radius: 12px; font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.02em;
+  transition: background .15s, color .15s, transform .1s;
+}
+.dock button:active { transform: scale(0.94); }
+.dock button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dock button:disabled { opacity: .35; }
+.dock button.primary { background: var(--accent); color: var(--accent-ink); }
+.dock button.primary:disabled { opacity: .35; }
+.dock button .badge {
+  position: absolute; top: 6px; right: 12px; min-width: 16px; height: 16px; border-radius: 8px;
+  background: var(--danger); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center;
+}
+.dock button { position: relative; }
+
+/* ---- sheets ---- */
+.backdrop {
+  position: fixed; inset: 0; background: rgba(5,7,12,.6); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20;
+  backdrop-filter: blur(2px);
+}
+.backdrop.show { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: var(--panel); border-top-left-radius: 20px; border-top-right-radius: 20px;
+  border: 1px solid var(--line); border-bottom: 0;
+  max-height: min(84vh, 720px); display: flex; flex-direction: column;
+  transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  -webkit-user-select: text; user-select: text;
+}
+.sheet.show { transform: translateY(0); }
+@media (min-width: 700px) {
+  .sheet { left: 50%; right: auto; width: 520px; transform: translate(-50%, 105%); border-radius: 20px 20px 0 0; }
+  .sheet.show { transform: translate(-50%, 0); }
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px 8px; }
+.sheet-head h2 { margin: 0; font-family: var(--font-display); font-size: 17px; letter-spacing: .03em; font-weight: 400; }
+.sheet-head .sub { color: var(--muted); font-size: 12.5px; font-weight: 700; margin-top: 2px; }
+.sheet-close { width: 34px; height: 34px; border-radius: 10px; background: var(--panel-2); font-size: 18px; color: var(--muted); flex: none; }
+.sheet-body { overflow: auto; padding: 4px 18px 18px; -webkit-overflow-scrolling: touch; }
+.grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 8px auto 0; }
+
+/* leaderboard */
+.lb-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 700; margin: 4px 0 10px; }
+.lb-status .pill { padding: 2px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); }
+.lb-status .pill.global { color: var(--good); border-color: rgba(91,227,165,.4); }
+.lb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lb-row {
+  display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 12px; background: var(--panel-2); border: 1px solid transparent;
+}
+.lb-row.me { border-color: var(--accent); background: rgba(255,179,71,.1); }
+.lb-row .rank { font-family: var(--font-display); font-size: 14px; color: var(--muted); }
+.lb-row.top .rank { color: var(--accent); }
+.lb-row .name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-row .meta { font-size: 11.5px; color: var(--muted); font-weight: 700; }
+.lb-row .pts { font-family: var(--font-display); font-size: 15px; font-variant-numeric: tabular-nums; }
+.lb-empty { text-align: center; color: var(--muted); padding: 24px 10px; font-weight: 700; }
+.lb-you { margin-top: 12px; font-size: 13px; color: var(--muted); font-weight: 700; text-align: center; }
+
+/* menu / forms */
+.menu-list { display: flex; flex-direction: column; gap: 8px; }
+.menu-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; text-align: left; padding: 13px 14px; border-radius: 12px;
+  background: var(--panel-2); border: 1px solid var(--line); font-weight: 800;
+}
+.menu-btn small { display: block; color: var(--muted); font-weight: 700; font-size: 12px; margin-top: 2px; }
+.menu-btn .kbd { font-family: var(--font-display); color: var(--accent); font-size: 12px; }
+.menu-btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.menu-btn.primary small { color: rgba(42,26,5,.75); }
+.field { display: flex; gap: 8px; }
+.field input {
+  flex: 1; min-width: 0; padding: 11px 12px; border-radius: 12px; background: var(--ink);
+  border: 1px solid var(--line); color: var(--text); font-weight: 700;
+}
+.field button { padding: 0 16px; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 900; }
+.section-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 800; margin: 14px 0 6px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.switch { width: 44px; height: 26px; border-radius: 13px; background: var(--line); position: relative; transition: background .15s; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.switch[aria-checked="true"] { background: var(--good); }
+.switch[aria-checked="true"]::after { transform: translateX(18px); }
+
+/* how to play */
+.how { display: flex; flex-direction: column; gap: 14px; }
+.how-item { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
+.how-item .ico { width: 56px; height: 56px; border-radius: 14px; background: var(--panel-2); display: grid; place-items: center; }
+.how-item .ico svg { width: 40px; height: 40px; }
+.how-item p { margin: 0; color: var(--muted); font-weight: 700; font-size: 13.5px; }
+.how-item p b { color: var(--text); }
+.cta { margin-top: 16px; width: 100%; padding: 13px; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 900; font-size: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .backdrop, .energy-fill, .score, .toast { transition: none; }
+  .board.shake { animation: none; }
+}
+@media (min-width: 700px) {
+  .hud { padding: 14px 24px 8px; }
+  .wordmark { font-size: 26px; }
+  .score { font-size: 36px; }
+  .energy { margin: 4px 24px 10px; }
+  .dock { grid-template-columns: repeat(6, 110px); justify-content: center; gap: 8px; }
+}
+
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <div class="hud-left">
+      <div class="wordmark">MAZER</div>
+      <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot"></span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
+    </div>
+    <div class="hud-score">
+      <div class="label">Score</div>
+      <div class="score" id="score">0</div>
+      <div class="best" id="best">Base <b>0</b></div>
+    </div>
+  </header>
+  <div class="energy" id="energy" role="progressbar" aria-label="Energy remaining">
+    <div class="energy-fill" id="energyFill"></div>
+    <div class="energy-text"><span id="energyText">0 / 0</span> ENERGY</div>
+  </div>
+  <main class="board" id="boardWrap">
+    <canvas id="board" aria-label="Maze board. Tap a tile to place or remove a wall."></canvas>
+    <div class="zoom-btns">
+      <button id="zoomIn" aria-label="Zoom in">+</button>
+      <button id="zoomOut" aria-label="Zoom out">−</button>
+      <button id="zoomFit" aria-label="Fit board">⤢</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+  <nav class="dock">
+    <button id="btnUndo" disabled><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Undo</button>
+    <button id="btnReset" disabled><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reset</button>
+    <button id="btnSubmit" class="primary"><svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>Submit</button>
+    <button id="btnRanks"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 5"/><path d="M17 6h3a3 3 0 0 1-3 5"/></svg>Ranks</button>
+    <button id="btnShare"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Share</button>
+    <button id="btnMenu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+  </nav>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<section class="sheet" id="sheetRanks" aria-label="Leaderboard">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2>LEADERBOARD</h2><div class="sub" id="ranksSub"></div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <div class="lb-status" id="lbStatus"></div>
+    <ul class="lb-list" id="lbList"></ul>
+    <div class="lb-you" id="lbYou"></div>
+  </div>
+</section>
+
+<section class="sheet" id="sheetMenu" aria-label="Menu">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2>MENU</h2><div class="sub" id="menuSub"></div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <div class="menu-list">
+      <button class="menu-btn primary" id="menuDaily"><span>Today's puzzle<small id="dailyCountdown">Everyone gets the same maze for 24 hours</small></span><span class="kbd">DAILY</span></button>
+      <button class="menu-btn" id="menuRandom"><span>New random maze<small>Fresh biome, walls and zones. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
+    </div>
+    <div class="section-label">Play a seed</div>
+    <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
+    <div class="section-label">Your name</div>
+    <div class="field"><input id="nameInput" placeholder="Shown on the leaderboard" maxlength="16" autocomplete="nickname"><button id="nameSave">Save</button></div>
+    <div class="section-label">Settings</div>
+    <div class="row" style="padding:6px 0"><span style="font-weight:800">Sound effects</span><button class="switch" id="soundSwitch" role="switch" aria-checked="true" aria-label="Sound effects"></button></div>
+    <div class="menu-list" style="margin-top:12px">
+      <button class="menu-btn" id="menuHow"><span>How to play</span><span class="kbd">?</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" id="sheetHow" aria-label="How to play">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Build the maze. Make the courier suffer.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <div class="how">
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A courier always takes the <b>shortest route</b> from <b>S</b> to <b>E</b>, visiting any numbered stops in order. Longer route, bigger score.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p><b>Tap a tile</b> to build a wall. Each wall costs <b>1 energy</b>. Tap it again to take it back and get the energy back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Rocks</b> are natural walls. Clearing one costs more energy, shown on the puzzle chip. You can put it back for a refund.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Gold zones</b> multiply every step taken inside them. Bend the route through them.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>You can never seal the courier in. A move that <b>blocks the route</b> flashes red and is undone. Stops can't be changed.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your score. Everyone in the world gets the same <b>daily</b> maze, so bring friends.</p></div>
+    </div>
+    <button class="cta" id="howDone">Let's build</button>
+  </div>
+</section>
+
+<section class="sheet" id="sheetName" aria-label="Choose a name">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your score. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <div class="field"><input id="nameInput2" placeholder="Name" maxlength="16" autocomplete="nickname"><button id="nameSubmit">Submit score</button></div>
+  </div>
+</section>
+
+<script>
+/* Mazer engine — deterministic, dependency-free.
+ * Works in the browser (globalThis.Mazer) and in node (module.exports).
+ * Everything here must stay deterministic: the leaderboard verifies
+ * submitted solutions by regenerating the maze from its seed and replaying moves.
+ */
+(function (root, factory) {
+  const api = factory();
+  root.Mazer = api;
+  if (typeof module === "object" && module.exports) module.exports = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+
+  /* ---------- seeded random ---------- */
+  function cyrb128(str) {
+    let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
+    for (let i = 0, k; i < str.length; i++) {
+      k = str.charCodeAt(i);
+      h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+      h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+      h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+      h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+    }
+    h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+    h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+    h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+    h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+    return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
+  }
+  function sfc32(a, b, c, d) {
+    return function () {
+      a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+      let t = (a + b) | 0;
+      a = b ^ (b >>> 9);
+      b = (c + (c << 3)) | 0;
+      c = (c << 21) | (c >>> 11);
+      d = (d + 1) | 0;
+      t = (t + d) | 0;
+      c = (c + t) | 0;
+      return (t >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seed) {
+    const s = cyrb128(String(seed));
+    const rnd = sfc32(s[0], s[1], s[2], s[3]);
+    for (let i = 0; i < 12; i++) rnd();
+    const int = (min, max) => Math.floor(rnd() * (max - min + 1)) + min;
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const chance = (p) => rnd() < p;
+    return { rnd, int, pick, chance };
+  }
+
+  /* ---------- grid helpers ---------- */
+  const idx = (cols, x, y) => y * cols + x;
+  const inBounds = (g, x, y) => x >= 0 && y >= 0 && x < g.cols && y < g.rows;
+
+  /* ---------- A* (8-way, no corner cutting, octile heuristic) ---------- */
+  const DIRS = [
+    [0, -1, 1], [1, 0, 1], [0, 1, 1], [-1, 0, 1],
+    [1, -1, Math.SQRT2], [1, 1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2],
+  ];
+  function octile(dx, dy) {
+    dx = Math.abs(dx); dy = Math.abs(dy);
+    return dx > dy ? dx + (Math.SQRT2 - 1) * dy : dy + (Math.SQRT2 - 1) * dx;
+  }
+  // Binary heap keyed on f, ties broken by insertion order (deterministic).
+  function Heap() { this.a = []; this.n = 0; }
+  Heap.prototype.push = function (f, node) {
+    const a = this.a; a.push([f, this.n++, node]);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (less(a[i], a[p])) { const t = a[i]; a[i] = a[p]; a[p] = t; i = p; } else break;
+    }
+  };
+  Heap.prototype.pop = function () {
+    const a = this.a, top = a[0], last = a.pop();
+    if (a.length) {
+      a[0] = last; let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1; let m = i;
+        if (l < a.length && less(a[l], a[m])) m = l;
+        if (r < a.length && less(a[r], a[m])) m = r;
+        if (m === i) break;
+        const t = a[i]; a[i] = a[m]; a[m] = t; i = m;
+      }
+    }
+    return top[2];
+  };
+  Heap.prototype.size = function () { return this.a.length; };
+  function less(u, v) { return u[0] < v[0] || (u[0] === v[0] && u[1] < v[1]); }
+
+  /** walls: Uint8Array (1 = blocked). Returns array of [x,y] or null. */
+  function findPath(walls, cols, rows, sx, sy, ex, ey) {
+    const n = cols * rows;
+    const start = sy * cols + sx, goal = ey * cols + ex;
+    if (walls[start] || walls[goal]) return null;
+    const g = new Float64Array(n).fill(Infinity);
+    const parent = new Int32Array(n).fill(-1);
+    const closed = new Uint8Array(n);
+    const open = new Heap();
+    g[start] = 0;
+    open.push(octile(ex - sx, ey - sy), start);
+    while (open.size()) {
+      const cur = open.pop();
+      if (closed[cur]) continue;
+      closed[cur] = 1;
+      if (cur === goal) break;
+      const cx = cur % cols, cy = (cur - cx) / cols;
+      for (let d = 0; d < 8; d++) {
+        const nx = cx + DIRS[d][0], ny = cy + DIRS[d][1];
+        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+        const ni = ny * cols + nx;
+        if (walls[ni] || closed[ni]) continue;
+        if (d >= 4) { // diagonal: both orthogonal neighbours must be free
+          if (walls[cy * cols + nx] || walls[ny * cols + cx]) continue;
+        }
+        const ng = g[cur] + DIRS[d][2];
+        if (ng < g[ni] - 1e-9) {
+          g[ni] = ng; parent[ni] = cur;
+          open.push(ng + octile(ex - nx, ey - ny), ni);
+        }
+      }
+    }
+    if (!closed[goal]) return null;
+    const path = [];
+    for (let c = goal; c !== -1; c = parent[c]) path.push([c % cols, (c - (c % cols)) / cols]);
+    path.reverse();
+    return path;
+  }
+
+  /** Route through every waypoint in order. Returns {segments, ok}. */
+  function routeWaypoints(walls, cols, rows, waypoints) {
+    const segments = [];
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const a = waypoints[i], b = waypoints[i + 1];
+      const seg = findPath(walls, cols, rows, a[0], a[1], b[0], b[1]);
+      if (!seg) return { segments, ok: false };
+      segments.push(seg);
+    }
+    return { segments, ok: true };
+  }
+
+  /* ---------- scoring ---------- */
+  const BASE_SCORE_MOD = 100;
+  function scorePath(segments, scoreMod, cols) {
+    let total = 0;
+    for (const seg of segments) {
+      for (let i = 1; i < seg.length; i++) {
+        const [ax, ay] = seg[i - 1], [bx, by] = seg[i];
+        const dist = ax !== bx && ay !== by ? Math.SQRT2 : 1;
+        const avg = (scoreMod[idx(cols, ax, ay)] + scoreMod[idx(cols, bx, by)]) / 2;
+        total += avg * dist;
+      }
+    }
+    return Math.round(total * BASE_SCORE_MOD);
+  }
+
+  /* ---------- biomes & variety tables ---------- */
+  const BIOMES = [
+    { id: "meadow", name: "Meadow", ground: ["#7fb96a", "#8cc47a", "#74ad60"], zone: "#f2c94c", rock: "#6b6f64", rockTop: "#8e9287", stone: "#d8cfbb", stoneTop: "#f0e8d6", path: "#ff7a45", water: null },
+    { id: "dunes", name: "Dunes", ground: ["#e0bf82", "#e6c890", "#d8b675"], zone: "#ff8e3c", rock: "#a5643a", rockTop: "#c98252", stone: "#efe7d0", stoneTop: "#fbf6ea", path: "#2f6fed" },
+    { id: "tundra", name: "Tundra", ground: ["#c9d8e2", "#d5e1ea", "#bfcfdb"], zone: "#ffb347", rock: "#5d6b7a", rockTop: "#7f8e9d", stone: "#e9eef2", stoneTop: "#ffffff", path: "#e0407a" },
+    { id: "ember", name: "Ember", ground: ["#4a3a3a", "#524040", "#423333"], zone: "#ff9a3c", rock: "#1f1717", rockTop: "#3a2b2b", stone: "#8d6b5a", stoneTop: "#b08a76", path: "#ffd54a" },
+    { id: "abyss", name: "Abyss", ground: ["#233650", "#2a3f5c", "#1e2f47"], zone: "#4fe3c1", rock: "#0e1522", rockTop: "#1b2638", stone: "#6a86a8", stoneTop: "#8fa9c8", path: "#ff6fb1" },
+    { id: "orchard", name: "Orchard", ground: ["#a7c957", "#b3d264", "#9bbf4d"], zone: "#f4a261", rock: "#5b4a3a", rockTop: "#7d6a55", stone: "#e9d8a6", stoneTop: "#f7ebc3", path: "#e63946" },
+    { id: "marsh", name: "Marsh", ground: ["#5c7f5a", "#668a63", "#547552"], zone: "#c8e55a", rock: "#3b4a3f", rockTop: "#57695b", stone: "#b7b39a", stoneTop: "#d4d0b8", path: "#ffb703" },
+    { id: "lavender", name: "Lavender", ground: ["#b8a9d9", "#c4b6e2", "#ad9dd0"], zone: "#ffd166", rock: "#4b3f6b", rockTop: "#6a5b90", stone: "#efe9fb", stoneTop: "#ffffff", path: "#06d6a0" },
+  ];
+  const WALL_STYLES = ["clusters", "caves", "veins", "ruins", "scatter"];
+  const ZONE_SHAPES = ["diamond", "disc", "ring", "cross"];
+
+  /* ---------- generation ---------- */
+  const DEFAULT_KNOBS = {
+    minSize: 14, maxSize: 30,
+    minActionPoints: 10,
+    minRemovalCost: 2, maxRemovalCost: 5,
+  };
+
+  function generate(seed, overrides) {
+    const K = Object.assign({}, DEFAULT_KNOBS, overrides || {});
+    const R = makeRng(seed);
+
+    const biome = R.pick(BIOMES);
+    const wallStyle = R.pick(WALL_STYLES);
+    const zoneShape = R.pick(ZONE_SHAPES);
+
+    const d1 = R.int(K.minSize, K.maxSize), d2 = R.int(K.minSize, K.maxSize);
+    // portrait-leaning: mobile screens are tall
+    const cols = Math.min(d1, d2), rows = Math.max(d1, d2);
+    const n = cols * rows;
+    const size = Math.sqrt(n);
+
+    const walls = new Uint8Array(n);      // current blockers
+    const natural = new Uint8Array(n);    // was a natural blocker at generation
+    const scoreMod = new Float32Array(n).fill(1);
+    const protectedT = new Uint8Array(n);
+
+    /* walls by style */
+    const fillClusters = () => {
+      const seeds = R.int(10, Math.max(12, Math.floor(n / 45)));
+      for (let s = 0; s < seeds; s++) {
+        const sx = R.int(0, cols - 1), sy = R.int(0, rows - 1);
+        const decay = R.int(3, 10) / 10;
+        for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+          const dist = Math.hypot(x - sx, y - sy);
+          if (R.rnd() < Math.exp(-decay * dist)) walls[idx(cols, x, y)] = 1;
+        }
+      }
+    };
+    const fillCaves = () => {
+      const fill = R.int(38, 46) / 100;
+      for (let i = 0; i < n; i++) walls[i] = R.chance(fill) ? 1 : 0;
+      const iters = R.int(3, 5);
+      for (let it = 0; it < iters; it++) {
+        const next = new Uint8Array(n);
+        for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+          let c = 0;
+          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            const nx = x + dx, ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue; // open borders
+            c += walls[idx(cols, nx, ny)];
+          }
+          next[idx(cols, x, y)] = c >= 5 ? 1 : c <= 2 ? 0 : walls[idx(cols, x, y)];
+        }
+        walls.set(next);
+      }
+    };
+    const fillVeins = () => {
+      const walkers = R.int(6, Math.max(8, Math.floor(n / 40)));
+      for (let w = 0; w < walkers; w++) {
+        let x = R.int(0, cols - 1), y = R.int(0, rows - 1);
+        let dir = R.int(0, 3);
+        const len = R.int(Math.floor(size), Math.floor(size * 2.2));
+        for (let s = 0; s < len; s++) {
+          walls[idx(cols, x, y)] = 1;
+          if (R.chance(0.25)) dir = (dir + (R.chance(0.5) ? 1 : 3)) % 4;
+          const [dx, dy] = DIRS[dir];
+          x += dx; y += dy;
+          if (x < 0 || y < 0 || x >= cols || y >= rows) { x = Math.max(0, Math.min(cols - 1, x)); y = Math.max(0, Math.min(rows - 1, y)); dir = (dir + 2) % 4; }
+        }
+      }
+    };
+    const fillRuins = () => {
+      const rooms = R.int(4, Math.max(5, Math.floor(n / 60)));
+      for (let r = 0; r < rooms; r++) {
+        const w = R.int(3, Math.min(9, cols - 2)), h = R.int(3, Math.min(9, rows - 2));
+        const x0 = R.int(0, cols - w), y0 = R.int(0, rows - h);
+        for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + h; y++) {
+          const edge = x === x0 || y === y0 || x === x0 + w - 1 || y === y0 + h - 1;
+          if (edge && !R.chance(0.22)) walls[idx(cols, x, y)] = 1;
+        }
+      }
+      // a few loose stones
+      const loose = Math.floor(n * 0.03);
+      for (let i = 0; i < loose; i++) walls[idx(cols, R.int(0, cols - 1), R.int(0, rows - 1))] = 1;
+    };
+    const fillScatter = () => {
+      const density = R.int(14, 24) / 100;
+      for (let i = 0; i < n; i++) walls[i] = R.chance(density) ? 1 : 0;
+    };
+    ({ clusters: fillClusters, caves: fillCaves, veins: fillVeins, ruins: fillRuins, scatter: fillScatter })[wallStyle]();
+
+    /* waypoints: choose vertices on free tiles, route through them, carve where needed */
+    const numVertices = Math.max(3, Math.floor((R.int(6, 10) / 10) * size));
+    let numWaypoints = 0; // extra waypoints between start and end
+    for (let i = 0; i < numVertices / 5; i++) if (R.chance(0.45)) numWaypoints++;
+    numWaypoints = Math.min(numWaypoints, 4);
+
+    const freeTile = () => {
+      for (let tries = 0; tries < 5000; tries++) {
+        const x = R.int(0, cols - 1), y = R.int(0, rows - 1);
+        const i = idx(cols, x, y);
+        if (!walls[i] && !protectedT[i]) return [x, y];
+      }
+      return null;
+    };
+    const vertices = [];
+    for (let i = 0; i < numVertices; i++) {
+      const p = freeTile();
+      if (p) vertices.push(p);
+    }
+    // spread start and end apart: start = first vertex, end = farthest vertex from it
+    let farI = 1, farD = -1;
+    for (let i = 1; i < vertices.length; i++) {
+      const d = Math.hypot(vertices[i][0] - vertices[0][0], vertices[i][1] - vertices[0][1]);
+      if (d > farD) { farD = d; farI = i; }
+    }
+    const endV = vertices.splice(farI, 1)[0];
+    vertices.push(endV);
+
+    // route through obstacles; carve a straight corridor when blocked
+    const empty = new Uint8Array(n);
+    for (let i = 0; i < vertices.length - 1; i++) {
+      const a = vertices[i], b = vertices[i + 1];
+      let seg = findPath(walls, cols, rows, a[0], a[1], b[0], b[1]);
+      if (!seg) {
+        seg = findPath(empty, cols, rows, a[0], a[1], b[0], b[1]);
+        for (let k = 0; k < seg.length; k++) {
+          const [x, y] = seg[k];
+          walls[idx(cols, x, y)] = 0;
+          if (k > 0) { // a diagonal step also needs both orthogonal neighbours open
+            const [px, py] = seg[k - 1];
+            if (px !== x && py !== y) { walls[idx(cols, px, y)] = 0; walls[idx(cols, x, py)] = 0; }
+          }
+        }
+      }
+      for (const [x, y] of seg) protectedT[idx(cols, x, y)] = 1;
+    }
+    // pick waypoints: start, end, plus a few interior vertices
+    const interior = vertices.slice(1, -1);
+    while (interior.length > numWaypoints) interior.splice(R.int(0, interior.length - 1), 1);
+    const waypoints = [vertices[0]].concat(interior, [vertices[vertices.length - 1]]);
+    for (const [x, y] of waypoints) walls[idx(cols, x, y)] = 0;
+
+    // mark natural
+    natural.set(walls);
+
+    /* score zones */
+    const numZones = R.int(1, Math.max(2, Math.floor(n / 220)));
+    const zones = [];
+    for (let z = 0; z < numZones; z++) {
+      const cx = R.int(1, cols - 2), cy = R.int(1, rows - 2);
+      const radius = R.int(2, 5);
+      const power = 7 - radius; // small zones are hot, big zones are mild (as in the original)
+      zones.push({ x: cx, y: cy, r: radius, power, shape: zoneShape });
+      for (let y = cy - radius; y <= cy + radius; y++) for (let x = cx - radius; x <= cx + radius; x++) {
+        if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
+        const dx = x - cx, dy = y - cy;
+        let inside;
+        switch (zoneShape) {
+          case "disc": inside = dx * dx + dy * dy <= radius * radius + 0.5; break;
+          case "ring": { const d = Math.sqrt(dx * dx + dy * dy); inside = d <= radius + 0.5 && d >= Math.max(0, radius - 1.6); break; }
+          case "cross": inside = Math.abs(dx) <= 1 || Math.abs(dy) <= 1; break;
+          default: inside = Math.abs(dx) + Math.abs(dy) <= radius;
+        }
+        if (inside) scoreMod[idx(cols, x, y)] += power;
+      }
+    }
+
+    const maxActionPoints = K.minActionPoints + Math.round((R.int(5, 15) / 10) * size);
+    const removalCost = R.int(K.minRemovalCost, K.maxRemovalCost);
+
+    const route = routeWaypoints(walls, cols, rows, waypoints);
+    const baseScore = scorePath(route.segments, scoreMod, cols);
+
+    return {
+      seed: String(seed), cols, rows, biome, wallStyle, zoneShape,
+      walls, natural, scoreMod, zones, waypoints,
+      maxActionPoints, removalCost, baseScore,
+      baseSegments: route.segments,
+    };
+  }
+
+  /* ---------- play state ---------- */
+  function isWaypoint(game, x, y) {
+    return game.waypoints.some((w) => w[0] === x && w[1] === y);
+  }
+  /** Cost of toggling tile (x,y) given current walls. */
+  function toggleCost(game, walls, x, y) {
+    const i = idx(game.cols, x, y);
+    if (game.natural[i]) return walls[i] ? game.removalCost : -game.removalCost;
+    return walls[i] ? -1 : 1;
+  }
+  /** Try a toggle. Returns {ok, reason, walls, ap, segments, score}. */
+  function tryToggle(game, walls, ap, x, y) {
+    if (!inBounds(game, x, y)) return { ok: false, reason: "out of bounds" };
+    if (isWaypoint(game, x, y)) return { ok: false, reason: "waypoint" };
+    const cost = toggleCost(game, walls, x, y);
+    if (ap - cost < 0) return { ok: false, reason: "energy" };
+    const next = new Uint8Array(walls);
+    const i = idx(game.cols, x, y);
+    next[i] = next[i] ? 0 : 1;
+    const route = routeWaypoints(next, game.cols, game.rows, game.waypoints);
+    if (!route.ok) return { ok: false, reason: "blocked" };
+    return { ok: true, walls: next, ap: ap - cost, segments: route.segments, score: scorePath(route.segments, game.scoreMod, game.cols) };
+  }
+  /** Diff of current walls against natural state → list of [x,y]. */
+  function diffMoves(game, walls) {
+    const out = [];
+    for (let i = 0; i < walls.length; i++) if (walls[i] !== game.natural[i]) out.push([i % game.cols, (i - (i % game.cols)) / game.cols]);
+    return out;
+  }
+  /** Verify a submitted solution: returns {ok, score, ap} (score = 0 when invalid). */
+  function verifySolution(game, moves) {
+    if (!Array.isArray(moves)) return { ok: false, score: 0 };
+    const walls = new Uint8Array(game.natural);
+    let ap = game.maxActionPoints;
+    const seen = new Set();
+    for (const m of moves) {
+      if (!Array.isArray(m) || m.length !== 2) return { ok: false, score: 0 };
+      const x = m[0] | 0, y = m[1] | 0;
+      const key = x + "," + y;
+      if (seen.has(key) || !inBounds(game, x, y) || isWaypoint(game, x, y)) return { ok: false, score: 0 };
+      seen.add(key);
+      ap -= toggleCost(game, walls, x, y);
+      if (ap < 0) return { ok: false, score: 0 };
+      const i = idx(game.cols, x, y);
+      walls[i] = walls[i] ? 0 : 1;
+    }
+    const route = routeWaypoints(walls, game.cols, game.rows, game.waypoints);
+    if (!route.ok) return { ok: false, score: 0 };
+    return { ok: true, score: scorePath(route.segments, game.scoreMod, game.cols), ap };
+  }
+
+  /* ---------- seeds ---------- */
+  const WORDS_A = ["amber", "brisk", "cobalt", "dusky", "ember", "frost", "gilded", "hollow", "ivory", "jade", "keen", "lunar", "mossy", "nimble", "opal", "pale", "quiet", "rusty", "silver", "tidal", "umber", "velvet", "wild", "young", "zesty"];
+  const WORDS_B = ["fox", "heron", "otter", "lynx", "raven", "badger", "moth", "crane", "wolf", "newt", "ibis", "hare", "stoat", "finch", "koi", "yak", "gecko", "bison", "owl", "eel"];
+  const WORDS_C = ["path", "gate", "ridge", "hollow", "vale", "marsh", "spire", "grove", "delta", "bluff", "reach", "wick", "ford", "cairn", "glen"];
+  function randomSeed(rand) {
+    const r = rand || Math.random;
+    const p = (a) => a[Math.floor(r() * a.length)];
+    return p(WORDS_A) + "-" + p(WORDS_B) + "-" + p(WORDS_C);
+  }
+  function dailySeed(date) {
+    const d = date || new Date();
+    const y = d.getUTCFullYear(), m = String(d.getUTCMonth() + 1).padStart(2, "0"), dd = String(d.getUTCDate()).padStart(2, "0");
+    return "daily-" + y + "-" + m + "-" + dd;
+  }
+  function sanitizeSeed(s) {
+    return String(s || "").trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9_\-.~:@+]/g, "").slice(0, 60);
+  }
+
+  return {
+    makeRng, findPath, routeWaypoints, scorePath, generate, tryToggle, toggleCost, isWaypoint,
+    diffMoves, verifySolution, randomSeed, dailySeed, sanitizeSeed, BIOMES, WALL_STYLES, ZONE_SHAPES, idx,
+  };
+});
+
+</script>
+<script>
+/* Mazer renderer — Canvas 2D, a cached static layer (ground, zones, walls)
+ * plus a live layer (path, waypoints, effects) drawn every frame. */
+(function (root) {
+  "use strict";
+  const T = 64; // world units per tile
+
+  function hash2(x, y) { // cheap deterministic per-tile noise, independent of game rng
+    let h = (x * 374761393 + y * 668265263) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function shade(hex, amt) { // amt -1..1
+    const [r, g, b] = hexToRgb(hex);
+    const t = amt < 0 ? 0 : 255, p = Math.abs(amt);
+    const f = (c) => Math.round((t - c) * p + c);
+    return `rgb(${f(r)},${f(g)},${f(b)})`;
+  }
+  function rgba(hex, a) { const [r, g, b] = hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+  function luma(hex) { const [r, g, b] = hexToRgb(hex); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    // r: [tl, tr, br, bl]
+    const [tl, tr, br, bl] = r;
+    ctx.beginPath();
+    ctx.moveTo(x + tl, y);
+    ctx.lineTo(x + w - tr, y);
+    if (tr) ctx.arcTo(x + w, y, x + w, y + tr, tr); else ctx.lineTo(x + w, y);
+    ctx.lineTo(x + w, y + h - br);
+    if (br) ctx.arcTo(x + w, y + h, x + w - br, y + h, br); else ctx.lineTo(x + w, y + h);
+    ctx.lineTo(x + bl, y + h);
+    if (bl) ctx.arcTo(x, y + h, x, y + h - bl, bl); else ctx.lineTo(x, y + h);
+    ctx.lineTo(x, y + tl);
+    if (tl) ctx.arcTo(x, y, x + tl, y, tl); else ctx.lineTo(x, y);
+    ctx.closePath();
+  }
+
+  function createRenderer(canvas) {
+    const ctx = canvas.getContext("2d");
+    let game = null, walls = null, segments = [];
+    let cache = null, cacheScale = 1;
+    const H = T * 0.3; // block height
+    const PAD = T * 0.6;
+    let view = { scale: 1, ox: 0, oy: 0 };
+    let dpr = 1, cssW = 0, cssH = 0;
+    const effects = []; // {type, x, y, t0, ...}
+    let hover = null;
+    let errorUntil = 0;
+    let reduced = false;
+    let darkText = false;
+
+    const worldW = () => game.cols * T + PAD * 2;
+    const worldH = () => game.rows * T + PAD * 2;
+
+    function resize(w, h, ratio) {
+      cssW = w; cssH = h; dpr = ratio;
+      canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
+      canvas.style.width = w + "px"; canvas.style.height = h + "px";
+    }
+
+    function setGame(g, w, segs) {
+      game = g; walls = w; segments = segs;
+      darkText = luma(g.biome.ground[0]) > 0.62;
+      cache = null;
+    }
+    function setState(w, segs) { walls = w; segments = segs; cache = null; }
+    function setView(v) { view = v; }
+    function setHover(t) { hover = t; }
+    function setReducedMotion(v) { reduced = v; }
+    function flashError() { errorUntil = performance.now() + 450; }
+    function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
+
+    /* ---------- static layer ---------- */
+    function isWall(x, y) { return x >= 0 && y >= 0 && x < game.cols && y < game.rows && walls[y * game.cols + x] === 1; }
+
+    function buildCache(scale) {
+      const W = worldW(), Hh = worldH();
+      const maxSide = 3072;
+      cacheScale = Math.min(scale, maxSide / W, maxSide / Hh);
+      cache = document.createElement("canvas");
+      cache.width = Math.ceil(W * cacheScale); cache.height = Math.ceil(Hh * cacheScale);
+      const c = cache.getContext("2d");
+      c.scale(cacheScale, cacheScale);
+      c.translate(PAD, PAD);
+      const b = game.biome, cols = game.cols, rows = game.rows;
+
+      // ground
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        const hv = hash2(x, y);
+        c.fillStyle = b.ground[Math.floor(hv * b.ground.length)];
+        c.fillRect(x * T, y * T, T, T);
+      }
+      // pebbles / grass tufts
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        const hv = hash2(x + 101, y + 7);
+        if (hv < 0.35) {
+          const n = 1 + Math.floor(hv * 8);
+          c.fillStyle = rgba(b.ground[0], 0);
+          for (let k = 0; k < n; k++) {
+            const px = x * T + T * (0.15 + hash2(x * 3 + k, y * 5) * 0.7), py = y * T + T * (0.15 + hash2(y * 7 + k, x * 11) * 0.7);
+            c.fillStyle = k % 2 ? shade(b.ground[0], -0.12) : shade(b.ground[0], 0.12);
+            c.beginPath(); c.arc(px, py, T * 0.035, 0, Math.PI * 2); c.fill();
+          }
+        }
+      }
+      // score zones: tint + glow
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        const m = game.scoreMod[y * cols + x];
+        if (m > 1) {
+          c.fillStyle = rgba(b.zone, Math.min(0.72, 0.16 + (m - 1) * 0.11));
+          c.fillRect(x * T, y * T, T, T);
+        }
+      }
+      c.save(); c.beginPath(); c.rect(0, 0, cols * T, rows * T); c.clip();
+      for (const z of game.zones) {
+        const cx = (z.x + 0.5) * T, cy = (z.y + 0.5) * T, r = (z.r + 0.8) * T;
+        const g = c.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, rgba(b.zone, 0.55)); g.addColorStop(0.6, rgba(b.zone, 0.12)); g.addColorStop(1, rgba(b.zone, 0));
+        c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill();
+      }
+      c.restore();
+      // grid
+      c.strokeStyle = darkText ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.07)";
+      c.lineWidth = 1.5;
+      c.beginPath();
+      for (let x = 0; x <= cols; x++) { c.moveTo(x * T, 0); c.lineTo(x * T, rows * T); }
+      for (let y = 0; y <= rows; y++) { c.moveTo(0, y * T); c.lineTo(cols * T, y * T); }
+      c.stroke();
+      // zone multiplier badges
+      for (const z of game.zones) {
+        const m = game.scoreMod[z.y * cols + z.x];
+        const cx = (z.x + 0.5) * T, cy = (z.y + 0.5) * T;
+        c.fillStyle = "rgba(0,0,0,0.42)";
+        roundRectPath(c, cx - T * 0.3, cy - T * 0.19, T * 0.6, T * 0.38, [8, 8, 8, 8]); c.fill();
+        c.fillStyle = "#fff"; c.font = `700 ${T * 0.26}px Nunito, system-ui, sans-serif`;
+        c.textAlign = "center"; c.textBaseline = "middle";
+        c.fillText("×" + Math.round(m), cx, cy + 1);
+      }
+      // walls: blocks with rounded convex corners and a front face
+      const r = T * 0.24;
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        if (!isWall(x, y)) continue;
+        const nat = game.natural[y * cols + x] === 1;
+        const top = nat ? b.rockTop : b.stoneTop, side = nat ? b.rock : b.stone;
+        const n = isWall(x, y - 1), e = isWall(x + 1, y), s = isWall(x, y + 1), w = isWall(x - 1, y);
+        const radii = [!n && !w ? r : 0, !n && !e ? r : 0, !s && !e ? r : 0, !s && !w ? r : 0];
+        const px = x * T, py = y * T;
+        // shadow on the ground to the lower-right
+        c.fillStyle = "rgba(0,0,0,0.18)";
+        roundRectPath(c, px + T * 0.08, py - H + T * 0.12, T, T + H, radii); c.fill();
+        // front face
+        if (!s) {
+          c.fillStyle = shade(side, -0.05);
+          roundRectPath(c, px, py + T - H - 1, T, H + 1, [0, 0, radii[2], radii[3]]); c.fill();
+          c.fillStyle = "rgba(0,0,0,0.22)";
+          c.fillRect(px + (w ? 0 : radii[3]), py + T - H * 0.45, T - (w ? 0 : radii[3]) - (e ? 0 : radii[2]), H * 0.45);
+        }
+        // top face
+        c.fillStyle = top;
+        roundRectPath(c, px, py - H, T, T, radii); c.fill();
+        // highlight edge (top) and shade edge (left)
+        c.fillStyle = "rgba(255,255,255,0.22)";
+        if (!n) c.fillRect(px + radii[0], py - H, T - radii[0] - radii[1], T * 0.06);
+        c.fillStyle = "rgba(0,0,0,0.10)";
+        if (!w) c.fillRect(px, py - H + radii[0], T * 0.06, T - radii[0] - radii[3]);
+        // texture: rock specks vs. stone seams
+        if (nat) {
+          c.fillStyle = "rgba(0,0,0,0.16)";
+          for (let k = 0; k < 3; k++) {
+            const sx = px + T * (0.2 + hash2(x + k * 13, y) * 0.6), sy = py - H + T * (0.25 + hash2(y + k * 7, x) * 0.55);
+            c.beginPath(); c.ellipse(sx, sy, T * 0.07, T * 0.045, hash2(x, y + k) * 3, 0, Math.PI * 2); c.fill();
+          }
+        } else {
+          c.strokeStyle = "rgba(0,0,0,0.13)"; c.lineWidth = 2;
+          c.beginPath();
+          c.moveTo(px + (w ? 0 : 4), py - H + T * 0.5); c.lineTo(px + T - (e ? 0 : 4), py - H + T * 0.5);
+          c.moveTo(px + T * 0.5, py - H + (n ? 0 : 4)); c.lineTo(px + T * 0.5, py - H + T * 0.5);
+          c.moveTo(px + T * 0.25, py - H + T * 0.5); c.lineTo(px + T * 0.25, py - H + T - (s ? 0 : 4));
+          c.moveTo(px + T * 0.75, py - H + T * 0.5); c.lineTo(px + T * 0.75, py - H + T - (s ? 0 : 4));
+          c.stroke();
+        }
+      }
+      // board edge
+      c.strokeStyle = "rgba(0,0,0,0.35)"; c.lineWidth = 3;
+      c.strokeRect(0, 0, cols * T, rows * T);
+    }
+
+    /* ---------- live layer ---------- */
+    function draw(now) {
+      if (!game) return;
+      const wantScale = Math.min(4, view.scale * dpr * 1.25);
+      if (!cache || Math.abs(wantScale - cacheScale) > cacheScale * 0.5) buildCache(wantScale);
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssW, cssH);
+      ctx.translate(view.ox, view.oy);
+      ctx.scale(view.scale, view.scale);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(cache, -PAD, -PAD, worldW(), worldH());
+
+      const b = game.biome;
+      // hover
+      if (hover) {
+        ctx.fillStyle = "rgba(255,255,255,0.28)";
+        ctx.fillRect(hover[0] * T, hover[1] * T, T, T);
+        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 3;
+        ctx.strokeRect(hover[0] * T + 2, hover[1] * T + 2, T - 4, T - 4);
+      }
+      // path
+      const err = now < errorUntil;
+      const pts = [];
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        for (let k = i === 0 ? 0 : 1; k < seg.length; k++) pts.push(seg[k]);
+      }
+      if (pts.length > 1) {
+        ctx.lineJoin = "round"; ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo((pts[0][0] + 0.5) * T, (pts[0][1] + 0.5) * T);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo((pts[i][0] + 0.5) * T, (pts[i][1] + 0.5) * T);
+        const col = err ? "#ff3b5c" : b.path;
+        ctx.strokeStyle = "rgba(0,0,0,0.28)"; ctx.lineWidth = T * 0.34; ctx.stroke();
+        ctx.strokeStyle = col; ctx.lineWidth = T * 0.2; ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = T * 0.08;
+        ctx.setLineDash([T * 0.35, T * 0.45]);
+        ctx.lineDashOffset = reduced ? 0 : -(now / 9) % (T * 0.8);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      // waypoints
+      const pulse = reduced ? 0 : (Math.sin(now / 380) + 1) / 2;
+      game.waypoints.forEach(([x, y], i) => {
+        const cx = (x + 0.5) * T, cy = (y + 0.5) * T;
+        const last = i === game.waypoints.length - 1;
+        const color = i === 0 ? "#3ddc84" : last ? "#ff4d6d" : "#ffd54a";
+        ctx.fillStyle = rgba(color === "#3ddc84" ? "#3ddc84" : color, 0.25 + pulse * 0.2);
+        ctx.beginPath(); ctx.arc(cx, cy, T * (0.42 + pulse * 0.08), 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.beginPath(); ctx.arc(cx + 2, cy + 3, T * 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(cx, cy, T * 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.beginPath(); ctx.arc(cx - T * 0.08, cy - T * 0.1, T * 0.12, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#1a1d26"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.font = `800 ${T * 0.28}px Nunito, system-ui, sans-serif`;
+        ctx.fillText(i === 0 ? "S" : last ? "E" : String(i), cx, cy + 1);
+      });
+      // effects
+      for (let i = effects.length - 1; i >= 0; i--) {
+        const e = effects[i], age = (now - e.t0) / 1000;
+        if (age > e.life) { effects.splice(i, 1); continue; }
+        const k = age / e.life;
+        if (e.type === "burst") {
+          for (let p = 0; p < 8; p++) {
+            const a = (p / 8) * Math.PI * 2 + e.seed;
+            const d = T * (0.2 + k * 0.7);
+            ctx.fillStyle = rgba(e.color, 1 - k);
+            ctx.beginPath(); ctx.arc((e.x + 0.5) * T + Math.cos(a) * d, (e.y + 0.5) * T + Math.sin(a) * d, T * 0.06 * (1 - k) + 1, 0, Math.PI * 2); ctx.fill();
+          }
+        } else if (e.type === "text") {
+          ctx.globalAlpha = 1 - k * k;
+          ctx.font = `900 ${T * 0.34}px Nunito, system-ui, sans-serif`;
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          const tx = (e.x + 0.5) * T, ty = (e.y + 0.5) * T - T * 0.2 - k * T * 0.9;
+          ctx.lineWidth = T * 0.09; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.strokeText(e.text, tx, ty);
+          ctx.fillStyle = e.color; ctx.fillText(e.text, tx, ty);
+          ctx.globalAlpha = 1;
+        }
+      }
+      return effects.length > 0;
+    }
+
+    function worldToTile(sx, sy) {
+      const wx = (sx - view.ox) / view.scale, wy = (sy - view.oy) / view.scale;
+      const x = Math.floor(wx / T), y = Math.floor(wy / T);
+      if (!game || x < 0 || y < 0 || x >= game.cols || y >= game.rows) return null;
+      return [x, y];
+    }
+    function fitView(w, h, margin) {
+      const bw = game.cols * T, bh = game.rows * T;
+      const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
+      return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 };
+    }
+
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+  }
+
+  root.MazerRender = { createRenderer, T };
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+<script>
+// Canonical link used by the Share button. Change this when hosting elsewhere.
+window.MAZER_SHARE_URL = "https://claude.ai/code/artifact/4f85ce17-09de-4f3a-8456-70e7b5bbceec";
+</script>
+<script>
+/* Mazer app — UI, input, persistence, leaderboard. */
+(function () {
+  "use strict";
+  const M = globalThis.Mazer, RR = globalThis.MazerRender;
+  // Canonical link to share. Set MAZER_SHARE_URL when hosting elsewhere; defaults to this page.
+  const SHARE_BASE = globalThis.MAZER_SHARE_URL || "";
+  const $ = (id) => document.getElementById(id);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- storage ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("mazer." + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("mazer." + k, JSON.stringify(v)); } catch (e) { /* private mode */ } },
+  };
+  let pid = store.get("pid", null);
+  if (!pid) { pid = "p" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); store.set("pid", pid); }
+  let playerName = store.get("name", "");
+  let soundOn = store.get("sound", true);
+
+  /* ---------- sound ---------- */
+  let actx = null;
+  function beep(freq, dur, type, gain) {
+    if (!soundOn) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || "sine"; o.frequency.setValueAtTime(freq, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.6), actx.currentTime + dur);
+      g.gain.setValueAtTime(gain || 0.08, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + dur);
+    } catch (e) { /* no audio */ }
+  }
+  const sfx = {
+    place: () => beep(520, 0.12, "triangle", 0.09),
+    remove: () => beep(300, 0.14, "triangle", 0.07),
+    error: () => { beep(140, 0.22, "sawtooth", 0.06); },
+    good: () => { beep(660, 0.1, "sine", 0.08); setTimeout(() => beep(880, 0.16, "sine", 0.08), 90); },
+  };
+  const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) { /* ignore */ } };
+
+  /* ---------- game state ---------- */
+  const canvas = $("board"), wrap = $("boardWrap");
+  const R = RR.createRenderer(canvas);
+  R.setReducedMotion(reduced);
+  let game = null, walls = null, ap = 0, segments = [], score = 0;
+  let history = [];
+  let fit = null, view = null;
+  let shownScore = 0, scoreAnim = null;
+
+  function seedLabel(seed) {
+    const m = /^daily-(\d{4})-(\d{2})-(\d{2})$/.exec(seed);
+    if (m) {
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+      return "Daily · " + d.toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+    }
+    return seed;
+  }
+  const fmt = (n) => Math.round(n).toLocaleString();
+
+  function loadGame(seed, opts) {
+    seed = M.sanitizeSeed(seed) || M.dailySeed();
+    game = M.generate(seed);
+    walls = new Uint8Array(game.natural);
+    ap = game.maxActionPoints;
+    segments = game.baseSegments;
+    score = game.baseScore;
+    history = [];
+    // restore progress for this seed
+    const saved = store.get("moves." + seed, null);
+    if (saved && !(opts && opts.fresh)) {
+      const v = M.verifySolution(game, saved);
+      if (v.ok) {
+        for (const [x, y] of saved) walls[y * game.cols + x] = walls[y * game.cols + x] ? 0 : 1;
+        ap = v.ap; score = v.score;
+        segments = M.routeWaypoints(walls, game.cols, game.rows, game.waypoints).segments;
+      }
+    }
+    R.setGame(game, walls, segments);
+    layout(true);
+    $("seedTitle").textContent = seedLabel(seed);
+    $("seedSub").textContent = " · " + game.biome.name + " · rock " + game.removalCost + "⚡";
+    $("seedDot").style.background = game.biome.path;
+    document.querySelector('meta[name="theme-color"]').content = "#0f1219";
+    shownScore = score; $("score").textContent = fmt(score);
+    updateHud();
+    updateUrl(seed);
+    leaderboard.setSeed(seed);
+  }
+  function updateUrl(seed) {
+    try {
+      const u = new URL(location.href);
+      if (u.searchParams.get("seed") !== seed) { u.searchParams.set("seed", seed); history_replace(u); }
+    } catch (e) { /* ignore */ }
+  }
+  function history_replace(u) { try { window.history.replaceState(null, "", u.toString()); } catch (e) { /* sandboxed */ } }
+
+  function updateHud() {
+    const pct = ap / game.maxActionPoints;
+    $("energyFill").style.transform = "scaleX(" + pct + ")";
+    $("energyText").textContent = ap + " / " + game.maxActionPoints;
+    $("energy").classList.toggle("low", pct <= 0.2);
+    $("energy").setAttribute("aria-valuenow", ap);
+    const best = store.get("best." + game.seed, 0);
+    $("best").innerHTML = best > 0 ? "Best <b>" + fmt(best) + "</b>" : "Base <b>" + fmt(game.baseScore) + "</b>";
+    $("btnUndo").disabled = history.length === 0;
+    $("btnReset").disabled = history.length === 0 && M.diffMoves(game, walls).length === 0;
+    animateScore();
+  }
+  function animateScore() {
+    if (scoreAnim) cancelAnimationFrame(scoreAnim);
+    const from = shownScore, to = score, t0 = performance.now(), dur = reduced ? 0 : 420;
+    const el = $("score");
+    el.classList.add("bump"); setTimeout(() => el.classList.remove("bump"), 140);
+    const step = (t) => {
+      const k = dur ? Math.min(1, (t - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
+      shownScore = from + (to - from) * e;
+      el.textContent = fmt(shownScore);
+      if (k < 1) scoreAnim = requestAnimationFrame(step); else scoreAnim = null;
+    };
+    scoreAnim = requestAnimationFrame(step);
+  }
+  function saveProgress() { store.set("moves." + game.seed, M.diffMoves(game, walls)); }
+
+  function toggleTile(x, y) {
+    const res = M.tryToggle(game, walls, ap, x, y);
+    if (!res.ok) {
+      R.flashError();
+      wrap.classList.remove("shake"); void wrap.offsetWidth; if (!reduced) wrap.classList.add("shake");
+      buzz(40); sfx.error();
+      toast(res.reason === "energy" ? "Not enough energy" : res.reason === "blocked" ? "That would trap the courier" : res.reason === "waypoint" ? "Stops can't be moved" : "Can't do that", "error");
+      return;
+    }
+    history.push({ walls, ap, segments, score });
+    if (history.length > 200) history.shift();
+    const delta = res.score - score;
+    const placed = res.walls[y * game.cols + x] === 1;
+    walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
+    R.setState(walls, segments);
+    R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? game.biome.stoneTop : game.biome.zone, seed: Math.random() * 6 });
+    if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "−") + fmt(Math.abs(delta)), color: delta > 0 ? "#5be3a5" : "#ff5470" });
+    placed ? sfx.place() : sfx.remove();
+    buzz(10);
+    if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
+    saveProgress(); updateHud();
+  }
+  function undo() {
+    const h = history.pop(); if (!h) return;
+    walls = h.walls; ap = h.ap; segments = h.segments; score = h.score;
+    R.setState(walls, segments); sfx.remove(); saveProgress(); updateHud();
+  }
+  function reset() {
+    if (M.diffMoves(game, walls).length === 0) return;
+    history.push({ walls, ap, segments, score });
+    walls = new Uint8Array(game.natural); ap = game.maxActionPoints; segments = game.baseSegments; score = game.baseScore;
+    R.setState(walls, segments); saveProgress(); updateHud(); toast("Board reset");
+  }
+
+  /* ---------- view / layout ---------- */
+  function layout(refit) {
+    const rect = wrap.getBoundingClientRect();
+    R.resize(rect.width, rect.height, Math.min(3, window.devicePixelRatio || 1));
+    const nf = R.fitView(rect.width, rect.height, 14);
+    if (refit || !view) { fit = nf; view = Object.assign({}, nf); }
+    else { fit = nf; clampView(); }
+    R.setView(view);
+  }
+  function clampView() {
+    const { w, h } = R.boardSize();
+    const rect = wrap.getBoundingClientRect();
+    view.scale = Math.max(fit.scale * 0.8, Math.min(fit.scale * 4.5, view.scale));
+    const bw = w * view.scale, bh = h * view.scale;
+    // keep at least 30% of the board on screen in each axis
+    const minX = Math.min(rect.width * 0.3 - bw, (rect.width - bw) / 2), maxX = Math.max(rect.width * 0.7, (rect.width - bw) / 2);
+    const minY = Math.min(rect.height * 0.3 - bh, (rect.height - bh) / 2), maxY = Math.max(rect.height * 0.7, (rect.height - bh) / 2);
+    view.ox = Math.max(minX, Math.min(maxX, view.ox));
+    view.oy = Math.max(minY, Math.min(maxY, view.oy));
+  }
+  function zoomAt(f, sx, sy) {
+    const ns = Math.max(fit.scale * 0.8, Math.min(fit.scale * 4.5, view.scale * f));
+    const k = ns / view.scale;
+    view.ox = sx - (sx - view.ox) * k; view.oy = sy - (sy - view.oy) * k; view.scale = ns;
+    clampView();
+  }
+
+  /* ---------- pointer input ---------- */
+  const pointers = new Map();
+  let gesture = null; // {type:'tap'|'pan'|'pinch', ...}
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) gesture = { type: "tap", x0: e.clientX, y0: e.clientY, t0: performance.now(), ox: view.ox, oy: view.oy };
+    else if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      gesture = { type: "pinch", d0: Math.hypot(a.x - b.x, a.y - b.y), s0: view.scale, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, ox: view.ox, oy: view.oy };
+    }
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    if (!pointers.has(e.pointerId)) {
+      if (e.pointerType === "mouse") R.setHover(R.worldToTile(e.clientX - rect.left, e.clientY - rect.top));
+      return;
+    }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!gesture) return;
+    if (gesture.type === "pinch" && pointers.size >= 2) {
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const ns = Math.max(fit.scale * 0.8, Math.min(fit.scale * 4.5, gesture.s0 * (d / gesture.d0)));
+      const k = ns / gesture.s0;
+      const lcx = gesture.cx - rect.left, lcy = gesture.cy - rect.top;
+      view.scale = ns;
+      view.ox = (lcx - (lcx - gesture.ox) * k) + (mx - gesture.cx);
+      view.oy = (lcy - (lcy - gesture.oy) * k) + (my - gesture.cy);
+      clampView();
+      return;
+    }
+    if (gesture.type === "tap" || gesture.type === "pan") {
+      const dx = e.clientX - gesture.x0, dy = e.clientY - gesture.y0;
+      if (gesture.type === "tap" && Math.hypot(dx, dy) > 8) gesture.type = "pan";
+      if (gesture.type === "pan") { view.ox = gesture.ox + dx; view.oy = gesture.oy + dy; clampView(); }
+    }
+  });
+  const endPointer = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    if (gesture && gesture.type === "tap" && pointers.size === 1 && pointers.has(e.pointerId) && performance.now() - gesture.t0 < 500 && e.type === "pointerup") {
+      const t = R.worldToTile(e.clientX - rect.left, e.clientY - rect.top);
+      if (t) toggleTile(t[0], t[1]);
+    }
+    pointers.delete(e.pointerId);
+    gesture = pointers.size === 0 ? null : gesture && gesture.type === "pinch" ? { type: "done" } : gesture;
+    if (e.pointerType !== "mouse") R.setHover(null);
+  };
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+  canvas.addEventListener("pointerleave", () => R.setHover(null));
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
+  $("zoomIn").onclick = () => zoomAt(1.35, wrap.clientWidth / 2, wrap.clientHeight / 2);
+  $("zoomOut").onclick = () => zoomAt(1 / 1.35, wrap.clientWidth / 2, wrap.clientHeight / 2);
+  $("zoomFit").onclick = () => layout(true);
+  window.addEventListener("resize", () => layout(false));
+  window.addEventListener("keydown", (e) => {
+    if (e.target && e.target.tagName === "INPUT") return;
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") { undo(); e.preventDefault(); }
+    if (e.key === "Escape") closeSheets();
+  });
+
+  /* ---------- render loop ---------- */
+  function frame(now) {
+    R.setView(view);
+    R.draw(now);
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- toasts & sheets ---------- */
+  let toastTimer = null;
+  function toast(msg, kind) {
+    const el = $("toast");
+    el.textContent = msg; el.className = "toast show" + (kind ? " " + kind : "");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+  }
+  let openSheet = null;
+  function showSheet(id) {
+    closeSheets();
+    openSheet = id;
+    $("backdrop").classList.add("show"); $(id).classList.add("show");
+    if (id === "sheetRanks") leaderboard.open(); else leaderboard.close();
+  }
+  function closeSheets() {
+    if (!openSheet) return;
+    $("backdrop").classList.remove("show");
+    document.querySelectorAll(".sheet.show").forEach((s) => s.classList.remove("show"));
+    openSheet = null; leaderboard.close();
+  }
+  $("backdrop").onclick = closeSheets;
+  document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = closeSheets));
+
+  /* ---------- leaderboard ---------- */
+  const leaderboard = (function () {
+    let db = null, dbState = "pending"; // pending | on | off
+    let seed = null, unsub = null, entries = [], myRank = null;
+    const col = (s) => db.collection("scores/" + s + "/entries");
+
+    claude_use("db").then((d) => { db = d; dbState = d ? "on" : "off"; if (openSheet === "sheetRanks") open(); });
+    function claude_use(name) {
+      try { if (window.claude && typeof window.claude.use === "function") return window.claude.use(name).catch(() => null); } catch (e) { /* ignore */ }
+      return Promise.resolve(null);
+    }
+    function localEntries(s) { return store.get("lb." + s, []); }
+    function saveLocal(s, entry) {
+      const list = localEntries(s).filter((e) => e.pid !== entry.pid);
+      list.push(entry); store.set("lb." + s, list.slice(-100));
+    }
+    // Verify every entry by replaying its moves against the seed. Cheats and corrupt rows are dropped.
+    function verified(list) {
+      const out = [];
+      for (const e of list) {
+        if (!e || typeof e.name !== "string" || !Array.isArray(e.moves)) continue;
+        const v = M.verifySolution(game, e.moves);
+        if (!v.ok) continue;
+        out.push({ pid: e.pid, name: e.name.slice(0, 16), score: v.score, ap: v.ap, at: e.at || 0, moves: e.moves });
+      }
+      out.sort((a, b) => b.score - a.score || a.at - b.at);
+      return out;
+    }
+    function render() {
+      const list = $("lbList"); list.innerHTML = "";
+      $("ranksSub").textContent = seedLabel(seed) + " · " + game.biome.name;
+      const st = $("lbStatus");
+      st.innerHTML = dbState === "on" ? '<span class="pill global">● Global</span><span>Live for everyone playing this seed</span>'
+        : dbState === "pending" ? '<span class="pill">Connecting…</span>'
+        : '<span class="pill">Local only</span><span>Scores are saved on this device</span>';
+      if (!entries.length) { list.innerHTML = '<li class="lb-empty">No scores yet. Be the first to submit.</li>'; }
+      myRank = null;
+      entries.slice(0, 50).forEach((e, i) => {
+        const li = document.createElement("li");
+        li.className = "lb-row" + (e.pid === pid ? " me" : "") + (i < 3 ? " top" : "");
+        if (e.pid === pid) myRank = i + 1;
+        li.innerHTML = '<div class="rank">' + (i + 1) + '</div><div><div class="name"></div><div class="meta">' + e.ap + " energy left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
+        li.querySelector(".name").textContent = e.name || "Anonymous";
+        list.appendChild(li);
+      });
+      const mine = entries.find((e) => e.pid === pid);
+      $("lbYou").textContent = mine ? "You're #" + (entries.indexOf(mine) + 1) + " of " + entries.length + " with " + fmt(mine.score)
+        : entries.length ? "Submit a score to get on the board" : "";
+    }
+    function setSeed(s) { close(); seed = s; entries = []; }
+    function open() {
+      entries = verified(localEntries(seed)); render();
+      if (dbState !== "on") return;
+      close();
+      unsub = col(seed).orderBy("score", "desc").limit(100).onSnapshot((snap) => {
+        const rows = snap.docs.map((d) => d.data());
+        entries = verified(rows.concat(localEntries(seed).filter((l) => !rows.some((r) => r.pid === l.pid))));
+        render();
+      }, (err) => { console.warn("leaderboard", err); dbState = "off"; entries = verified(localEntries(seed)); render(); });
+    }
+    function close() { if (unsub) { unsub(); unsub = null; } }
+    async function submit() {
+      const moves = M.diffMoves(game, walls);
+      const entry = { pid, name: playerName, score, ap, at: Date.now(), moves, seed };
+      saveLocal(seed, entry);
+      let ok = true;
+      if (db) {
+        try {
+          const ref = col(seed).doc(pid);
+          const cur = await ref.get();
+          if (cur.exists && (cur.data().score || 0) > score) { toast("Your posted score is already higher", "good"); showSheet("sheetRanks"); return; }
+          await ref.set(entry);
+        } catch (e) { ok = false; console.warn("submit failed", e); }
+      }
+      sfx.good(); buzz([20, 40, 20]);
+      toast(db && ok ? "Score posted" : db ? "Saved locally. Global board unavailable" : "Saved on this device", "good");
+      showSheet("sheetRanks");
+    }
+    return { setSeed, open, close, submit, get myRank() { return myRank; } };
+  })();
+
+  /* ---------- buttons ---------- */
+  $("btnUndo").onclick = undo;
+  $("btnReset").onclick = reset;
+  $("btnRanks").onclick = () => showSheet("sheetRanks");
+  $("btnMenu").onclick = () => { $("nameInput").value = playerName; $("seedInput").value = ""; updateCountdown(); showSheet("sheetMenu"); };
+  $("seedChip").onclick = () => { showSheet("sheetMenu"); $("seedInput").value = game.seed; };
+  $("btnSubmit").onclick = () => {
+    if (!playerName) { $("nameInput2").value = ""; showSheet("sheetName"); setTimeout(() => $("nameInput2").focus(), 300); return; }
+    leaderboard.submit();
+  };
+  $("nameSubmit").onclick = () => {
+    const n = cleanName($("nameInput2").value); if (!n) { toast("Pick a name first", "error"); return; }
+    playerName = n; store.set("name", n); leaderboard.submit();
+  };
+  $("nameInput2").addEventListener("keydown", (e) => { if (e.key === "Enter") $("nameSubmit").click(); });
+  $("nameSave").onclick = () => { const n = cleanName($("nameInput").value); if (n) { playerName = n; store.set("name", n); toast("Name saved", "good"); } };
+  function cleanName(s) { return String(s || "").replace(/[^\w \-.'!?]/g, "").trim().slice(0, 16); }
+  $("menuDaily").onclick = () => { closeSheets(); loadGame(M.dailySeed()); };
+  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New maze: " + game.seed); };
+  $("seedGo").onclick = () => { const s = M.sanitizeSeed($("seedInput").value); if (!s) return; closeSheets(); loadGame(s); };
+  $("seedInput").addEventListener("keydown", (e) => { if (e.key === "Enter") $("seedGo").click(); });
+  $("menuHow").onclick = () => showSheet("sheetHow");
+  $("howDone").onclick = () => { store.set("seen", 1); closeSheets(); };
+  const sw = $("soundSwitch");
+  sw.setAttribute("aria-checked", String(!!soundOn));
+  sw.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); sw.setAttribute("aria-checked", String(soundOn)); if (soundOn) sfx.place(); };
+  $("btnShare").onclick = async () => {
+    const url = shareUrl();
+    const text = "I scored " + fmt(score) + " on Mazer (" + seedLabel(game.seed) + "). Beat me: seed “" + game.seed + "”";
+    try {
+      if (navigator.share) { await navigator.share({ title: "Mazer", text, url }); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(text + " " + url); toast("Link copied", "good"); }
+    catch (e) { toast("Seed: " + game.seed); }
+  };
+  function shareUrl() {
+    try {
+      const base = SHARE_BASE || (window.top === window ? location.href : (document.referrer || location.href));
+      const u = new URL(base); u.searchParams.set("seed", game.seed); u.hash = ""; return u.toString();
+    } catch (e) { return ""; }
+  }
+  function updateCountdown() {
+    const now = new Date();
+    const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+    const ms = next - now.getTime(), h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+    $("dailyCountdown").textContent = "Same maze for everyone · next one in " + h + "h " + m + "m";
+    $("menuSub").textContent = "Seed: " + game.seed + " · " + game.cols + "×" + game.rows + " · " + game.biome.name + " / " + game.wallStyle;
+  }
+
+  /* ---------- boot ---------- */
+  function seedFromUrl() {
+    try {
+      const u = new URL(location.href);
+      const q = u.searchParams.get("seed") || new URLSearchParams(u.hash.replace(/^#/, "")).get("seed");
+      if (q) return q;
+      if (document.referrer) { const r = new URL(document.referrer); const rq = r.searchParams.get("seed"); if (rq) return rq; }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+  document.fonts && document.fonts.ready.then(() => R.setState(walls, segments));
+  loadGame(seedFromUrl() || M.dailySeed());
+  requestAnimationFrame(frame);
+  if (!store.get("seen", 0)) setTimeout(() => showSheet("sheetHow"), 400);
+})();
+
+</script>
+
+</body>
+</html>
