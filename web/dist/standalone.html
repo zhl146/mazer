@@ -857,7 +857,6 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   const H = 10;       // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
   const CH = 12;      // chamfer on convex corners: shows the diagonal gap the courier slips through
-  const CF = 8;       // chamfer on the bottom corners of a cliff face
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -1163,10 +1162,12 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
         if (!isWall(tx, ty)) continue;
         const n = isWall(tx, ty - 1), e = isWall(tx + 1, ty), s = isWall(tx, ty + 1), w = isWall(tx - 1, ty);
-        const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut: corner(n, e, s, w), ox: PAD + tx * T, oy: PAD + ty * T };
+        // bottom row of the top face in column x (follows the chamfer), so the face extrudes from it
+        const bottomRow = (x) => Math.min(T - 1, !s && !w && x < CH ? T - 1 - CH + x : T - 1, !s && !e && x > T - 1 - CH ? T - 1 - CH + (T - 1 - x) : T - 1);
+        const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut: corner(n, e, s, w), bottomRow, ox: PAD + tx * T, oy: PAD + ty * T };
         blocks.push(b);
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (!b.cut(x, y)) solid[(b.oy + y - H) * W + b.ox + x] = 1;
-        if (!s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) { const cutF = (!w && x + (T - 1 - y) < CF) || (!e && (T - 1 - x) + (T - 1 - y) < CF); if (!cutF) solid[(b.oy + y) * W + b.ox + x] = 1; }
+        if (!s) for (let x = 0; x < T; x++) { const br = bottomRow(x); for (let k = 1; k <= H; k++) solid[(b.oy - H + br + k) * W + b.ox + x] = 1; }
       }
       // dirt trail along the bent route: a thin core that always connects, plus a wider band that keeps clear of blocks
       const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
@@ -1187,12 +1188,14 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       // block faces and tops (row order so lower blocks cover the faces above)
       for (const b of blocks) {
         const R = b.nat ? P.rock : P.wood;
-        if (!b.s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) {
-          if ((!b.w && x + (T - 1 - y) < CF) || (!b.e && (T - 1 - x) + (T - 1 - y) < CF)) continue;
-          let c;
-          if (b.nat) { const st = hash2(b.tx * 32 + x, 3), c0 = st < 0.3 ? R[0] : st < 0.6 ? R[1] : R[2]; c = y >= T - 2 ? R[0] : c0; if (hash2(x + b.tx, y + b.ty) < 0.06) c = R[3]; }
-          else { const k = x % 6; c = k === 0 ? R[0] : k === 2 ? R[3] : R[2]; if (y >= T - 2) c = R[0]; }
-          set(b.ox + x, b.oy + y, c, b.nat ? 2 : 4, b.ty);
+        if (!b.s) for (let x = 0; x < T; x++) { // cliff face: extruded H px down from the plateau's bottom edge
+          const br = b.bottomRow(x);
+          for (let k = 1; k <= H; k++) {
+            const y = br + k; let c;
+            if (b.nat) { const st = hash2(b.tx * 32 + x, 3), c0 = st < 0.3 ? R[0] : st < 0.6 ? R[1] : R[2]; c = k >= H - 1 ? R[0] : c0; if (hash2(x + b.tx, y + b.ty) < 0.06) c = R[3]; }
+            else { const q = x % 6; c = q === 0 ? R[0] : q === 2 ? R[3] : R[2]; if (k >= H - 1) c = R[0]; }
+            set(b.ox + x, b.oy - H + y, c, b.nat ? 2 : 4, b.ty);
+          }
         }
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
           if (b.cut(x, y)) continue;
