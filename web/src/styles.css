@@ -230,3 +230,46 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .err { min-height: 20px; margin-top: 10px; color: #ffb3bd; font-size: 15px; }
 .link { display: block; width: 100%; margin-top: 10px; padding: 8px; color: var(--muted); font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
 .cta:disabled { opacity: .5; }
+
+/* full-screen play */
+.fs-btn {
+  position: absolute; left: 10px; bottom: 10px; width: 36px; height: 36px; border-radius: 4px;
+  background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border);
+  box-shadow: 0 0 0 1px var(--win-outer); color: var(--text); font-size: 16px; opacity: .85;
+}
+.fs-overlay { display: none; }
+body.immersive .hud, body.immersive .energy, body.immersive .dock, body.immersive .fs-btn, body.immersive .zoom-btns { display: none; }
+body.immersive #app { padding: 0; }
+body.immersive .fs-overlay { display: block; }
+.fs-status {
+  position: absolute; left: 10px; top: calc(10px + env(safe-area-inset-top, 0)); display: flex; align-items: center; gap: 12px;
+  padding: 6px 10px; border-radius: 4px; background: linear-gradient(180deg, rgba(43,47,168,.92), rgba(14,17,80,.92));
+  border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); pointer-events: none;
+}
+.fs-score { font-family: var(--font-display); font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+.fs-mp { font-family: var(--font-display); font-size: 8px; color: var(--text); }
+.fs-mp .lbl { color: var(--gold); }
+.fs-mp.low { color: var(--danger); }
+.fs-actions { position: absolute; right: 10px; top: calc(10px + env(safe-area-inset-top, 0)); display: flex; gap: 6px; }
+.fs-actions button {
+  width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(180deg, rgba(43,47,168,.92), rgba(14,17,80,.92));
+  border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); color: var(--text); display: grid; place-items: center;
+}
+.fs-actions button:disabled { opacity: .4; }
+.fs-actions svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; stroke-linejoin: miter; }
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.menu-grid .menu-btn { padding-left: 22px; font-size: 15px; }
+.hint { display: block; color: var(--muted); font-weight: 600; font-size: 12px; margin-top: 2px; }
+
+/* courier controls */
+.walk-ctl { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; }
+.walk-ctl button {
+  height: 40px; padding: 0 14px; border-radius: 4px; background: linear-gradient(180deg, rgba(43,47,168,.94), rgba(14,17,80,.94));
+  border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); color: var(--text);
+  font-family: var(--font-display); font-size: 9px; display: flex; align-items: center; gap: 8px;
+}
+.walk-ctl #walkBtn { color: var(--gold); border-color: var(--gold); }
+.walk-ctl #walkBtn .ico { font-size: 11px; }
+.walk-ctl #walkBtn.running { color: var(--danger); border-color: var(--danger); }
+.walk-ctl #speedBtn { min-width: 48px; justify-content: center; }
+body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }

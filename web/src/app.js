@@ -18,6 +18,10 @@
   if (!pid) { pid = "p" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); store.set("pid", pid); }
   let playerName = store.get("name", "");
   let soundOn = store.get("sound", true);
+  let fxOn = store.get("fx", true);
+  const SPEEDS = [0.5, 1, 2, 3];
+  const courier = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
+  let immersive = store.get("immersive", false);
 
   /* ---------- sound ---------- */
   let actx = null;
@@ -46,6 +50,7 @@
   const canvas = $("board"), wrap = $("boardWrap");
   const R = RR.createRenderer(canvas);
   R.setReducedMotion(reduced);
+  R.setFx(fxOn);
   let game = null, walls = null, ap = 0, segments = [], score = 0;
   let history = [];
   let fit = null, view = null;
@@ -79,7 +84,7 @@
         segments = M.routeWaypoints(walls, game.cols, game.rows, game.waypoints).segments;
       }
     }
-    R.setGame(game, walls, segments);
+    R.setGame(game, walls, segments); courierReset();
     layout(true);
     $("seedTitle").textContent = seedLabel(seed);
     $("seedSub").textContent = " · " + game.biome.name + " ⛏" + game.removalCost;
@@ -106,6 +111,10 @@
     $("energy").setAttribute("aria-valuenow", ap);
     const best = store.get("best." + game.seed, 0);
     $("best").innerHTML = best > 0 ? "Best <b>" + fmt(best) + "</b>" : "Base <b>" + fmt(game.baseScore) + "</b>";
+    $("fsScore").textContent = fmt(score);
+    $("fsMp").textContent = ap + "/" + game.maxActionPoints;
+    $("fsMp").parentElement.classList.toggle("low", pct <= 0.2);
+    $("fsUndo").disabled = history.length === 0;
     $("btnUndo").disabled = history.length === 0;
     $("btnReset").disabled = history.length === 0 && M.diffMoves(game, walls).length === 0;
     animateScore();
@@ -139,7 +148,7 @@
     const delta = res.score - score;
     const placed = res.walls[y * game.cols + x] === 1;
     walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
-    R.setState(walls, segments);
+    R.setState(walls, segments); courierReset();
     R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? "#fff0c8" : game.biome.zone, seed: Math.random() * 6 });
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
@@ -150,13 +159,13 @@
   function undo() {
     const h = history.pop(); if (!h) return;
     walls = h.walls; ap = h.ap; segments = h.segments; score = h.score;
-    R.setState(walls, segments); sfx.remove(); saveProgress(); updateHud();
+    R.setState(walls, segments); courierReset(); sfx.remove(); saveProgress(); updateHud();
   }
   function reset() {
     if (M.diffMoves(game, walls).length === 0) return;
     history.push({ walls, ap, segments, score });
     walls = new Uint8Array(game.natural); ap = game.maxActionPoints; segments = game.baseSegments; score = game.baseScore;
-    R.setState(walls, segments); saveProgress(); updateHud(); toast("Board reset");
+    R.setState(walls, segments); courierReset(); saveProgress(); updateHud(); toast("Board reset");
   }
 
   /* ---------- view / layout ---------- */
@@ -185,7 +194,7 @@
   }
   function snapZoom() {
     const d = DPR(), k = view.scale * d, r = Math.round(k);
-    if (r >= 1 && Math.abs(k - r) / r < 0.3 && Math.abs(k - r) > 0.001) zoomAt(r / d / view.scale, wrap.clientWidth / 2, wrap.clientHeight / 2);
+    if (r >= 1 && Math.abs(k - r) / r < 0.15 && Math.abs(k - r) > 0.001) zoomAt(r / d / view.scale, wrap.clientWidth / 2, wrap.clientHeight / 2);
   }
   function zoomAt(f, sx, sy) {
     const ns = Math.max(fit.scale * 0.8, Math.min(fit.scale * 4.5, view.scale * f));
@@ -238,9 +247,10 @@
       const t = R.worldToTile(e.clientX - rect.left, e.clientY - rect.top);
       if (t) toggleTile(t[0], t[1]);
     }
+    const wasZoomGesture = gesture && (gesture.type === "pinch" || gesture.type === "done");
     pointers.delete(e.pointerId);
     gesture = pointers.size === 0 ? null : gesture && gesture.type === "pinch" ? { type: "done" } : gesture;
-    if (pointers.size === 0) snapZoom();
+    if (pointers.size === 0 && wasZoomGesture) snapZoom();
     if (e.pointerType !== "mouse") R.setHover(null);
   };
   canvas.addEventListener("pointerup", endPointer);
@@ -260,11 +270,31 @@
   window.addEventListener("keydown", (e) => {
     if (e.target && e.target.tagName === "INPUT") return;
     if ((e.ctrlKey || e.metaKey) && e.key === "z") { undo(); e.preventDefault(); }
-    if (e.key === "Escape") closeSheets();
+    if (e.key === "Escape") { if (openSheet) closeSheets(); else if (immersive) setImmersive(false); }
+    if (e.key === "f" || e.key === "F") setImmersive(!immersive);
   });
 
   /* ---------- render loop ---------- */
+  function courierReset() { courier.running = false; courier.idx = 0; R.setCourier(0); walkUi(); }
+  function walkUi() {
+    $("walkBtn").classList.toggle("running", courier.running);
+    $("walkBtn").querySelector(".ico").textContent = courier.running ? "■" : "▶";
+    $("walkLabel").textContent = courier.running ? "STOP" : courier.idx > 0 ? "AGAIN" : "WALK";
+    $("speedBtn").textContent = courier.speed + "×";
+  }
+  $("walkBtn").onclick = () => {
+    if (courier.running) { courier.running = false; walkUi(); return; }
+    courier.running = true; courier.t0 = performance.now(); courier.idx = 0; R.setCourier(0); sfx.place(); walkUi();
+  };
+  $("speedBtn").onclick = () => { courier.speed = SPEEDS[(SPEEDS.indexOf(courier.speed) + 1) % SPEEDS.length]; store.set("speed", courier.speed); walkUi(); };
+  walkUi();
   function frame(now) {
+    if (courier.running) {
+      const len = R.pathLength();
+      courier.idx = Math.floor((now - courier.t0) / 1000 * 56 * courier.speed);
+      if (courier.idx >= len - 1) { courier.idx = len - 1; courier.running = false; sfx.good(); walkUi(); }
+      R.setCourier(courier.idx);
+    }
     R.setView(view);
     R.draw(now);
     requestAnimationFrame(frame);
@@ -423,7 +453,38 @@
     return { setSeed, open, close, submit };
   })();
 
+  /* ---------- full screen ---------- */
+  let browserFs = false;
+  function setImmersive(on) {
+    immersive = !!on; store.set("immersive", immersive);
+    document.body.classList.toggle("immersive", immersive);
+    $("fsSwitch").setAttribute("aria-checked", String(immersive));
+    const el = document.documentElement;
+    if (immersive && el.requestFullscreen && !document.fullscreenElement) {
+      el.requestFullscreen({ navigationUI: "hide" }).then(() => { browserFs = true; }).catch(() => {});
+    } else if (!immersive && document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    requestAnimationFrame(() => layout(true));
+  }
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement && browserFs) { browserFs = false; if (immersive) setImmersive(false); }
+  });
+  $("fsEnter").onclick = () => setImmersive(true);
+  $("fsExit").onclick = () => setImmersive(false);
+  $("fsSwitch").onclick = () => setImmersive(!immersive);
+  $("fsUndo").onclick = () => undo();
+  $("fsMenu").onclick = () => $("btnMenu").click();
+  const fxSw = $("fxSwitch");
+  fxSw.setAttribute("aria-checked", String(!!fxOn));
+  fxSw.onclick = () => { fxOn = !fxOn; store.set("fx", fxOn); R.setFx(fxOn); fxSw.setAttribute("aria-checked", String(fxOn)); };
+  if (immersive) { document.body.classList.add("immersive"); $("fsSwitch").setAttribute("aria-checked", "true"); }
+
   /* ---------- buttons ---------- */
+  $("menuSubmit").onclick = () => { closeSheets(); $("btnSubmit").click(); };
+  $("menuRanks").onclick = () => showSheet("sheetRanks");
+  $("menuShare").onclick = () => { closeSheets(); $("btnShare").click(); };
+  $("menuReset").onclick = () => { closeSheets(); reset(); };
   $("btnUndo").onclick = undo;
   $("btnReset").onclick = reset;
   $("btnRanks").onclick = () => showSheet("sheetRanks");

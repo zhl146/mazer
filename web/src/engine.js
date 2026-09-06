@@ -53,7 +53,9 @@
   const idx = (cols, x, y) => y * cols + x;
   const inBounds = (g, x, y) => x >= 0 && y >= 0 && x < g.cols && y < g.rows;
 
-  /* ---------- A* (8-way, no corner cutting, octile heuristic) ---------- */
+  /* ---------- A* (8-way, diagonals always allowed, octile heuristic) ----------
+   * Two blocks that touch only at a corner do NOT stop the courier; he slips between them.
+   * Only orthogonally joined blocks form a barrier. */
   const DIRS = [
     [0, -1, 1], [1, 0, 1], [0, 1, 1], [-1, 0, 1],
     [1, -1, Math.SQRT2], [1, 1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2],
@@ -111,9 +113,6 @@
         if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
         const ni = ny * cols + nx;
         if (walls[ni] || closed[ni]) continue;
-        if (d >= 4) { // diagonal: both orthogonal neighbours must be free
-          if (walls[cy * cols + nx] || walls[ny * cols + cx]) continue;
-        }
         const ng = g[cur] + DIRS[d][2];
         if (ng < g[ni] - 1e-9) {
           g[ni] = ng; parent[ni] = cur;
@@ -296,14 +295,7 @@
       let seg = findPath(walls, cols, rows, a[0], a[1], b[0], b[1]);
       if (!seg) {
         seg = findPath(empty, cols, rows, a[0], a[1], b[0], b[1]);
-        for (let k = 0; k < seg.length; k++) {
-          const [x, y] = seg[k];
-          walls[idx(cols, x, y)] = 0;
-          if (k > 0) { // a diagonal step also needs both orthogonal neighbours open
-            const [px, py] = seg[k - 1];
-            if (px !== x && py !== y) { walls[idx(cols, px, y)] = 0; walls[idx(cols, x, py)] = 0; }
-          }
-        }
+        for (const [x, y] of seg) walls[idx(cols, x, y)] = 0;
       }
       for (const [x, y] of seg) protectedT[idx(cols, x, y)] = 1;
     }

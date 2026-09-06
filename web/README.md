@@ -6,12 +6,12 @@ Mobile-first rebuild of Mazer as a single self-contained HTML page. No framework
 
 ## How the game works
 
-A courier always takes the shortest route from **S** to **E**, visiting numbered stops in order. You spend a limited energy budget placing walls (1 energy) or clearing natural rocks (2–5 energy, shown on the puzzle chip) to force the courier onto the longest, most valuable route. Gold zones multiply every step inside them. A move that would trap the courier is rejected. Score = Σ (average zone multiplier × step length) × 100, exactly as in the original.
+A courier always takes the shortest route from the cottage to the tower, visiting numbered wells in order. He can move diagonally and slips between two blocks that only touch at a corner; only edge-joined walls form a barrier. Press Walk to watch him go, with a speed control. You spend a limited energy budget placing walls (1 energy) or clearing natural rocks (2–5 energy, shown on the puzzle chip) to force the courier onto the longest, most valuable route. Gold zones multiply every step inside them. A move that would trap the courier is rejected. Score = Σ (average zone multiplier × step length) × 100, exactly as in the original.
 
 ## Layout
 
 - `src/engine.js` — deterministic core: seeded RNG, A* (8-way, no corner cutting), procedural generation, scoring, move validation and solution verification. Runs in node and the browser.
-- `src/render.js` — 16-bit pixel-art renderer. All art is generated at runtime: 16×16 tiles painted into a pixel buffer (ground styles, dithered gold floors, autotiled cliffs and brick walls with 4-shade palette ramps per biome), sprites defined as string maps (crystal, chest, flag, courier walk cycle, sparkle), a 3×5 pixel font, and pixel-snapped zoom. No image files.
+- `src/render.js` — HD-2D renderer, all art generated at runtime (no image files). 32px tiles painted into a pixel buffer: ground variants per biome, dithered gold zones, a worn dirt trail along the route, cobbled cliffs and wooden palisades with chamfered corners (so diagonal gaps are visible while edge-joined blocks merge), an outline pass, soft cast shadows, procedurally painted cottage / wells / tower and trees. A live layer draws the courier, labels and effects. Post-processing: tilt-shift depth of field, bloom, warm/cool light grade, vignette, light rays and drifting particles (toggle in the menu).
 - `src/app.js` — UI, touch/pan/pinch input, persistence, sharing, leaderboard adapters.
 - `src/styles.css`, `src/template.html` — chrome.
 - `build.js` — concatenates everything into `dist/index.html` (artifact fragment) and `dist/standalone.html` (full document for any static host).

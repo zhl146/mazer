@@ -35,13 +35,25 @@ for (let i = 0; i < 300; i++) {
   assert(!bad.ok);
   checked++;
 }
-// pathfinding sanity: no corner cutting
+// pathfinding sanity: corner-touching blocks do not block a diagonal step
 {
   const walls = new Uint8Array(9); walls[1] = 1; walls[3] = 1; // block (1,0) and (0,1)
-  assert.strictEqual(M.findPath(walls, 3, 3, 0, 0, 2, 2), null, "corner cut blocked");
-  walls[3] = 0;
   const p = M.findPath(walls, 3, 3, 0, 0, 2, 2);
-  assert(p && p.length === 4, "path around corner");
+  assert(p && p.length === 3, "slips between corner-touching blocks");
+  walls[4] = 1; // (1,1) blocked too: now sealed in
+  assert.strictEqual(M.findPath(walls, 3, 3, 0, 0, 2, 2), null, "orthogonally joined blocks seal");
+}
+// sprite art sanity: every row of every string-map sprite has the same width
+{
+  const src = require("fs").readFileSync(__dirname + "/../src/render.js", "utf8");
+  const re = /(\w+): \{ pal: \{[^}]*\}, rows: \[([\s\S]*?)\] \}/g; let m, n = 0;
+  while ((m = re.exec(src))) {
+    const rows = m[2].match(/"[^"]*"/g).map((r) => r.slice(1, -1));
+    const w = rows[0].length;
+    for (const r of rows) assert.strictEqual(r.length, w, "sprite " + m[1] + " row width");
+    n++;
+  }
+  assert(n > 0, "found sprites");
 }
 console.log("ok", checked, "seeds");
 console.log("wall styles", styles);
