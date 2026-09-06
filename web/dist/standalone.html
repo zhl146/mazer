@@ -392,7 +392,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     <div class="how">
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A courier always takes the <b>shortest route</b> from the <b>cottage</b> to the <b>tower</b>, visiting numbered wells in order. Longer route, bigger score. Press <b>Walk</b> to watch him go.</p></div>
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p><b>Tap a tile</b> to build a wall. Each wall costs <b>1 energy</b>. Tap it again to take it back and get the energy back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Rocks</b> are natural walls. Clearing one costs more energy, shown on the puzzle chip. You can put it back for a refund.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Rocks</b> are natural walls. Clearing one costs more MP, shown on the puzzle chip. It leaves <b>rubble</b> behind: tap the rubble to put the rock back and get the MP refunded.</p></div>
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Gold zones</b> multiply every step taken inside them. Bend the route through them.</p></div>
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>He slips diagonally between blocks that only touch at a corner, so join walls edge to edge. You can never seal him in: a move that <b>blocks the route</b> flashes red and is undone.</p></div>
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your score. Everyone in the world gets the same <b>daily</b> maze, so bring friends.</p></div>
@@ -1190,8 +1190,8 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
       const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the courier)
-      const set = (x, y, c, k, o) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
-      const blend = (x, y, c, a) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
+      const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
+      const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
 
       // ground
@@ -1227,6 +1227,27 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const i = y * W + x;
         if (!trail[i] || solid[i]) continue;
         const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
+      }
+      // rubble where a natural rock was cleared: a scar of disturbed earth with outlined rock chunks (tap to restore for a refund)
+      for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
+        const i = ty * cols + tx; if (!game.natural[i] || walls[i]) continue;
+        const ox = PAD + tx * T, oy = PAD + ty * T, R = P.rock, earth = mix(R[1], P.ground[1], 0.45);
+        for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
+          const dx = x - 16, dy = y - 16, rr = Math.sqrt(dx * dx + dy * dy) + (vnoise(ox + x, oy + y, 5) - 0.5) * 8;
+          if (rr < 13) blend(ox + x, oy + y, earth, 0.55 * Math.min(1, (13 - rr) / 4));
+          if (rr < 12 && hash2(ox + x, oy + y) < 0.06) blend(ox + x, oy + y, R[3], 0.7);
+        }
+        const nChunks = 4 + Math.floor(hash2(tx + 5, ty + 9) * 3);
+        for (let k = 0; k < nChunks; k++) {
+          const a = hash2(tx * 3 + k, ty * 5 + 1) * Math.PI * 2, d = 3 + hash2(tx * 7 + k, ty * 3 + 2) * 8;
+          const cx = ox + 16 + Math.round(Math.cos(a) * d), cy = oy + 16 + Math.round(Math.sin(a) * d * 0.8);
+          const rx = 1.5 + Math.floor(hash2(k, tx + ty) * 2.5), ry = 1 + Math.floor(hash2(k + 3, tx * ty + 1) * 2);
+          for (let yy = -Math.ceil(ry) - 1; yy <= Math.ceil(ry) + 1; yy++) for (let xx = -Math.ceil(rx) - 1; xx <= Math.ceil(rx) + 1; xx++) {
+            const inner = (xx * xx) / (rx * rx) + (yy * yy) / (ry * ry) <= 1, outer = (xx * xx) / ((rx + 1) * (rx + 1)) + (yy * yy) / ((ry + 1) * (ry + 1)) <= 1;
+            if (!outer) continue;
+            set(cx + xx, cy + yy, !inner ? INK : xx < 0 && yy < 0 ? R[3] : yy > 0 ? R[1] : R[2], 0);
+          }
+        }
       }
       // soft cast shadows (light from top-left)
       for (let ring = 0; ring < 3; ring++) {
@@ -1282,7 +1303,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const R = P.rock, px = b.ox + 6 + Math.floor(h1 * 16), py = b.oy - H + 6 + Math.floor(h2 * 16);
         if (h1 < 0.22) { // boulder
           const rx = 2 + Math.floor(h2 * 2), ry = 1.5 + Math.floor(h1 * 10) % 2;
-          for (let dy = -ry - 1; dy <= ry + 1; dy++) for (let dx = -rx - 1; dx <= rx + 1; dx++) {
+          for (let dy = -Math.ceil(ry) - 1; dy <= Math.ceil(ry) + 1; dy++) for (let dx = -Math.ceil(rx) - 1; dx <= Math.ceil(rx) + 1; dx++) {
             const inner = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1, outer = (dx * dx) / ((rx + 1) * (rx + 1)) + (dy * dy) / ((ry + 1) * (ry + 1)) <= 1;
             if (!outer) continue;
             const c = !inner ? INK : dx < 0 && dy < 0 ? R[3] : dy > 0 ? R[1] : R[2];
@@ -1530,7 +1551,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
@@ -1696,6 +1717,9 @@ window.MAZER_CONFIG = {"api":"/api","shareUrl":"","mode":"server"};
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
+    const wasRock = game.natural[y * game.cols + x] === 1;
+    if (wasRock && !placed) toast("Rock cleared (−" + game.removalCost + " MP). Tap the rubble to put it back and get it refunded");
+    else if (wasRock && placed) toast("Rock restored (+" + game.removalCost + " MP)", "good");
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
     saveProgress(); updateHud();
   }
@@ -2087,7 +2111,7 @@ window.MAZER_CONFIG = {"api":"/api","shareUrl":"","mode":"server"};
     return null;
   }
   document.fonts && document.fonts.ready.then(() => R.setState(walls, segments));
-  globalThis.__mazer = () => ({ game, walls, segments, view }); // debug hook
+  globalThis.__mazer = () => ({ game, walls, segments, view, R }); // debug hook
   loadGame(seedFromUrl() || M.dailySeed());
   requestAnimationFrame(frame);
   if (!store.get("seen", 0)) setTimeout(() => showSheet("sheetHow"), 400);

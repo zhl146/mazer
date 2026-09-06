@@ -153,6 +153,9 @@
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
+    const wasRock = game.natural[y * game.cols + x] === 1;
+    if (wasRock && !placed) toast("Rock cleared (−" + game.removalCost + " MP). Tap the rubble to put it back and get it refunded");
+    else if (wasRock && placed) toast("Rock restored (+" + game.removalCost + " MP)", "good");
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
     saveProgress(); updateHud();
   }
@@ -544,7 +547,7 @@
     return null;
   }
   document.fonts && document.fonts.ready.then(() => R.setState(walls, segments));
-  globalThis.__mazer = () => ({ game, walls, segments, view }); // debug hook
+  globalThis.__mazer = () => ({ game, walls, segments, view, R }); // debug hook
   loadGame(seedFromUrl() || M.dailySeed());
   requestAnimationFrame(frame);
   if (!store.get("seen", 0)) setTimeout(() => showSheet("sheetHow"), 400);

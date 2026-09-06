@@ -339,8 +339,8 @@
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
       const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the courier)
-      const set = (x, y, c, k, o) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
-      const blend = (x, y, c, a) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
+      const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
+      const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
 
       // ground
@@ -376,6 +376,27 @@
         const i = y * W + x;
         if (!trail[i] || solid[i]) continue;
         const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
+      }
+      // rubble where a natural rock was cleared: a scar of disturbed earth with outlined rock chunks (tap to restore for a refund)
+      for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
+        const i = ty * cols + tx; if (!game.natural[i] || walls[i]) continue;
+        const ox = PAD + tx * T, oy = PAD + ty * T, R = P.rock, earth = mix(R[1], P.ground[1], 0.45);
+        for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
+          const dx = x - 16, dy = y - 16, rr = Math.sqrt(dx * dx + dy * dy) + (vnoise(ox + x, oy + y, 5) - 0.5) * 8;
+          if (rr < 13) blend(ox + x, oy + y, earth, 0.55 * Math.min(1, (13 - rr) / 4));
+          if (rr < 12 && hash2(ox + x, oy + y) < 0.06) blend(ox + x, oy + y, R[3], 0.7);
+        }
+        const nChunks = 4 + Math.floor(hash2(tx + 5, ty + 9) * 3);
+        for (let k = 0; k < nChunks; k++) {
+          const a = hash2(tx * 3 + k, ty * 5 + 1) * Math.PI * 2, d = 3 + hash2(tx * 7 + k, ty * 3 + 2) * 8;
+          const cx = ox + 16 + Math.round(Math.cos(a) * d), cy = oy + 16 + Math.round(Math.sin(a) * d * 0.8);
+          const rx = 1.5 + Math.floor(hash2(k, tx + ty) * 2.5), ry = 1 + Math.floor(hash2(k + 3, tx * ty + 1) * 2);
+          for (let yy = -Math.ceil(ry) - 1; yy <= Math.ceil(ry) + 1; yy++) for (let xx = -Math.ceil(rx) - 1; xx <= Math.ceil(rx) + 1; xx++) {
+            const inner = (xx * xx) / (rx * rx) + (yy * yy) / (ry * ry) <= 1, outer = (xx * xx) / ((rx + 1) * (rx + 1)) + (yy * yy) / ((ry + 1) * (ry + 1)) <= 1;
+            if (!outer) continue;
+            set(cx + xx, cy + yy, !inner ? INK : xx < 0 && yy < 0 ? R[3] : yy > 0 ? R[1] : R[2], 0);
+          }
+        }
       }
       // soft cast shadows (light from top-left)
       for (let ring = 0; ring < 3; ring++) {
@@ -431,7 +452,7 @@
         const R = P.rock, px = b.ox + 6 + Math.floor(h1 * 16), py = b.oy - H + 6 + Math.floor(h2 * 16);
         if (h1 < 0.22) { // boulder
           const rx = 2 + Math.floor(h2 * 2), ry = 1.5 + Math.floor(h1 * 10) % 2;
-          for (let dy = -ry - 1; dy <= ry + 1; dy++) for (let dx = -rx - 1; dx <= rx + 1; dx++) {
+          for (let dy = -Math.ceil(ry) - 1; dy <= Math.ceil(ry) + 1; dy++) for (let dx = -Math.ceil(rx) - 1; dx <= Math.ceil(rx) + 1; dx++) {
             const inner = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1, outer = (dx * dx) / ((rx + 1) * (rx + 1)) + (dy * dy) / ((ry + 1) * (ry + 1)) <= 1;
             if (!outer) continue;
             const c = !inner ? INK : dx < 0 && dy < 0 ? R[3] : dy > 0 ? R[1] : R[2];
@@ -679,7 +700,7 @@
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
