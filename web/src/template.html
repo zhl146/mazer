@@ -1,7 +1,7 @@
 <title>Mazer</title>
-<meta name="theme-color" content="#0f1219">
+<meta name="theme-color" content="#08081c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
 <style>
 /*__CSS__*/
 </style>
@@ -9,8 +9,8 @@
 <div id="app">
   <header class="hud">
     <div class="hud-left">
-      <div class="wordmark">MAZER</div>
-      <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot"></span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
+      <div class="wordmark"><span>M</span>AZER</div>
+      <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot">◆</span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
     </div>
     <div class="hud-score">
       <div class="label">Score</div>
@@ -20,7 +20,7 @@
   </header>
   <div class="energy" id="energy" role="progressbar" aria-label="Energy remaining">
     <div class="energy-fill" id="energyFill"></div>
-    <div class="energy-text"><span id="energyText">0 / 0</span> ENERGY</div>
+    <div class="energy-text"><span class="lbl">MP</span><span id="energyText">0 / 0</span></div>
   </div>
   <main class="board" id="boardWrap">
     <canvas id="board" aria-label="Maze board. Tap a tile to place or remove a wall."></canvas>
@@ -75,7 +75,7 @@
 
 <section class="sheet" id="sheetHow" aria-label="How to play">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Build the maze. Make the courier suffer.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Build the maze. Make the courier walk.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="how">
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A courier always takes the <b>shortest route</b> from <b>S</b> to <b>E</b>, visiting any numbered stops in order. Longer route, bigger score.</p></div>

@@ -11,7 +11,7 @@ A courier always takes the shortest route from **S** to **E**, visiting numbered
 ## Layout
 
 - `src/engine.js` — deterministic core: seeded RNG, A* (8-way, no corner cutting), procedural generation, scoring, move validation and solution verification. Runs in node and the browser.
-- `src/render.js` — Canvas 2D renderer (cached static layer + live path/effects layer).
+- `src/render.js` — 16-bit pixel-art renderer. All art is generated at runtime: 16×16 tiles painted into a pixel buffer (ground styles, dithered gold floors, autotiled cliffs and brick walls with 4-shade palette ramps per biome), sprites defined as string maps (crystal, chest, flag, courier walk cycle, sparkle), a 3×5 pixel font, and pixel-snapped zoom. No image files.
 - `src/app.js` — UI, touch/pan/pinch input, persistence, sharing, leaderboard adapters.
 - `src/styles.css`, `src/template.html` — chrome.
 - `build.js` — concatenates everything into `dist/index.html` (artifact fragment) and `dist/standalone.html` (full document for any static host).

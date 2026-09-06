@@ -80,9 +80,9 @@
     R.setGame(game, walls, segments);
     layout(true);
     $("seedTitle").textContent = seedLabel(seed);
-    $("seedSub").textContent = " · " + game.biome.name + " · rock " + game.removalCost + "⚡";
-    $("seedDot").style.background = game.biome.path;
-    document.querySelector('meta[name="theme-color"]').content = "#0f1219";
+    $("seedSub").textContent = " · " + game.biome.name + " ⛏" + game.removalCost;
+    $("seedDot").style.color = game.biome.path;
+    
     shownScore = score; $("score").textContent = fmt(score);
     updateHud();
     updateUrl(seed);
@@ -129,7 +129,7 @@
       R.flashError();
       wrap.classList.remove("shake"); void wrap.offsetWidth; if (!reduced) wrap.classList.add("shake");
       buzz(40); sfx.error();
-      toast(res.reason === "energy" ? "Not enough energy" : res.reason === "blocked" ? "That would trap the courier" : res.reason === "waypoint" ? "Stops can't be moved" : "Can't do that", "error");
+      toast(res.reason === "energy" ? "Not enough MP" : res.reason === "blocked" ? "That would trap the courier" : res.reason === "waypoint" ? "Stops can't be moved" : "Can't do that", "error");
       return;
     }
     history.push({ walls, ap, segments, score });
@@ -138,8 +138,8 @@
     const placed = res.walls[y * game.cols + x] === 1;
     walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
     R.setState(walls, segments);
-    R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? game.biome.stoneTop : game.biome.zone, seed: Math.random() * 6 });
-    if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "−") + fmt(Math.abs(delta)), color: delta > 0 ? "#5be3a5" : "#ff5470" });
+    R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? "#fff0c8" : game.biome.zone, seed: Math.random() * 6 });
+    if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
@@ -158,10 +158,14 @@
   }
 
   /* ---------- view / layout ---------- */
+  const DPR = () => Math.min(3, window.devicePixelRatio || 1);
   function layout(refit) {
     const rect = wrap.getBoundingClientRect();
-    R.resize(rect.width, rect.height, Math.min(3, window.devicePixelRatio || 1));
-    const nf = R.fitView(rect.width, rect.height, 14);
+    R.resize(rect.width, rect.height, DPR());
+    const nf = R.fitView(rect.width, rect.height, 10);
+    // prefer a whole number of device pixels per art pixel when it costs less than a quarter of the size
+    const k = nf.scale * DPR(), ki = Math.floor(k);
+    if (ki >= 1 && ki >= k * 0.9) { const f = ki / DPR() / nf.scale; nf.ox = rect.width / 2 - (rect.width / 2 - nf.ox) * f; nf.oy = rect.height / 2 - (rect.height / 2 - nf.oy) * f; nf.scale = ki / DPR(); }
     if (refit || !view) { fit = nf; view = Object.assign({}, nf); }
     else { fit = nf; clampView(); }
     R.setView(view);
@@ -176,6 +180,10 @@
     const minY = Math.min(rect.height * 0.3 - bh, (rect.height - bh) / 2), maxY = Math.max(rect.height * 0.7, (rect.height - bh) / 2);
     view.ox = Math.max(minX, Math.min(maxX, view.ox));
     view.oy = Math.max(minY, Math.min(maxY, view.oy));
+  }
+  function snapZoom() {
+    const d = DPR(), k = view.scale * d, r = Math.round(k);
+    if (r >= 1 && Math.abs(k - r) / r < 0.3 && Math.abs(k - r) > 0.001) zoomAt(r / d / view.scale, wrap.clientWidth / 2, wrap.clientHeight / 2);
   }
   function zoomAt(f, sx, sy) {
     const ns = Math.max(fit.scale * 0.8, Math.min(fit.scale * 4.5, view.scale * f));
@@ -230,6 +238,7 @@
     }
     pointers.delete(e.pointerId);
     gesture = pointers.size === 0 ? null : gesture && gesture.type === "pinch" ? { type: "done" } : gesture;
+    if (pointers.size === 0) snapZoom();
     if (e.pointerType !== "mouse") R.setHover(null);
   };
   canvas.addEventListener("pointerup", endPointer);
@@ -239,9 +248,11 @@
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
+    clearTimeout(wheelTimer); wheelTimer = setTimeout(snapZoom, 180);
   }, { passive: false });
-  $("zoomIn").onclick = () => zoomAt(1.35, wrap.clientWidth / 2, wrap.clientHeight / 2);
-  $("zoomOut").onclick = () => zoomAt(1 / 1.35, wrap.clientWidth / 2, wrap.clientHeight / 2);
+  let wheelTimer = null;
+  $("zoomIn").onclick = () => { zoomAt(1.5, wrap.clientWidth / 2, wrap.clientHeight / 2); snapZoom(); };
+  $("zoomOut").onclick = () => { zoomAt(1 / 1.5, wrap.clientWidth / 2, wrap.clientHeight / 2); snapZoom(); };
   $("zoomFit").onclick = () => layout(true);
   window.addEventListener("resize", () => layout(false));
   window.addEventListener("keydown", (e) => {

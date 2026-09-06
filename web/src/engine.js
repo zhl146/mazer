@@ -157,14 +157,14 @@
 
   /* ---------- biomes & variety tables ---------- */
   const BIOMES = [
-    { id: "meadow", name: "Meadow", ground: ["#7fb96a", "#8cc47a", "#74ad60"], zone: "#f2c94c", rock: "#6b6f64", rockTop: "#8e9287", stone: "#d8cfbb", stoneTop: "#f0e8d6", path: "#ff7a45", water: null },
-    { id: "dunes", name: "Dunes", ground: ["#e0bf82", "#e6c890", "#d8b675"], zone: "#ff8e3c", rock: "#a5643a", rockTop: "#c98252", stone: "#efe7d0", stoneTop: "#fbf6ea", path: "#2f6fed" },
-    { id: "tundra", name: "Tundra", ground: ["#c9d8e2", "#d5e1ea", "#bfcfdb"], zone: "#ffb347", rock: "#5d6b7a", rockTop: "#7f8e9d", stone: "#e9eef2", stoneTop: "#ffffff", path: "#e0407a" },
-    { id: "ember", name: "Ember", ground: ["#4a3a3a", "#524040", "#423333"], zone: "#ff9a3c", rock: "#1f1717", rockTop: "#3a2b2b", stone: "#8d6b5a", stoneTop: "#b08a76", path: "#ffd54a" },
-    { id: "abyss", name: "Abyss", ground: ["#233650", "#2a3f5c", "#1e2f47"], zone: "#4fe3c1", rock: "#0e1522", rockTop: "#1b2638", stone: "#6a86a8", stoneTop: "#8fa9c8", path: "#ff6fb1" },
-    { id: "orchard", name: "Orchard", ground: ["#a7c957", "#b3d264", "#9bbf4d"], zone: "#f4a261", rock: "#5b4a3a", rockTop: "#7d6a55", stone: "#e9d8a6", stoneTop: "#f7ebc3", path: "#e63946" },
-    { id: "marsh", name: "Marsh", ground: ["#5c7f5a", "#668a63", "#547552"], zone: "#c8e55a", rock: "#3b4a3f", rockTop: "#57695b", stone: "#b7b39a", stoneTop: "#d4d0b8", path: "#ffb703" },
-    { id: "lavender", name: "Lavender", ground: ["#b8a9d9", "#c4b6e2", "#ad9dd0"], zone: "#ffd166", rock: "#4b3f6b", rockTop: "#6a5b90", stone: "#efe9fb", stoneTop: "#ffffff", path: "#06d6a0" },
+    { id: "meadow", groundStyle: "grass", flower: "#ff6b8a", name: "Meadow", ground: ["#7fb96a", "#8cc47a", "#74ad60"], zone: "#f2c94c", rock: "#6b6f64", rockTop: "#8e9287", stone: "#d8cfbb", stoneTop: "#f0e8d6", path: "#ff7a45", water: null },
+    { id: "dunes", groundStyle: "sand", flower: "#ff6b3d", name: "Dunes", ground: ["#e0bf82", "#e6c890", "#d8b675"], zone: "#ff8e3c", rock: "#a5643a", rockTop: "#c98252", stone: "#efe7d0", stoneTop: "#fbf6ea", path: "#2f6fed" },
+    { id: "tundra", groundStyle: "snow", flower: "#7fb7ff", name: "Tundra", ground: ["#c9d8e2", "#d5e1ea", "#bfcfdb"], zone: "#ffb347", rock: "#5d6b7a", rockTop: "#7f8e9d", stone: "#e9eef2", stoneTop: "#ffffff", path: "#e0407a" },
+    { id: "ember", groundStyle: "ash", flower: "#ff9a3c", name: "Ember", ground: ["#4a3a3a", "#524040", "#423333"], zone: "#ff9a3c", rock: "#1f1717", rockTop: "#3a2b2b", stone: "#8d6b5a", stoneTop: "#b08a76", path: "#ffd54a" },
+    { id: "abyss", groundStyle: "stone", flower: "#4fe3c1", name: "Abyss", ground: ["#233650", "#2a3f5c", "#1e2f47"], zone: "#4fe3c1", rock: "#0e1522", rockTop: "#1b2638", stone: "#6a86a8", stoneTop: "#8fa9c8", path: "#ff6fb1" },
+    { id: "orchard", groundStyle: "grass", flower: "#ff4d6d", name: "Orchard", ground: ["#a7c957", "#b3d264", "#9bbf4d"], zone: "#f4a261", rock: "#5b4a3a", rockTop: "#7d6a55", stone: "#e9d8a6", stoneTop: "#f7ebc3", path: "#e63946" },
+    { id: "marsh", groundStyle: "grass", flower: "#c8e55a", name: "Marsh", ground: ["#5c7f5a", "#668a63", "#547552"], zone: "#c8e55a", rock: "#3b4a3f", rockTop: "#57695b", stone: "#b7b39a", stoneTop: "#d4d0b8", path: "#ffb703" },
+    { id: "lavender", groundStyle: "grass", flower: "#ffd166", name: "Lavender", ground: ["#b8a9d9", "#c4b6e2", "#ad9dd0"], zone: "#ffd166", rock: "#4b3f6b", rockTop: "#6a5b90", stone: "#efe9fb", stoneTop: "#ffffff", path: "#06d6a0" },
   ];
   const WALL_STYLES = ["clusters", "caves", "veins", "ruins", "scatter"];
   const ZONE_SHAPES = ["diamond", "disc", "ring", "cross"];
