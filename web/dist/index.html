@@ -1145,18 +1145,6 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const density = Math.min(16, 5 + Math.round((m - 1) * 2.2)), ox = PAD + tx * T, oy = PAD + ty * T;
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) { const bv = BAYER[(y >> 1) & 3][(x >> 1) & 3]; if (bv < density) blend(ox + x, oy + y, bv < density / 3 ? P.zoneLight : P.zone, 0.85); }
       }
-      // dirt trail along the route
-      const pts = [];
-      for (let i = 0; i < segments.length; i++) for (let k = i === 0 ? 0 : 1; k < segments[i].length; k++) pts.push(segments[i][k]);
-      const trail = new Uint8Array(W * Hh);
-      const stampDisc = (cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) trail[py * W + px] = 1; } };
-      for (let i = 1; i < pts.length; i++) {
-        const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
-        for (let s = 0; s <= 8; s++) { const t = s / 8, x = PAD + (ax + 0.5) * T + (bx - ax) * T * t, y = PAD + (ay + 0.5) * T + (by - ay) * T * t; stampDisc(Math.round(x), Math.round(y), 6 + (hash2(Math.round(x), Math.round(y)) < 0.4 ? 1 : 0)); }
-      }
-      if (pts.length === 1) stampDisc(PAD + Math.round((pts[0][0] + 0.5) * T), PAD + Math.round((pts[0][1] + 0.5) * T), 7);
-      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (trail[y * W + x]) { const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5); }
-
       // block silhouettes (top face lifted by H, chamfered convex corners, front face when open below)
       const corner = (n, e, s, w) => (x, y) => { // true when (x,y) inside a top face is cut away
         const inTL = !n && !w && x + y < CH, inTR = !n && !e && (T - 1 - x) + y < CH, inBL = !s && !w && x + (T - 1 - y) < CH, inBR = !s && !e && (T - 1 - x) + (T - 1 - y) < CH;
@@ -1169,7 +1157,22 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut: corner(n, e, s, w), ox: PAD + tx * T, oy: PAD + ty * T };
         blocks.push(b);
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (!b.cut(x, y)) solid[(b.oy + y - H) * W + b.ox + x] = 1;
-        if (!s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) { const cutF = (!w && x + (T - 1 - y) < 4) || (!e && (T - 1 - x) + (T - 1 - y) < 4); if (!cutF) solid[(b.oy + y) * W + b.ox + x] = 1; }
+        if (!s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) { const cutF = (!w && x + (T - 1 - y) < 6) || (!e && (T - 1 - x) + (T - 1 - y) < 6); if (!cutF) solid[(b.oy + y) * W + b.ox + x] = 1; }
+      }
+      // dirt trail along the route: a thin core that always connects, plus a wider band that keeps clear of blocks
+      const pts = [];
+      for (let i = 0; i < segments.length; i++) for (let k = i === 0 ? 0 : 1; k < segments[i].length; k++) pts.push(segments[i][k]);
+      const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
+      const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
+      const along = (ax, ay, bx, by, fn) => { for (let s = 0; s <= 10; s++) { const t = s / 10; fn(Math.round(PAD + (ax + 0.5) * T + (bx - ax) * T * t), Math.round(PAD + (ay + 0.5) * T + (by - ay) * T * t)); } };
+      for (let i = 1; i < pts.length; i++) along(pts[i - 1][0], pts[i - 1][1], pts[i][0], pts[i][1], (x, y) => { stampDisc(trail, x, y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, x, y, 2); });
+      if (pts.length === 1) stampDisc(trail, PAD + Math.round((pts[0][0] + 0.5) * T), PAD + Math.round((pts[0][1] + 0.5) * T), 7);
+      const near = new Uint8Array(W * Hh); // within 3px of a block silhouette
+      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (solid[y * W + x]) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < W && py < Hh) near[py * W + px] = 1; }
+      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        if (!trail[i] || solid[i] || (near[i] && !core[i])) continue;
+        const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
       }
       // soft cast shadows (light from top-left)
       for (let ring = 0; ring < 3; ring++) {
@@ -1180,7 +1183,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       for (const b of blocks) {
         const R = b.nat ? P.rock : P.wood;
         if (!b.s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) {
-          if ((!b.w && x + (T - 1 - y) < 4) || (!b.e && (T - 1 - x) + (T - 1 - y) < 4)) continue;
+          if ((!b.w && x + (T - 1 - y) < 6) || (!b.e && (T - 1 - x) + (T - 1 - y) < 6)) continue;
           let c;
           if (b.nat) { const st = hash2(b.tx * 32 + x, 3), c0 = st < 0.3 ? R[0] : st < 0.6 ? R[1] : R[2]; c = y >= T - 2 ? R[0] : c0; if (hash2(x + b.tx, y + b.ty) < 0.06) c = R[3]; }
           else { const k = x % 6; c = k === 0 ? R[0] : k === 2 ? R[3] : R[2]; if (y >= T - 2) c = R[0]; }
