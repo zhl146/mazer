@@ -1,0 +1,39 @@
+# Fly.io config for Mazer. One small machine + a persistent volume for the SQLite database.
+# Deploy from this folder with `fly deploy`, or let .github/workflows/fly.yml do it on push.
+app = "mazer-game"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  MAZER_DATA = "/data"
+
+[mounts]
+  source = "mazer_data"
+  destination = "/data"
+  initial_size = "1gb"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

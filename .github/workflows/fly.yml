@@ -1,0 +1,40 @@
+name: Deploy to Fly.io
+
+# Deploys web/ to Fly whenever this branch is pushed, or on demand.
+# One-time setup: add a repository secret named FLY_API_TOKEN (Settings → Secrets and variables → Actions).
+
+on:
+  push:
+    branches: [claude/mazer-mobile-recreation-ecbzsc, master, main]
+    paths: [web/**, .github/workflows/fly.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: fly-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      APP: mazer-game
+      REGION: sjc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Test the engine
+        run: node web/test/engine.test.js
+      - name: Create the app if it doesn't exist
+        working-directory: web
+        run: flyctl apps list --json | grep -q "\"$APP\"" || flyctl apps create "$APP"
+      - name: Create the data volume if it doesn't exist
+        working-directory: web
+        run: flyctl volumes list -a "$APP" --json | grep -q mazer_data || flyctl volumes create mazer_data -a "$APP" -r "$REGION" -s 1 -y
+      - name: Deploy
+        working-directory: web
+        run: flyctl deploy --remote-only --ha=false
+      - name: Smoke test
+        run: |
+          sleep 5
+          curl -fsS "https://$APP.fly.dev/healthz"
