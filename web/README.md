@@ -49,10 +49,10 @@ docker run -p 8080:8080 -v mazer-data:/data mazer
 
 `web/fly.toml` describes one shared-CPU machine that stops when idle, plus a 1GB volume for the database. Two ways to deploy:
 
-- **From GitHub**: add a repository secret `FLY_API_TOKEN` (Settings → Secrets and variables → Actions). `.github/workflows/fly.yml` then creates the app and volume on first run and redeploys on every push that touches `web/`. You can also run it from the Actions tab.
+- **From GitHub**: add a repository secret `FLY_API_TOKEN` (Settings → Secrets and variables → Actions). `.github/workflows/fly.yml` then creates the app and volume on first run and redeploys on every push that touches `web/`. Run it by hand from the Actions tab, where you can also type a different app name if `mazer-game` is taken. The run summary prints the live URL.
 - **From your machine**: `brew install flyctl`, `fly auth login`, then `cd web && fly apps create mazer-game && fly volumes create mazer_data -r sjc -s 1 && fly deploy --ha=false`.
 
-The site comes up at `https://mazer-game.fly.dev` (rename `app` in `fly.toml` and the workflow if that name is taken). Fly issues the TLS certificate and takes daily volume snapshots. Keep it at one machine: SQLite can't be shared.
+The site comes up at `https://<app-name>.fly.dev`, so `https://mazer-game.fly.dev` by default. Fly app names are globally unique; if that one is taken, pick another when you run the workflow (or pass `-a` to the CLI commands). Fly issues the TLS certificate and takes daily volume snapshots. Keep it at one machine: SQLite can't be shared.
 
 Any other host works too (Railway, a VPS with Caddy, a Cloudflare tunnel) as long as it terminates TLS and gives the container a persistent disk at `/data`. Session tokens travel as bearer tokens, so TLS is required for a public deployment.
 
