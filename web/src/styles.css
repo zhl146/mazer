@@ -106,8 +106,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.error { color: #ffc2ca; }
 .toast.good { color: var(--good); }
-.zoom-btns { position: absolute; right: 10px; bottom: 10px; display: none; flex-direction: column; gap: 6px; }
-@media (hover: hover) and (pointer: fine) { .zoom-btns { display: flex; } }
+.zoom-btns { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+#zoomIn, #zoomOut { display: none; }
+@media (hover: hover) and (pointer: fine) { #zoomIn, #zoomOut { display: block; } }
+body.immersive .zoom-btns { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }
 .zoom-btns button {
   width: 36px; height: 36px; border-radius: 4px; background: linear-gradient(180deg, var(--win-top), var(--win-bot));
   border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); color: var(--text); font-size: 18px;
@@ -238,7 +240,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
   box-shadow: 0 0 0 1px var(--win-outer); color: var(--text); font-size: 16px; opacity: .85;
 }
 .fs-overlay { display: none; }
-body.immersive .hud, body.immersive .energy, body.immersive .dock, body.immersive .fs-btn, body.immersive .zoom-btns { display: none; }
+body.immersive .hud, body.immersive .energy, body.immersive .dock, body.immersive .fs-btn { display: none; }
 body.immersive #app { padding: 0; }
 body.immersive .fs-overlay { display: block; }
 .fs-status {

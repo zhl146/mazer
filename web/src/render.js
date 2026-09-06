@@ -18,6 +18,22 @@
   const rgba = (hex, a) => { const c = hexToRgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
   function hash2(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
   const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function vnoise(x, y, sc) { // smooth value noise on world coords
+    const gx = Math.floor(x / sc), gy = Math.floor(y / sc), fx = x / sc - gx, fy = y / sc - gy, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+    return lerp(lerp(hash2(gx, gy), hash2(gx + 1, gy), u), lerp(hash2(gx, gy + 1), hash2(gx + 1, gy + 1), u), v);
+  }
+  function worley(wx, wy, cell) { // nearest two jittered cell seeds → irregular flagstones
+    const cx = Math.floor(wx / cell), cy = Math.floor(wy / cell);
+    let d1 = 1e9, d2 = 1e9, id = 0, sx1 = 0, sy1 = 0;
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+      const gx = cx + i, gy = cy + j;
+      const sx = (gx + 0.15 + hash2(gx * 3 + 11, gy * 7 + 5) * 0.7) * cell, sy = (gy + 0.15 + hash2(gy * 5 + 3, gx * 11 + 9) * 0.7) * cell;
+      const d = Math.hypot(wx + 0.5 - sx, wy + 0.5 - sy);
+      if (d < d1) { d2 = d1; d1 = d; id = gx * 7919 + gy * 104729; sx1 = sx; sy1 = sy; } else if (d < d2) d2 = d;
+    }
+    return { d1, d2, id, sx: sx1, sy: sy1 };
+  }
 
   /* ---------- sprite buffer & painters ---------- */
   function Sprite(w, h) { this.w = w; this.h = h; this.c = new Array(w * h).fill(null); }
@@ -353,7 +369,10 @@
           const br = b.bottomRow(x);
           for (let k = 1; k <= H; k++) {
             const y = br + k; let c;
-            if (b.nat) { const st = hash2(b.tx * 32 + x, 3), c0 = st < 0.3 ? R[0] : st < 0.6 ? R[1] : R[2]; c = k >= H - 1 ? R[0] : c0; if (hash2(x + b.tx, y + b.ty) < 0.06) c = R[3]; }
+            if (b.nat) { // layered strata with a few vertical cracks
+              const wx = b.tx * T + x, band = Math.floor((k + vnoise(wx, b.ty * 7, 6) * 2.5) / 2.5);
+              c = band % 2 ? R[1] : R[2]; if (hash2(wx * 3, b.ty * 11 + k) < 0.05) c = R[0]; if (k === 1) c = R[3]; if (k >= H - 1) c = R[0];
+            }
             else { const q = x % 6; c = q === 0 ? R[0] : q === 2 ? R[3] : R[2]; if (k >= H - 1) c = R[0]; }
             set(b.ox + x, b.oy - H + y, c, b.nat ? 2 : 4, b.ty);
           }
@@ -361,12 +380,19 @@
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
           if (b.cut(x, y)) continue;
           let c;
-          if (b.nat) { // cobbles in 8px cells with jitter
-            const cx = Math.floor(x / 8), cy = Math.floor(y / 8), jx = Math.floor(hash2(b.tx * 4 + cx, b.ty * 4 + cy) * 2), jy = Math.floor(hash2(b.ty * 4 + cy, b.tx * 4 + cx + 9) * 2);
-            const lx = x - cx * 8 - jx, ly = y - cy * 8 - jy, hv = hash2(b.tx * 4 + cx + 100, b.ty * 4 + cy);
-            const gap = lx <= 0 || ly <= 0 || lx > 7 || ly > 7;
-            c = gap ? R[0] : hv < 0.25 ? R[1] : hv < 0.7 ? R[2] : R[3]; if (!gap && lx === 1 && ly === 1) c = R[4]; if (!gap && (lx === 7 || ly === 7)) c = shade(c, -0.18);
-            if (P.style === "grass" && hash2(b.tx * 7 + (x >> 2), b.ty * 5 + (y >> 2)) < 0.12 && !gap) c = mix(c, P.ground[2], 0.55); // moss
+          if (b.nat) { // irregular flagstones (Voronoi cells) with soft joints, a lit upper-left rim, and moss
+            const wx = b.tx * T + x, wy = b.ty * T + y;
+            const v = worley(wx, wy, 11), edge = v.d2 - v.d1, hv = hash2(v.id, 7);
+            c = hv < 0.25 ? R[1] : hv < 0.8 ? R[2] : R[3];
+            if (edge < 1.2) c = R[0];
+            else if (edge < 2.6) c = (wx + wy) < (v.sx + v.sy) ? R[3] : R[1];
+            if (hash2(wx * 5 + 3, wy * 3 + 1) < 0.05) c = shade(c, -0.15);
+            const mossN = vnoise(wx, wy, 9) * 0.65 + vnoise(wx + 200, wy + 100, 23) * 0.35;
+            if (P.style === "grass" && mossN > 0.56) c = mix(c, P.ground[2], Math.min(0.75, (mossN - 0.56) * 3));
+            else if (P.style === "snow" && mossN > 0.55) c = mix(c, [240, 244, 250], Math.min(0.9, (mossN - 0.55) * 4));
+            else if (P.style === "sand" && mossN > 0.6) c = mix(c, P.ground[3], Math.min(0.7, (mossN - 0.6) * 3));
+            else if (P.style === "ash" && mossN > 0.66) c = mix(c, [255, 110, 50], Math.min(0.5, (mossN - 0.66) * 3));
+            if (!b.n && y === 0) c = R[3]; if (!b.w && x === 0) c = R[3];
           } else { // log ends
             const lx = x % 8 - 4, ly = y % 8 - 4, rr = lx * lx + ly * ly;
             c = rr <= 3 ? R[3] : rr <= 7 ? R[1] : rr <= 11 ? R[2] : R[0]; if (rr <= 1) c = R[4];
