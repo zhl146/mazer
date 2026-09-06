@@ -854,7 +854,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 (function (root) {
   "use strict";
   const T = 32;       // pixels per tile
-  const H = 10;       // block height in pixels
+  const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
   const CH = 12;      // chamfer on convex corners: shows the diagonal gap the courier slips through
   const INK = [30, 23, 16];
@@ -1121,6 +1121,24 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
     const isWall = (x, y) => x >= 0 && y >= 0 && x < game.cols && y < game.rows && walls[y * game.cols + x] === 1;
+    // Drawn shape of a block: chamfered top face lifted by H, plus a face extruded from the top face's bottom edge.
+    function shapeOf(tx, ty) {
+      const n = isWall(tx, ty - 1), e = isWall(tx + 1, ty), s = isWall(tx, ty + 1), w = isWall(tx - 1, ty);
+      const cut = (x, y) => (!n && !w && x + y < CH) || (!n && !e && (T - 1 - x) + y < CH) || (!s && !w && x + (T - 1 - y) < CH) || (!s && !e && (T - 1 - x) + (T - 1 - y) < CH);
+      const bottomRow = (x) => Math.min(T - 1, !s && !w && x < CH ? T - 1 - CH + x : T - 1, !s && !e && x > T - 1 - CH ? T - 1 - CH + (T - 1 - x) : T - 1);
+      return { n, e, s, w, cut, bottomRow };
+    }
+    // Is world pixel (x,y) covered by a drawn block? (top faces reach H px into the tile above)
+    function solidAt(x, y) {
+      const tx = Math.floor(x / T), ty0 = Math.floor(y / T);
+      for (let ty = ty0; ty <= ty0 + 1; ty++) {
+        if (!isWall(tx, ty)) continue;
+        const sh = shapeOf(tx, ty), lx = x - tx * T, ly = y - ty * T + H; // ly: top-face-local row
+        if (ly >= 0 && ly < T && !sh.cut(lx, ly)) return true;
+        if (!sh.s) { const br = sh.bottomRow(lx); if (ly > br && ly <= br + H) return true; }
+      }
+      return false;
+    }
 
     function buildGrade() {
       const W = grade.width, Hh = grade.height, A = pal.atmos;
@@ -1154,30 +1172,22 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) { const bv = BAYER[(y >> 1) & 3][(x >> 1) & 3]; if (bv < density) blend(ox + x, oy + y, bv < density / 3 ? P.zoneLight : P.zone, 0.85); }
       }
       // block silhouettes (top face lifted by H, chamfered convex corners, front face when open below)
-      const corner = (n, e, s, w) => (x, y) => { // true when (x,y) inside a top face is cut away
-        const inTL = !n && !w && x + y < CH, inTR = !n && !e && (T - 1 - x) + y < CH, inBL = !s && !w && x + (T - 1 - y) < CH, inBR = !s && !e && (T - 1 - x) + (T - 1 - y) < CH;
-        return inTL || inTR || inBL || inBR;
-      };
       const blocks = [];
       for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
         if (!isWall(tx, ty)) continue;
-        const n = isWall(tx, ty - 1), e = isWall(tx + 1, ty), s = isWall(tx, ty + 1), w = isWall(tx - 1, ty);
-        // bottom row of the top face in column x (follows the chamfer), so the face extrudes from it
-        const bottomRow = (x) => Math.min(T - 1, !s && !w && x < CH ? T - 1 - CH + x : T - 1, !s && !e && x > T - 1 - CH ? T - 1 - CH + (T - 1 - x) : T - 1);
-        const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut: corner(n, e, s, w), bottomRow, ox: PAD + tx * T, oy: PAD + ty * T };
+        const { n, e, s, w, cut, bottomRow } = shapeOf(tx, ty);
+        const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut, bottomRow, ox: PAD + tx * T, oy: PAD + ty * T };
         blocks.push(b);
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (!b.cut(x, y)) solid[(b.oy + y - H) * W + b.ox + x] = 1;
         if (!s) for (let x = 0; x < T; x++) { const br = bottomRow(x); for (let k = 1; k <= H; k++) solid[(b.oy - H + br + k) * W + b.ox + x] = 1; }
       }
       // dirt trail along the bent route: a thin core that always connects, plus a wider band that keeps clear of blocks
-      const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
+      const trail = new Uint8Array(W * Hh);
       const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
-      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 2); }
-      const near = new Uint8Array(W * Hh); // within 3px of a block silhouette
-      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (solid[y * W + x]) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < W && py < Hh) near[py * W + px] = 1; }
+      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); }
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
         const i = y * W + x;
-        if (!trail[i] || solid[i] || (near[i] && !core[i])) continue;
+        if (!trail[i] || solid[i]) continue;
         const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
       }
       // soft cast shadows (light from top-left)
@@ -1277,24 +1287,31 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         for (let k = i === 1 ? 0 : 1; k <= n; k++) raw.push([ax + (bx - ax) * k / n, ay + (by - ay) * k / n]);
       }
       if (!raw.length) raw.push([pts[0][0] * T + 16, pts[0][1] * T + 16]);
-      // push each sample away from nearby block silhouettes (footprint plus the lifted top face)
-      const R = 11;
+      // push each sample away from the drawn block silhouettes within R px (chamfered channels centre the line)
+      const R = 10;
       const bent = raw.map(([x, y]) => {
-        const tx = Math.floor(x / T), ty = Math.floor(y / T); let ox = 0, oy = 0;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const bx = tx + dx, by = ty + dy; if (!isWall(bx, by)) continue;
-          const x0 = bx * T, y0 = by * T - H, x1 = x0 + T, y1 = by * T + T;
-          const cx = Math.max(x0, Math.min(x1, x)), cy = Math.max(y0, Math.min(y1, y));
-          const ddx = x - cx, ddy = y - cy, dist = Math.hypot(ddx, ddy);
-          if (dist < 0.5 || dist >= R) continue;
-          ox += (ddx / dist) * (R - dist); oy += (ddy / dist) * (R - dist);
+        let ox = 0, oy = 0;
+        const px = Math.round(x), py = Math.round(y);
+        for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+          const d2 = dx * dx + dy * dy; if (d2 === 0 || d2 > R * R) continue;
+          if (!solidAt(px + dx, py + dy)) continue;
+          const d = Math.sqrt(d2), wgt = (R - d) / R;
+          ox -= (dx / d) * wgt; oy -= (dy / d) * wgt;
         }
-        const m = Math.hypot(ox, oy); if (m > R) { ox *= R / m; oy *= R / m; }
+        const m = Math.hypot(ox, oy); if (m > 0) { const k = Math.min(R, m * 0.9) / m; ox *= k; oy *= k; }
         return [x + ox, y + oy];
       });
       // smooth, then resample to whole pixels with a facing direction
       for (let pass = 0; pass < 3; pass++) for (let i = 2; i < bent.length - 2; i++) {
         bent[i] = [(bent[i - 2][0] + bent[i - 1][0] + bent[i][0] + bent[i + 1][0] + bent[i + 2][0]) / 5, (bent[i - 2][1] + bent[i - 1][1] + bent[i][1] + bent[i + 1][1] + bent[i + 2][1]) / 5];
+      }
+      // guarantee: every road point sits on a free pixel (nudge to the nearest free one)
+      for (let i = 0; i < bent.length; i++) {
+        let x = Math.round(bent[i][0]), y = Math.round(bent[i][1]);
+        if (!solidAt(x, y)) continue;
+        let best = null, bd = Infinity;
+        for (let dy = -12; dy <= 12; dy++) for (let dx = -12; dx <= 12; dx++) { const d2 = dx * dx + dy * dy; if (d2 < bd && !solidAt(x + dx, y + dy)) { bd = d2; best = [x + dx, y + dy]; } }
+        if (best) bent[i] = best;
       }
       let dir = 1;
       for (let i = 0; i < bent.length; i++) {
@@ -1995,6 +2012,7 @@ window.MAZER_CONFIG = {"api":"/api","shareUrl":"","mode":"server"};
     return null;
   }
   document.fonts && document.fonts.ready.then(() => R.setState(walls, segments));
+  globalThis.__mazer = () => ({ game, walls, segments, view }); // debug hook
   loadGame(seedFromUrl() || M.dailySeed());
   requestAnimationFrame(frame);
   if (!store.get("seen", 0)) setTimeout(() => showSheet("sheetHow"), 400);

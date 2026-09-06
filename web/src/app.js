@@ -544,6 +544,7 @@
     return null;
   }
   document.fonts && document.fonts.ready.then(() => R.setState(walls, segments));
+  globalThis.__mazer = () => ({ game, walls, segments, view }); // debug hook
   loadGame(seedFromUrl() || M.dailySeed());
   requestAnimationFrame(frame);
   if (!store.get("seen", 0)) setTimeout(() => showSheet("sheetHow"), 400);
