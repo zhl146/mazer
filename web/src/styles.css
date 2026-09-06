@@ -222,3 +222,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
   .energy { margin: 4px 24px 10px; }
   .dock { grid-template-columns: repeat(6, 110px); justify-content: center; gap: 8px; }
 }
+
+/* account & auth */
+.account { padding: 6px 0; font-size: 16px; }
+.account b { color: var(--gold); }
+.btn-small { padding: 7px 12px; border-radius: 3px; background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); color: var(--text); font-family: var(--font-display); font-size: 8px; flex: none; }
+.err { min-height: 20px; margin-top: 10px; color: #ffb3bd; font-size: 15px; }
+.link { display: block; width: 100%; margin-top: 10px; padding: 8px; color: var(--muted); font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
+.cta:disabled { opacity: .5; }

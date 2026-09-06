@@ -28,12 +28,44 @@ Every seed picks a biome (8 palettes), a wall style (clusters, caves, veins, rui
 
 Seeds: `daily-YYYY-MM-DD` (UTC) is the shared daily puzzle; the menu also makes random word seeds, and any typed seed works. `?seed=...` in the URL loads a seed directly when hosted standalone.
 
-## Leaderboard
+## Running it (accounts + global leaderboard)
 
-Entries are stored per seed as `scores/<seed>/entries/<playerId>` and carry the player's move list. Every client re-verifies each entry by replaying the moves against the regenerated maze, so tampered scores are dropped on read.
+`server.js` is a zero-dependency Node server (node >= 22.13, uses the built-in `node:sqlite`). It serves the game and a small JSON API with username/password accounts. Every submitted score is re-verified on the server by regenerating the maze from its seed and replaying the moves, so a modified client can't post a fake score.
 
-Adapters, in `src/app.js`:
-- Claude artifact `db` capability (current hosting). Shared with everyone who can open the artifact.
-- Local fallback (localStorage) when no database is available.
+```
+cd web
+npm start                 # builds, then serves http://localhost:8080
+PORT=3000 MAZER_DATA=/var/mazer node server.js
+```
 
-To host elsewhere, serve `dist/standalone.html`, set `window.MAZER_SHARE_URL` in `src/template.html`, and swap the db adapter for your own API.
+Or with Docker (the SQLite file lives in the `/data` volume):
+
+```
+docker build -t mazer web
+docker run -p 8080:8080 -v mazer-data:/data mazer
+```
+
+Put it behind HTTPS (Caddy, nginx, Fly.io, Railway, Render, a Cloudflare tunnel, anything that terminates TLS). Session tokens travel as bearer tokens, so TLS is required for a public deployment.
+
+### API
+
+| Method | Path | Body / query | Notes |
+| --- | --- | --- | --- |
+| POST | `/api/register` | `{username, password}` | username 3–16 `[A-Za-z0-9_]`, password >= 8 chars. Returns `{token, username}`. |
+| POST | `/api/login` | `{username, password}` | Returns `{token, username}`. |
+| POST | `/api/logout` | | Bearer token. |
+| GET | `/api/me` | | Bearer token → `{user}`. |
+| GET | `/api/scores?seed=` | | Top 100 for the seed, plus `me` (your rank) when logged in. |
+| POST | `/api/scores` | `{seed, moves}` | Bearer token. Verified server-side; keeps your best per seed. Returns `{score, best, improved, rank, total}`. |
+| GET | `/api/solution?seed=&username=` | | A player's move list. Today's daily is withheld until tomorrow. |
+
+Passwords are hashed with scrypt (random 16-byte salt). Sessions last 60 days and are stored hashed. Register and login are rate-limited per IP.
+
+### Two builds
+
+`node build.js` produces:
+
+- `dist/standalone.html` — what the server serves. Talks to `/api`; Submit asks you to log in or create an account.
+- `dist/index.html` — the Claude artifact fragment. Artifacts can't make network requests, so this build keeps scores on the device only. It's a shareable demo of the game, not the leaderboard.
+
+To host the page on a different origin from the API, set `CORS_ORIGIN` on the server and change `api` in `build.js`.

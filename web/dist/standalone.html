@@ -233,6 +233,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
   .dock { grid-template-columns: repeat(6, 110px); justify-content: center; gap: 8px; }
 }
 
+/* account & auth */
+.account { padding: 6px 0; font-size: 16px; }
+.account b { color: var(--gold); }
+.btn-small { padding: 7px 12px; border-radius: 3px; background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); color: var(--text); font-family: var(--font-display); font-size: 8px; flex: none; }
+.err { min-height: 20px; margin-top: 10px; color: #ffb3bd; font-size: 15px; }
+.link { display: block; width: 100%; margin-top: 10px; padding: 8px; color: var(--muted); font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
+.cta:disabled { opacity: .5; }
+
 </style>
 
 </head>
@@ -294,8 +302,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
-    <div class="section-label">Your name</div>
-    <div class="field"><input id="nameInput" placeholder="Shown on the leaderboard" maxlength="16" autocomplete="nickname"><button id="nameSave">Save</button></div>
+    <div id="accountSection">
+      <div class="section-label">Account</div>
+      <div class="row account"><span id="accountText">Not logged in</span><button class="btn-small" id="accountBtn">Log in</button></div>
+    </div>
+    <div id="nameSection" hidden>
+      <div class="section-label">Your name</div>
+      <div class="field"><input id="nameInput" placeholder="Shown on the leaderboard" maxlength="16" autocomplete="nickname"><button id="nameSave">Save</button></div>
+    </div>
     <div class="section-label">Settings</div>
     <div class="row" style="padding:6px 0"><span style="font-weight:800">Sound effects</span><button class="switch" id="soundSwitch" role="switch" aria-checked="true" aria-label="Sound effects"></button></div>
     <div class="menu-list" style="margin-top:12px">
@@ -317,6 +331,22 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
       <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your score. Everyone in the world gets the same <b>daily</b> maze, so bring friends.</p></div>
     </div>
     <button class="cta" id="howDone">Let's build</button>
+  </div>
+</section>
+
+<section class="sheet" id="sheetAuth" aria-label="Log in">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Scores are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <form id="authForm" autocomplete="on">
+      <div class="section-label">Username</div>
+      <div class="field"><input id="authUser" placeholder="3–16 letters, numbers or _" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" required></div>
+      <div class="section-label">Password</div>
+      <div class="field"><input id="authPass" type="password" placeholder="At least 8 characters" maxlength="128" autocomplete="current-password" required></div>
+      <div class="err" id="authErr" role="alert"></div>
+      <button class="cta" id="authGo" type="submit">Log in</button>
+    </form>
+    <button class="link" id="authSwap">New here? Create an account</button>
   </div>
 </section>
 
@@ -1094,16 +1124,17 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 
 </script>
 <script>
-// Canonical link used by the Share button. Change this when hosting elsewhere.
-window.MAZER_SHARE_URL = "https://claude.ai/code/artifact/4f85ce17-09de-4f3a-8456-70e7b5bbceec";
+window.MAZER_CONFIG = {"api":"/api","shareUrl":"","mode":"server"};
 </script>
 <script>
 /* Mazer app — UI, input, persistence, leaderboard. */
 (function () {
   "use strict";
   const M = globalThis.Mazer, RR = globalThis.MazerRender;
-  // Canonical link to share. Set MAZER_SHARE_URL when hosting elsewhere; defaults to this page.
-  const SHARE_BASE = globalThis.MAZER_SHARE_URL || "";
+  // Build-time config: {api: "/api" | null, shareUrl, mode}. See web/build.js.
+  const CFG = globalThis.MAZER_CONFIG || {};
+  const API = CFG.api || null; // null → no server: scores stay on this device
+  const SHARE_BASE = CFG.shareUrl || "";
   const $ = (id) => document.getElementById(id);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -1391,95 +1422,144 @@ window.MAZER_SHARE_URL = "https://claude.ai/code/artifact/4f85ce17-09de-4f3a-845
   $("backdrop").onclick = closeSheets;
   document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = closeSheets));
 
+  /* ---------- server API & auth ---------- */
+  async function api(method, path, body) {
+    const headers = { "Content-Type": "application/json" };
+    if (auth.token) headers.Authorization = "Bearer " + auth.token;
+    let res;
+    try { res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined }); }
+    catch (e) { throw { status: 0, error: "Can't reach the server" }; }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw { status: res.status, error: data.error || "Request failed" };
+    return data;
+  }
+  const auth = {
+    token: store.get("token", null), user: store.get("user", null), after: null,
+    set(token, user) { this.token = token; this.user = user; store.set("token", token); store.set("user", user); renderAccount(); },
+    async logout() { try { await api("POST", "/logout"); } catch (e) { /* ignore */ } this.set(null, null); toast("Logged out"); },
+  };
+  let authMode = "login";
+  function renderAccount() {
+    if (!API) return;
+    $("accountText").innerHTML = auth.user ? "Logged in as <b></b>" : "Not logged in";
+    if (auth.user) $("accountText").querySelector("b").textContent = auth.user;
+    $("accountBtn").textContent = auth.user ? "Log out" : "Log in";
+  }
+  function openAuth(mode, after) {
+    authMode = mode; auth.after = after || null;
+    $("authTitle").textContent = mode === "login" ? "LOG IN" : "NEW ACCOUNT";
+    $("authGo").textContent = mode === "login" ? "Log in" : "Create account";
+    $("authSwap").textContent = mode === "login" ? "New here? Create an account" : "Have an account? Log in";
+    $("authPass").autocomplete = mode === "login" ? "current-password" : "new-password";
+    $("authErr").textContent = ""; $("authPass").value = "";
+    showSheet("sheetAuth"); setTimeout(() => $("authUser").focus(), 300);
+  }
+  if (API) {
+    $("accountBtn").onclick = () => { if (auth.user) auth.logout(); else openAuth("login"); };
+    $("authSwap").onclick = () => openAuth(authMode === "login" ? "register" : "login", auth.after);
+    $("authForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const username = $("authUser").value.trim(), password = $("authPass").value;
+      if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) { $("authErr").textContent = "Username: 3–16 letters, numbers or _"; return; }
+      if (password.length < 8) { $("authErr").textContent = "Password must be at least 8 characters"; return; }
+      $("authGo").disabled = true; $("authErr").textContent = "";
+      try {
+        const r = await api("POST", authMode === "login" ? "/login" : "/register", { username, password });
+        auth.set(r.token, r.username);
+        sfx.good(); toast(authMode === "login" ? "Welcome back, " + r.username : "Account created", "good");
+        const next = auth.after; auth.after = null; closeSheets();
+        if (next) next();
+      } catch (err) { $("authErr").textContent = err.error; }
+      $("authGo").disabled = false;
+    };
+    api("GET", "/me").then((r) => { if (auth.token && !r.user) auth.set(null, null); }).catch(() => {});
+    $("nameSection").hidden = true; $("accountSection").hidden = false;
+  } else {
+    $("nameSection").hidden = false; $("accountSection").hidden = true;
+  }
+
   /* ---------- leaderboard ---------- */
   const leaderboard = (function () {
-    let db = null, dbState = "pending"; // pending | on | off
-    let seed = null, unsub = null, entries = [], myRank = null;
-    const col = (s) => db.collection("scores/" + s + "/entries");
-
-    claude_use("db").then((d) => { db = d; dbState = d ? "on" : "off"; if (openSheet === "sheetRanks") open(); });
-    function claude_use(name) {
-      try { if (window.claude && typeof window.claude.use === "function") return window.claude.use(name).catch(() => null); } catch (e) { /* ignore */ }
-      return Promise.resolve(null);
-    }
+    let seed = null, entries = [], mine = null, total = 0, status = API ? "loading" : "local";
     function localEntries(s) { return store.get("lb." + s, []); }
     function saveLocal(s, entry) {
       const list = localEntries(s).filter((e) => e.pid !== entry.pid);
       list.push(entry); store.set("lb." + s, list.slice(-100));
     }
-    // Verify every entry by replaying its moves against the seed. Cheats and corrupt rows are dropped.
-    function verified(list) {
+    // Local mode: verify every entry by replaying its moves against the seed.
+    function verifiedLocal(list) {
       const out = [];
       for (const e of list) {
         if (!e || typeof e.name !== "string" || !Array.isArray(e.moves)) continue;
         const v = M.verifySolution(game, e.moves);
         if (!v.ok) continue;
-        out.push({ pid: e.pid, name: e.name.slice(0, 16), score: v.score, ap: v.ap, at: e.at || 0, moves: e.moves });
+        out.push({ username: e.name.slice(0, 16), score: v.score, ap: v.ap, at: e.at || 0, me: e.pid === pid });
       }
       out.sort((a, b) => b.score - a.score || a.at - b.at);
-      return out;
+      return out.map((e, i) => Object.assign(e, { rank: i + 1 }));
     }
     function render() {
       const list = $("lbList"); list.innerHTML = "";
       $("ranksSub").textContent = seedLabel(seed) + " · " + game.biome.name;
       const st = $("lbStatus");
-      st.innerHTML = dbState === "on" ? '<span class="pill global">● Global</span><span>Live for everyone playing this seed</span>'
-        : dbState === "pending" ? '<span class="pill">Connecting…</span>'
+      st.innerHTML = status === "global" ? '<span class="pill global">● Global</span><span>' + total + (total === 1 ? " player" : " players") + " on this seed</span>"
+        : status === "loading" ? '<span class="pill">Loading…</span>'
+        : status === "offline" ? '<span class="pill">Offline</span><span>Couldn\'t reach the server</span>'
         : '<span class="pill">Local only</span><span>Scores are saved on this device</span>';
-      if (!entries.length) { list.innerHTML = '<li class="lb-empty">No scores yet. Be the first to submit.</li>'; }
-      myRank = null;
-      entries.slice(0, 50).forEach((e, i) => {
+      if (!entries.length) list.innerHTML = '<li class="lb-empty">No scores yet. Be the first to submit.</li>';
+      entries.slice(0, 50).forEach((e) => {
         const li = document.createElement("li");
-        li.className = "lb-row" + (e.pid === pid ? " me" : "") + (i < 3 ? " top" : "");
-        if (e.pid === pid) myRank = i + 1;
-        li.innerHTML = '<div class="rank">' + (i + 1) + '</div><div><div class="name"></div><div class="meta">' + e.ap + " energy left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
-        li.querySelector(".name").textContent = e.name || "Anonymous";
+        li.className = "lb-row" + (e.me ? " me" : "") + (e.rank <= 3 ? " top" : "");
+        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " MP left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
+        li.querySelector(".name").textContent = e.username || "Anonymous";
         list.appendChild(li);
       });
-      const mine = entries.find((e) => e.pid === pid);
-      $("lbYou").textContent = mine ? "You're #" + (entries.indexOf(mine) + 1) + " of " + entries.length + " with " + fmt(mine.score)
-        : entries.length ? "Submit a score to get on the board" : "";
+      const me = mine || entries.find((e) => e.me);
+      $("lbYou").textContent = me ? "You're #" + me.rank + " of " + (total || entries.length) + " with " + fmt(me.score)
+        : API && !auth.user ? "Log in to post a score" : entries.length ? "Submit a score to get on the board" : "";
     }
-    function setSeed(s) { close(); seed = s; entries = []; }
-    function open() {
-      entries = verified(localEntries(seed)); render();
-      if (dbState !== "on") return;
-      close();
-      unsub = col(seed).orderBy("score", "desc").limit(100).onSnapshot((snap) => {
-        const rows = snap.docs.map((d) => d.data());
-        entries = verified(rows.concat(localEntries(seed).filter((l) => !rows.some((r) => r.pid === l.pid))));
-        render();
-      }, (err) => { console.warn("leaderboard", err); dbState = "off"; entries = verified(localEntries(seed)); render(); });
+    function setSeed(s) { seed = s; entries = []; mine = null; total = 0; }
+    async function open() {
+      if (!API) { entries = verifiedLocal(localEntries(seed)); total = entries.length; status = "local"; render(); return; }
+      status = "loading"; render();
+      try {
+        const r = await api("GET", "/scores?seed=" + encodeURIComponent(seed));
+        if (r.seed !== seed) return;
+        entries = r.entries.map((e) => Object.assign(e, { me: auth.user && e.username === auth.user }));
+        mine = r.me; total = r.total; status = "global";
+      } catch (e) { status = "offline"; entries = []; }
+      render();
     }
-    function close() { if (unsub) { unsub(); unsub = null; } }
+    function close() { /* nothing to release */ }
     async function submit() {
       const moves = M.diffMoves(game, walls);
-      const entry = { pid, name: playerName, score, ap, at: Date.now(), moves, seed };
-      saveLocal(seed, entry);
-      let ok = true;
-      if (db) {
-        try {
-          const ref = col(seed).doc(pid);
-          const cur = await ref.get();
-          if (cur.exists && (cur.data().score || 0) > score) { toast("Your posted score is already higher", "good"); showSheet("sheetRanks"); return; }
-          await ref.set(entry);
-        } catch (e) { ok = false; console.warn("submit failed", e); }
+      if (!API) {
+        saveLocal(seed, { pid, name: playerName, score, ap, at: Date.now(), moves, seed });
+        sfx.good(); buzz([20, 40, 20]); toast("Saved on this device", "good"); showSheet("sheetRanks"); return;
       }
-      sfx.good(); buzz([20, 40, 20]);
-      toast(db && ok ? "Score posted" : db ? "Saved locally. Global board unavailable" : "Saved on this device", "good");
-      showSheet("sheetRanks");
+      if (!auth.user) { openAuth("login", submit); return; }
+      try {
+        const r = await api("POST", "/scores", { seed, moves });
+        sfx.good(); buzz([20, 40, 20]);
+        toast(r.improved ? "Posted! You're #" + r.rank : "Your best is still " + fmt(r.best) + " (#" + r.rank + ")", "good");
+        if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
+        showSheet("sheetRanks");
+      } catch (err) {
+        if (err.status === 401) { auth.set(null, null); openAuth("login", submit); return; }
+        sfx.error(); toast(err.error, "error");
+      }
     }
-    return { setSeed, open, close, submit, get myRank() { return myRank; } };
+    return { setSeed, open, close, submit };
   })();
 
   /* ---------- buttons ---------- */
   $("btnUndo").onclick = undo;
   $("btnReset").onclick = reset;
   $("btnRanks").onclick = () => showSheet("sheetRanks");
-  $("btnMenu").onclick = () => { $("nameInput").value = playerName; $("seedInput").value = ""; updateCountdown(); showSheet("sheetMenu"); };
+  $("btnMenu").onclick = () => { $("nameInput").value = playerName; $("seedInput").value = ""; updateCountdown(); renderAccount(); showSheet("sheetMenu"); };
   $("seedChip").onclick = () => { showSheet("sheetMenu"); $("seedInput").value = game.seed; };
   $("btnSubmit").onclick = () => {
-    if (!playerName) { $("nameInput2").value = ""; showSheet("sheetName"); setTimeout(() => $("nameInput2").focus(), 300); return; }
+    if (!API && !playerName) { $("nameInput2").value = ""; showSheet("sheetName"); setTimeout(() => $("nameInput2").focus(), 300); return; }
     leaderboard.submit();
   };
   $("nameSubmit").onclick = () => {

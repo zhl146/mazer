@@ -63,8 +63,14 @@
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
-    <div class="section-label">Your name</div>
-    <div class="field"><input id="nameInput" placeholder="Shown on the leaderboard" maxlength="16" autocomplete="nickname"><button id="nameSave">Save</button></div>
+    <div id="accountSection">
+      <div class="section-label">Account</div>
+      <div class="row account"><span id="accountText">Not logged in</span><button class="btn-small" id="accountBtn">Log in</button></div>
+    </div>
+    <div id="nameSection" hidden>
+      <div class="section-label">Your name</div>
+      <div class="field"><input id="nameInput" placeholder="Shown on the leaderboard" maxlength="16" autocomplete="nickname"><button id="nameSave">Save</button></div>
+    </div>
     <div class="section-label">Settings</div>
     <div class="row" style="padding:6px 0"><span style="font-weight:800">Sound effects</span><button class="switch" id="soundSwitch" role="switch" aria-checked="true" aria-label="Sound effects"></button></div>
     <div class="menu-list" style="margin-top:12px">
@@ -89,6 +95,22 @@
   </div>
 </section>
 
+<section class="sheet" id="sheetAuth" aria-label="Log in">
+  <div class="grab"></div>
+  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Scores are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-body">
+    <form id="authForm" autocomplete="on">
+      <div class="section-label">Username</div>
+      <div class="field"><input id="authUser" placeholder="3–16 letters, numbers or _" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" required></div>
+      <div class="section-label">Password</div>
+      <div class="field"><input id="authPass" type="password" placeholder="At least 8 characters" maxlength="128" autocomplete="current-password" required></div>
+      <div class="err" id="authErr" role="alert"></div>
+      <button class="cta" id="authGo" type="submit">Log in</button>
+    </form>
+    <button class="link" id="authSwap">New here? Create an account</button>
+  </div>
+</section>
+
 <section class="sheet" id="sheetName" aria-label="Choose a name">
   <div class="grab"></div>
   <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your score. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
@@ -104,8 +126,7 @@
 /*__RENDER__*/
 </script>
 <script>
-// Canonical link used by the Share button. Change this when hosting elsewhere.
-window.MAZER_SHARE_URL = "https://claude.ai/code/artifact/4f85ce17-09de-4f3a-8456-70e7b5bbceec";
+/*__CONFIG__*/
 </script>
 <script>
 /*__APP__*/

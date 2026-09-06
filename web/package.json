@@ -1,0 +1,12 @@
+{
+  "name": "mazer-web",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Mazer: build the maze, make the courier walk. Single-page game with accounts and a verified global leaderboard.",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "build": "node build.js",
+    "test": "node test/engine.test.js",
+    "start": "node build.js && node server.js"
+  }
+}
