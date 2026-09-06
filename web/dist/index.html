@@ -849,7 +849,8 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   const T = 32;       // pixels per tile
   const H = 10;       // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
-  const CH = 8;       // chamfer on convex corners: shows the diagonal gap the courier slips through
+  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the courier slips through
+  const CF = 8;       // chamfer on the bottom corners of a cliff face
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -1065,7 +1066,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
     let hover = null, errorUntil = 0, reduced = false, fx = true, courierIdx = 0;
-    let pathPx = [];
+    let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
       courierA: fromRows(ART.courierA.rows, ART.courierA.pal).toCanvas(), courierB: fromRows(ART.courierB.rows, ART.courierB.pal).toCanvas(),
@@ -1133,9 +1134,10 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const img = new ImageData(W, Hh), d = img.data;
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
-      const set = (x, y, c, k) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; };
+      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the courier)
+      const set = (x, y, c, k, o) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
       const blend = (x, y, c, a) => { if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
-      const blit = (sp, ox, oy, k) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k); } };
+      const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
 
       // ground
       for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) blit(props.ground[Math.floor(hash2(tx, ty) * props.ground.length)], PAD + tx * T, PAD + ty * T, 0);
@@ -1157,16 +1159,12 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const b = { tx, ty, n, e, s, w, nat: game.natural[ty * cols + tx] === 1, cut: corner(n, e, s, w), ox: PAD + tx * T, oy: PAD + ty * T };
         blocks.push(b);
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (!b.cut(x, y)) solid[(b.oy + y - H) * W + b.ox + x] = 1;
-        if (!s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) { const cutF = (!w && x + (T - 1 - y) < 6) || (!e && (T - 1 - x) + (T - 1 - y) < 6); if (!cutF) solid[(b.oy + y) * W + b.ox + x] = 1; }
+        if (!s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) { const cutF = (!w && x + (T - 1 - y) < CF) || (!e && (T - 1 - x) + (T - 1 - y) < CF); if (!cutF) solid[(b.oy + y) * W + b.ox + x] = 1; }
       }
-      // dirt trail along the route: a thin core that always connects, plus a wider band that keeps clear of blocks
-      const pts = [];
-      for (let i = 0; i < segments.length; i++) for (let k = i === 0 ? 0 : 1; k < segments[i].length; k++) pts.push(segments[i][k]);
+      // dirt trail along the bent route: a thin core that always connects, plus a wider band that keeps clear of blocks
       const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
       const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
-      const along = (ax, ay, bx, by, fn) => { for (let s = 0; s <= 10; s++) { const t = s / 10; fn(Math.round(PAD + (ax + 0.5) * T + (bx - ax) * T * t), Math.round(PAD + (ay + 0.5) * T + (by - ay) * T * t)); } };
-      for (let i = 1; i < pts.length; i++) along(pts[i - 1][0], pts[i - 1][1], pts[i][0], pts[i][1], (x, y) => { stampDisc(trail, x, y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, x, y, 2); });
-      if (pts.length === 1) stampDisc(trail, PAD + Math.round((pts[0][0] + 0.5) * T), PAD + Math.round((pts[0][1] + 0.5) * T), 7);
+      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 2); }
       const near = new Uint8Array(W * Hh); // within 3px of a block silhouette
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) if (solid[y * W + x]) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < W && py < Hh) near[py * W + px] = 1; }
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
@@ -1183,11 +1181,11 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       for (const b of blocks) {
         const R = b.nat ? P.rock : P.wood;
         if (!b.s) for (let y = T - H; y < T; y++) for (let x = 0; x < T; x++) {
-          if ((!b.w && x + (T - 1 - y) < 6) || (!b.e && (T - 1 - x) + (T - 1 - y) < 6)) continue;
+          if ((!b.w && x + (T - 1 - y) < CF) || (!b.e && (T - 1 - x) + (T - 1 - y) < CF)) continue;
           let c;
           if (b.nat) { const st = hash2(b.tx * 32 + x, 3), c0 = st < 0.3 ? R[0] : st < 0.6 ? R[1] : R[2]; c = y >= T - 2 ? R[0] : c0; if (hash2(x + b.tx, y + b.ty) < 0.06) c = R[3]; }
           else { const k = x % 6; c = k === 0 ? R[0] : k === 2 ? R[3] : R[2]; if (y >= T - 2) c = R[0]; }
-          set(b.ox + x, b.oy + y, c, b.nat ? 2 : 4);
+          set(b.ox + x, b.oy + y, c, b.nat ? 2 : 4, b.ty);
         }
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
           if (b.cut(x, y)) continue;
@@ -1202,7 +1200,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
             const lx = x % 8 - 4, ly = y % 8 - 4, rr = lx * lx + ly * ly;
             c = rr <= 3 ? R[3] : rr <= 7 ? R[1] : rr <= 11 ? R[2] : R[0]; if (rr <= 1) c = R[4];
           }
-          set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3);
+          set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3, b.ty);
         }
       }
       // outline pass: dark edge wherever a category meets a different one (joined blocks merge, chamfers show gaps)
@@ -1217,13 +1215,13 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         if (!b.nat || !b.n || hash2(b.tx + 31, b.ty + 17) > 0.14) continue;
         const sp = props.trees[Math.floor(hash2(b.tx, b.ty + 3) * props.trees.length)];
         propShadow(b.ox + 17, b.oy - H + 15, 11, 4);
-        blit(sp, b.ox + 1, b.oy - H - 24, 6);
+        blit(sp, b.ox + 1, b.oy - H - 24, 6, b.ty);
       }
       game.waypoints.forEach(([x, y], i) => {
         const ox = PAD + x * T, oy = PAD + y * T, last = i === game.waypoints.length - 1;
-        if (i === 0) { propShadow(ox + 18, oy + 22, 17, 5); blit(props.cottage, ox - 2, oy - 14, 6); }
-        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.tower, ox + 3, oy - 34, 6); }
-        else { propShadow(ox + 16, oy + 22, 12, 4); blit(props.well, ox + 2, oy - 4, 6); }
+        if (i === 0) { propShadow(ox + 18, oy + 22, 17, 5); blit(props.cottage, ox - 2, oy - 14, 6, y); }
+        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.tower, ox + 3, oy - 34, 6, y); }
+        else { propShadow(ox + 16, oy + 22, 12, 4); blit(props.well, ox + 2, oy - 4, 6, y); }
       });
       // zone badges
       const plotBuf = (x, y, w, h, c) => { for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) set(x + xx, y + yy, c); };
@@ -1238,25 +1236,65 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
+      // per-row overlays of block/prop pixels, drawn in front of the courier when he stands above that row
+      rowOverlays = [];
+      for (let r = 0; r < rows; r++) {
+        const y0 = Math.max(0, PAD + r * T - 36), y1 = Math.min(Hh, PAD + (r + 1) * T);
+        const od = new ImageData(W, y1 - y0); let any = false;
+        for (let y = y0; y < y1; y++) for (let x = 0; x < W; x++) {
+          const i = y * W + x; if (owner[i] !== r) continue;
+          const j = ((y - y0) * W + x) * 4; od.data[j] = d[i * 4]; od.data[j + 1] = d[i * 4 + 1]; od.data[j + 2] = d[i * 4 + 2]; od.data[j + 3] = 255; any = true;
+        }
+        if (!any) { rowOverlays.push(null); continue; }
+        const cv = document.createElement("canvas"); cv.width = W; cv.height = y1 - y0; cv.getContext("2d").putImageData(od, 0, 0);
+        rowOverlays.push({ cv, y0 });
+      }
       cacheDirty = false;
     }
 
-    /* ---------- route pixels (for the courier and the error flash) ---------- */
+    /* ---------- route pixels: the road centreline, bent to keep clear of blocks ---------- */
     function buildPathPixels() {
       pathPx = [];
+      if (!game) return;
       const pts = [];
       for (let i = 0; i < segments.length; i++) for (let k = i === 0 ? 0 : 1; k < segments[i].length; k++) pts.push(segments[i][k]);
+      if (!pts.length) return;
+      // 1px samples along the straight centre-to-centre polyline
+      const raw = [];
       for (let i = 1; i < pts.length; i++) {
-        let x0 = pts[i - 1][0] * T + 16, y0 = pts[i - 1][1] * T + 16;
-        const x1 = pts[i][0] * T + 16, y1 = pts[i][1] * T + 16;
-        const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let err = dx + dy;
-        for (;;) {
-          pathPx.push([x0, y0, Math.sign(x1 - x0) || (pathPx.length ? pathPx[pathPx.length - 1][2] : 1)]);
-          if (x0 === x1 && y0 === y1) break;
-          const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; }
-        }
+        const ax = pts[i - 1][0] * T + 16, ay = pts[i - 1][1] * T + 16, bx = pts[i][0] * T + 16, by = pts[i][1] * T + 16;
+        const n = Math.ceil(Math.hypot(bx - ax, by - ay));
+        for (let k = i === 1 ? 0 : 1; k <= n; k++) raw.push([ax + (bx - ax) * k / n, ay + (by - ay) * k / n]);
       }
-      if (!pathPx.length && pts.length) pathPx.push([pts[0][0] * T + 16, pts[0][1] * T + 16, 1]);
+      if (!raw.length) raw.push([pts[0][0] * T + 16, pts[0][1] * T + 16]);
+      // push each sample away from nearby block silhouettes (footprint plus the lifted top face)
+      const R = 11;
+      const bent = raw.map(([x, y]) => {
+        const tx = Math.floor(x / T), ty = Math.floor(y / T); let ox = 0, oy = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const bx = tx + dx, by = ty + dy; if (!isWall(bx, by)) continue;
+          const x0 = bx * T, y0 = by * T - H, x1 = x0 + T, y1 = by * T + T;
+          const cx = Math.max(x0, Math.min(x1, x)), cy = Math.max(y0, Math.min(y1, y));
+          const ddx = x - cx, ddy = y - cy, dist = Math.hypot(ddx, ddy);
+          if (dist < 0.5 || dist >= R) continue;
+          ox += (ddx / dist) * (R - dist); oy += (ddy / dist) * (R - dist);
+        }
+        const m = Math.hypot(ox, oy); if (m > R) { ox *= R / m; oy *= R / m; }
+        return [x + ox, y + oy];
+      });
+      // smooth, then resample to whole pixels with a facing direction
+      for (let pass = 0; pass < 3; pass++) for (let i = 2; i < bent.length - 2; i++) {
+        bent[i] = [(bent[i - 2][0] + bent[i - 1][0] + bent[i][0] + bent[i + 1][0] + bent[i + 2][0]) / 5, (bent[i - 2][1] + bent[i - 1][1] + bent[i][1] + bent[i + 1][1] + bent[i + 2][1]) / 5];
+      }
+      let dir = 1;
+      for (let i = 0; i < bent.length; i++) {
+        const x = Math.round(bent[i][0]), y = Math.round(bent[i][1]);
+        const ahead = bent[Math.min(bent.length - 1, i + 4)][0] - bent[Math.max(0, i - 4)][0];
+        if (Math.abs(ahead) > 0.5) dir = Math.sign(ahead);
+        const last = pathPx[pathPx.length - 1];
+        if (last && last[0] === x && last[1] === y) continue;
+        pathPx.push([x, y, dir]);
+      }
       courierIdx = Math.min(courierIdx, Math.max(0, pathPx.length - 1));
     }
 
@@ -1291,6 +1329,9 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const sp = frame ? (left ? sprites.courierBf : sprites.courierB) : (left ? sprites.courierAf : sprites.courierA);
         c.fillStyle = "rgba(30,23,16,0.35)"; c.fillRect(p[0] - 5, p[1] - 2, 10, 3);
         c.drawImage(sp, p[0] - 8, p[1] - 23);
+        // blocks and props whose footprint is below the courier stand in front of him
+        const cr = Math.floor(p[1] / T);
+        for (let r = cr + 1; r < Math.min(game.rows, cr + 3); r++) { const o = rowOverlays[r]; if (o) c.drawImage(o.cv, -PAD, o.y0 - PAD); }
       }
       for (let i = effects.length - 1; i >= 0; i--) {
         const e = effects[i], age = (now - e.t0) / 1000;
