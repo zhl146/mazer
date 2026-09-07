@@ -7,7 +7,7 @@
   const T = 32;       // pixels per tile
   const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
-  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the pilgrim slips through
+  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the spark slips through
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -69,15 +69,14 @@
     return sp;
   }
 
-  const PILGRIM_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
-  const PILGRIM_BODY = [
-    "......kkkk......", "....kkrRRRkk....", "...krRRRRRRRk...", "..kRRRRRRRRRRk..", ".kkkkkkkkkkkkkk.", "...khhhhhhhhk...", "...khsssssshk...", "...kssksskssk...",
-    "...kssssssssk...", "....kssssssk....", "...kkCCCCCCkk...", "..kCkccccccckCk.", "..kCkccccccckCk.", "..kCkbccccbbkCk.", "..kCkccccccckCk.", "..kckccccccckck.",
-    "...kkccccccckk..", "....kccccccck...", "....kkkkkkkkk..."];
+  // The spark: a mote of drawn power running the line. Two frames so it breathes.
+  const SPARK_PAL = { k: "#0a2030", c: "#3fbcd8", W: "#eafcff" };
   const ART = {
-    pilgrimA: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
-    pilgrimB: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
-    sparkle: { pal: { w: "#ffffff", W: "#fff6b0" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
+    sparkA: { pal: SPARK_PAL, rows: [
+      "...........", ".....k.....", "....kck....", "...kcWck...", "..kcWWWck..", ".kcWWWWWck.", "..kcWWWck..", "...kcWck...", "....kck....", ".....k.....", "..........."] },
+    sparkB: { pal: SPARK_PAL, rows: [
+      "...........", "...........", ".....k.....", "....kck....", "...kcWck...", "..kcWWWck..", "...kcWck...", "....kck....", ".....k.....", "...........", "..........."] },
+    sparkle: { pal: { w: "#ffffff", W: "#cdf6ff" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
   };
 
   const TREE_PALS = {
@@ -129,40 +128,54 @@
     tri(15, 6, 36, 6); tri(7, 16, 36, 4); tri(23, 14, 36, 4);
     return sp.outline(INK);
   }
-  function paintCottage() {
-    const sp = new Sprite(36, 40), plaster = [232, 220, 192], timber = [110, 75, 45], roof = [178, 96, 52], roofD = [130, 66, 36], roofL = [205, 128, 72];
-    sp.rect(4, 22, 28, 15, plaster);
-    for (const x of [4, 10, 18, 26, 31]) sp.rect(x, 22, 1, 15, timber);
-    sp.rect(4, 22, 28, 1, timber); sp.rect(4, 29, 28, 1, timber);
-    sp.rect(15, 27, 6, 10, [70, 45, 30]); sp.set(15, 27, plaster); sp.set(20, 27, plaster); sp.set(19, 32, [200, 170, 90]);
-    sp.rect(7, 25, 4, 4, [255, 220, 120]); sp.rect(25, 25, 4, 4, [255, 220, 120]); sp.set(9, 25, timber); sp.set(9, 27, timber); sp.set(27, 25, timber); sp.set(27, 27, timber);
-    for (let y = 5; y < 23; y++) { const hw = 6 + (y - 5) * 0.75; for (let x = Math.round(18 - hw); x <= Math.round(18 + hw); x++) { const row = (y - 5) % 3 === 2, sh = hash2(x + y * 3, y) < 0.35; sp.set(x, y, row ? roofD : sh ? roofL : roof); } }
-    sp.rect(12, 5, 12, 1, roofL);
-    sp.rect(26, 1, 4, 9, [120, 110, 105]); sp.rect(25, 1, 6, 2, [80, 72, 68]);
-    return sp.outline(INK);
+  const GRANITE = { D: [96, 92, 88], M: [150, 146, 140], L: [198, 194, 188], G: [150, 238, 255] };
+  function graniteAt(x, y, hw, left, right) { // shaded column pixel: lit on the left, dark on the right
+    const hv = hash2(x * 3 + 7, y * 5 + 3);
+    if (x < left + 2) return GRANITE.L;
+    if (x > right - 2) return GRANITE.D;
+    return hv < 0.14 ? GRANITE.D : hv > 0.87 ? GRANITE.L : GRANITE.M;
   }
-  function paintTower() {
-    const sp = new Sprite(26, 60), sL = [180, 176, 170], sM = [140, 136, 130], sD = [95, 92, 88], bL = [90, 130, 200], bM = [58, 95, 168], bD = [40, 66, 120];
-    for (let y = 22; y < 58; y++) for (let x = 4; x < 22; x++) {
-      const t = (x - 4) / 17, h = hash2(x, y);
-      let c = t < 0.2 ? sL : t < 0.6 ? sM : sD; if (t < 0.35 && h < 0.3) c = sL; if (t > 0.5 && t < 0.75 && h < 0.4) c = sD;
-      if (y % 6 === 5 || ((x + (Math.floor(y / 6) % 2) * 4) % 8 === 0 && y % 6 !== 5 && h < 0.7)) c = shade(c, -0.25);
-      sp.set(x, y, c);
+  // Start of the line: a trilithon, two uprights under a lintel, with a cut ring that still holds light.
+  function paintFocus() {
+    const sp = new Sprite(36, 40);
+    const slab = (x0, y0, w, h) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) sp.set(x, y, graniteAt(x, y, 0, x0, x0 + w - 1)); };
+    slab(4, 15, 9, 24); slab(23, 15, 9, 24);
+    slab(1, 4, 34, 12);
+    for (let y = 0; y < 40; y++) for (let x = 0; x < 36; x++) {
+      if (!sp.get(x, y)) continue;
+      const d = Math.hypot(x - 18, y - 10);
+      if (d > 2.4 && d < 4.2) sp.set(x, y, GRANITE.G);
     }
-    for (let y = 4; y < 24; y++) { const hw = 1 + (y - 4) * 0.62; for (let x = Math.round(13 - hw); x <= Math.round(13 + hw); x++) sp.set(x, y, x < 11 ? bL : x > 15 ? bD : bM); }
-    sp.rect(4, 22, 18, 2, bD);
-    sp.rect(12, 0, 1, 5, INK); sp.rect(13, 0, 5, 3, [200, 50, 60]);
-    sp.rect(11, 32, 4, 6, [255, 220, 120]); sp.set(11, 32, sD); sp.set(14, 32, sD);
-    sp.rect(10, 50, 6, 8, [60, 42, 30]); sp.set(10, 50, sM); sp.set(15, 50, sM);
     return sp.outline(INK);
   }
-  function paintWell() {
-    const sp = new Sprite(28, 30), wood = [110, 75, 45], woodL = [150, 105, 62], stone = [150, 146, 140], stoneD = [100, 96, 92];
-    for (let y = 0; y < 8; y++) { const hw = 3 + y * 1.4; for (let x = Math.round(14 - hw); x <= Math.round(14 + hw); x++) sp.set(x, y, y % 3 === 2 ? wood : woodL); }
-    sp.rect(5, 8, 2, 13, wood); sp.rect(21, 8, 2, 13, wood);
-    sp.rect(13, 8, 1, 8, INK); sp.rect(11, 15, 5, 4, wood); sp.rect(11, 15, 5, 1, woodL);
-    sp.disc(14, 23, 11, 6, stone); sp.disc(14, 25, 11, 4.5, stoneD); sp.disc(14, 22, 7, 3, [60, 90, 150]); sp.disc(13, 21.5, 3, 1.2, [120, 160, 220]);
-    for (let x = 3; x < 25; x += 4) sp.set(x, 23 + Math.round(Math.sin(x) * 1.5), stoneD);
+  // Each waypoint: a leaning standing stone with a cut rune.
+  function paintMenhir() {
+    const sp = new Sprite(28, 40);
+    for (let y = 6; y < 38; y++) {
+      const t = (y - 6) / 32, hw = 3.8 + t * 3.0, lean = (1 - t) * 1.4;
+      const l = Math.round(14 - hw + lean), r = Math.round(14 + hw + lean);
+      for (let x = l; x <= r; x++) sp.set(x, y, graniteAt(x, y, hw, l, r));
+    }
+    for (let y = 0; y < 40; y++) for (let x = 0; x < 28; x++) {
+      if (!sp.get(x, y)) continue;
+      const d = Math.hypot(x - 14, y - 21);
+      if (d > 2.0 && d < 3.5) sp.set(x, y, GRANITE.G);
+    }
+    for (let x = 7; x < 22; x++) { const h = 1 + Math.floor(hash2(x, 91) * 2); for (let j = 0; j < h; j++) sp.set(x, 38 - j, j === 0 ? GRANITE.D : GRANITE.M); }
+    return sp.outline(INK);
+  }
+  // End of the line: a stacked cairn carrying a lit crystal.
+  function paintBeacon() {
+    const sp = new Sprite(26, 60), C = [120, 230, 255], W = [235, 252, 255];
+    for (let y = 58; y > 17; y -= 5) {
+      const t = (y - 17) / 41, hw = 4.0 + t * 5.4;
+      const l = Math.round(13 - hw), r = Math.round(13 + hw);
+      for (let j = 0; j < 5 && y - j > 16; j++) for (let x = l; x <= r; x++) sp.set(x, y - j, j === 0 ? GRANITE.D : graniteAt(x, y - j, hw, l, r));
+    }
+    for (let y = 2; y < 17; y++) {
+      const w = y < 9 ? (y - 1) * 0.62 : (16 - y) * 0.78;
+      for (let x = Math.round(13 - w); x <= Math.round(13 + w); x++) sp.set(x, y, x < 13 ? W : C);
+    }
     return sp.outline(INK);
   }
   function paintGround(style, R, F, seed) {
@@ -224,11 +237,11 @@
     ash: { top: "#ffb48a", bot: "#6d5a8a", dust: "#ff7a2a", ray: "#ffc9a0", trees: ["dead"] },
     stone: { top: "#b9d6ff", bot: "#5a6aa8", dust: "#7ff0ff", ray: "#c8e6ff", trees: ["shard"] },
   };
-  const TRAIL = [[214, 190, 140], [196, 170, 120], [226, 204, 158]];
+  const CHANNEL = [[26, 38, 54], [40, 58, 78]], GROOVE = [[92, 196, 226], [150, 232, 250]];
   function palette(b) {
     const style = b.groundStyle || "grass";
     const rockBase = shade(hexToRgb(b.rock), 0.28);
-    return { ground: ramp5(b.ground[0]), rock: [shade(rockBase, -0.55), shade(rockBase, -0.25), rockBase, shade(rockBase, 0.18), shade(rockBase, 0.42)], wood: ramp5("#9a6a3c"), zone: hexToRgb(b.zone), zoneHex: b.zone, zoneLight: shade(hexToRgb(b.zone), 0.5), flower: hexToRgb(b.flower || b.path), path: b.path, style, atmos: ATMOS[style] || ATMOS.grass };
+    return { ground: ramp5(b.ground[0]), rock: [shade(rockBase, -0.55), shade(rockBase, -0.25), rockBase, shade(rockBase, 0.18), shade(rockBase, 0.42)], ward: ramp5("#b9b5ad"), zone: hexToRgb(b.zone), zoneHex: b.zone, zoneLight: shade(hexToRgb(b.zone), 0.5), flower: hexToRgb(b.flower || b.path), path: b.path, style, atmos: ATMOS[style] || ATMOS.grass };
   }
 
   function createRenderer(canvas) {
@@ -238,12 +251,12 @@
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, pilgrimIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
-      pilgrimA: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal).toCanvas(), pilgrimB: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal).toCanvas(),
-      pilgrimAf: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal, true).toCanvas(), pilgrimBf: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal, true).toCanvas(),
+      sparkA: fromRows(ART.sparkA.rows, ART.sparkA.pal).toCanvas(),
+      sparkB: fromRows(ART.sparkB.rows, ART.sparkB.pal).toCanvas(),
       sparkle: fromRows(ART.sparkle.rows, ART.sparkle.pal).toCanvas(),
     };
     let props = null; // per-biome painted sprites
@@ -273,7 +286,7 @@
       const A = pal.atmos;
       props = {
         trees: A.trees.map((k, i) => (k === "dead" ? paintDead(i) : k === "cactus" ? paintCactus() : k === "shard" ? paintShard() : paintTree(k, i + 1))),
-        cottage: paintCottage(), tower: paintTower(), well: paintWell(),
+        focus: paintFocus(), beacon: paintBeacon(), menhir: paintMenhir(),
         ground: Array.from({ length: 10 }, (_, i) => paintGround(pal.style, pal.ground, pal.flower, i + 1)),
       };
     }
@@ -283,7 +296,7 @@
     function setHover(t) { hover = t; }
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
-    function setPilgrim(i) { pilgrimIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setSpark(i) { sparkIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -338,7 +351,7 @@
       const img = new ImageData(W, Hh), d = img.data;
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
-      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the pilgrim)
+      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the spark)
       const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
       const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
@@ -368,14 +381,17 @@
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (b.top[y * T + x]) solid[(b.oy + y - H) * W + b.ox + x] = 1;
         if (!sh.s) for (let x = 0; x < T; x++) { const br = b.bottomRow[x]; if (br < 0) continue; const fh = H - (hash2(tx * T + x, 99) < 0.35 ? 1 : 0); for (let k = 1; k <= fh; k++) solid[(b.oy - H + br + k) * W + b.ox + x] = 1; }
       }
-      // dirt trail along the bent route: a thin core that always connects, plus a wider band that keeps clear of blocks
-      const trail = new Uint8Array(W * Hh);
+      // the ley channel: ground scorched dark where the current runs, with a lit groove down the middle
+      const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
       const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
-      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); }
+      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 2); }
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
         const i = y * W + x;
         if (!trail[i] || solid[i]) continue;
-        const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
+        const h = hash2(x * 3, y * 7);
+        blend(x, y, h < 0.2 ? CHANNEL[1] : CHANNEL[0], 0.62);
+        if (core[i]) blend(x, y, h < 0.3 ? GROOVE[1] : GROOVE[0], 0.62);
+        cat[i] = 5;
       }
       // rubble where a natural rock was cleared: a scar of disturbed earth with outlined rock chunks (tap to restore for a refund)
       for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
@@ -405,7 +421,7 @@
       }
       // block faces and tops (row order so lower blocks cover the faces above)
       for (const b of blocks) {
-        const R = b.nat ? P.rock : P.wood;
+        const R = b.nat ? P.rock : P.ward;
         if (!b.s) for (let x = 0; x < T; x++) { // cliff face: extruded down from the plateau's (wobbly) bottom edge
           const br = b.bottomRow[x]; if (br < 0) continue;
           const fh = H - (hash2(b.tx * T + x, 99) < 0.35 ? 1 : 0);
@@ -437,9 +453,15 @@
             if (P.style === "snow" && n1 > 0.45 && rocky <= 0.62) c = mix(c, [240, 244, 250], 0.8);
             if (P.style === "ash" && n2 > 0.8 && rocky <= 0.62) c = mix(c, [255, 110, 50], 0.6);
             if (lit) c = mix(c, [255, 250, 232], 0.22);
-          } else { // log ends
-            const lx = x % 8 - 4, ly = y % 8 - 4, rr = lx * lx + ly * ly;
-            c = rr <= 3 ? R[3] : rr <= 7 ? R[1] : rr <= 11 ? R[2] : R[0]; if (rr <= 1) c = R[4];
+          } else { // a chalked ward stone: pale kerb carrying a sigil that links to its neighbours
+            const hv = hash2(b.tx * 32 + x + 5, b.ty * 32 + y + 9);
+            c = hv < 0.16 ? R[1] : hv > 0.86 ? R[4] : R[2];
+            if (lit) c = mix(c, [255, 253, 245], 0.3);
+            const dx = x - 16, dy = y - 16, d = Math.hypot(dx, dy);
+            const ring = d > 4.2 && d < 6.0;
+            const spoke = (b.n && Math.abs(dx) < 1.6 && dy < 0) || (b.s && Math.abs(dx) < 1.6 && dy > 0)
+              || (b.w && Math.abs(dy) < 1.6 && dx < 0) || (b.e && Math.abs(dy) < 1.6 && dx > 0);
+            if (ring || spoke) c = [232, 250, 255];
           }
           set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3, b.ty);
         }
@@ -484,9 +506,9 @@
       }
       game.waypoints.forEach(([x, y], i) => {
         const ox = PAD + x * T, oy = PAD + y * T, last = i === game.waypoints.length - 1;
-        if (i === 0) { propShadow(ox + 18, oy + 22, 17, 5); blit(props.cottage, ox - 2, oy - 14, 6, y); }
-        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.tower, ox + 3, oy - 34, 6, y); }
-        else { propShadow(ox + 16, oy + 22, 12, 4); blit(props.well, ox + 2, oy - 4, 6, y); }
+        if (i === 0) { propShadow(ox + 16, oy + 24, 17, 5); blit(props.focus, ox - 2, oy - 16, 6, y); }
+        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.beacon, ox + 3, oy - 34, 6, y); }
+        else { propShadow(ox + 16, oy + 24, 10, 4); blit(props.menhir, ox + 2, oy - 14, 6, y); }
       });
       // zone badges
       const plotBuf = (x, y, w, h, c) => { for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) set(x + xx, y + yy, c); };
@@ -501,7 +523,7 @@
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
-      // per-row overlays of block/prop pixels, drawn in front of the pilgrim when he stands above that row
+      // per-row overlays of block/prop pixels, drawn in front of the spark when he stands above that row
       rowOverlays = [];
       for (let r = 0; r < rows; r++) {
         const y0 = Math.max(0, PAD + r * T - 36), y1 = Math.min(Hh, PAD + (r + 1) * T);
@@ -567,7 +589,7 @@
         if (last && last[0] === x && last[1] === y) continue;
         pathPx.push([x, y, dir]);
       }
-      pilgrimIdx = Math.min(pilgrimIdx, Math.max(0, pathPx.length - 1));
+      sparkIdx = Math.min(sparkIdx, Math.max(0, pathPx.length - 1));
     }
 
     /* ---------- scene ---------- */
@@ -588,20 +610,27 @@
         const corner = (cx, cy, dx, dy) => { rect(cx, cy, 7 * dx, 2 * dy, "#fff"); rect(cx, cy, 2 * dx, 7 * dy, "#fff"); };
         c.save(); c.translate(hx, hy); corner(0, 0, 1, 1); c.translate(T, 0); corner(0, 0, -1, 1); c.translate(0, T); corner(0, 0, -1, -1); c.translate(-T, 0); corner(0, 0, 1, -1); c.restore();
       }
-      if (now < errorUntil) for (let i = 0; i < pathPx.length; i += 2) { const p = pathPx[i]; rect(p[0] - 2, p[1] - 2, 4, 4, ((i >> 3) & 1) ? "#ff3b5c" : "#ffd0d8"); }
+      // the current: a steady thread with bright pulses running toward the beacon
+      const err = now < errorUntil;
+      for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ff3b5c" : "#8ff0ff"); }
+      const flow = reduced ? 0 : Math.floor(now / 22);
+      for (let i = 0; i < pathPx.length; i++) {
+        if (((i - flow) % 30 + 30) % 30 > 3) continue;
+        const p = pathPx[i]; rect(p[0] - 2, p[1] - 2, 4, 4, err ? "#ffd0d8" : "#ffffff");
+      }
       game.waypoints.forEach(([x, y], i) => {
         if (i === 0 || i === game.waypoints.length - 1) return;
         const txt = String(i), tw = textWidth(txt, 2);
         pixelText(rect, txt, x * T + 16 - Math.floor(tw / 2), y * T - 16, 2, "#fff", "#1e1710");
       });
-      const p = pathPx[pilgrimIdx];
+      const p = pathPx[sparkIdx];
       if (p) {
-        const walking = pilgrimIdx > 0 && pilgrimIdx < pathPx.length - 1;
-        const frame = walking ? Math.floor(now / 140) % 2 : 0, left = p[2] < 0;
-        const sp = frame ? (left ? sprites.pilgrimBf : sprites.pilgrimB) : (left ? sprites.pilgrimAf : sprites.pilgrimA);
-        c.fillStyle = "rgba(30,23,16,0.35)"; c.fillRect(p[0] - 5, p[1] - 2, 10, 3);
-        c.drawImage(sp, p[0] - 8, p[1] - 23);
-        // blocks and props whose footprint is below the pilgrim stand in front of him
+        for (let k = 10; k > 0; k--) { // the tail it drags behind
+          const q = pathPx[sparkIdx - k * 2];
+          if (q) rect(q[0] - 1, q[1] - 1, 2, 2, "rgba(190,244,255," + (0.5 - k * 0.045).toFixed(2) + ")");
+        }
+        c.drawImage(Math.floor(now / 180) % 2 ? sprites.sparkB : sprites.sparkA, p[0] - 5, p[1] - 5);
+        // blocks and props whose footprint is below the spark stand in front of it
         const cr = Math.floor(p[1] / T);
         for (let r = cr + 1; r < Math.min(game.rows, cr + 3); r++) { const o = rowOverlays[r]; if (o) c.drawImage(o.cv, -PAD, o.y0 - PAD); }
       }
@@ -626,14 +655,23 @@
       const pulse = reduced ? 0.5 : (Math.sin(now / 600) + 1) / 2;
       const radial = (x, y, r, col, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); };
       for (const z of game.zones) radial((z.x + 0.5) * T, (z.y + 0.5) * T, (z.r + 1) * T, pal.zoneHex, 0.45 + pulse * 0.2);
+      if (!(now < errorUntil)) { // the current glows along its whole length
+        c.strokeStyle = rgba("#7fe4ff", 0.24); c.lineWidth = 3; c.lineJoin = "round"; c.lineCap = "round";
+        c.beginPath();
+        for (let i = 0; i < pathPx.length; i += 3) { const q = pathPx[i]; i === 0 ? c.moveTo(q[0], q[1]) : c.lineTo(q[0], q[1]); }
+        c.stroke();
+        const flow = reduced ? 0 : Math.floor(now / 22);
+        c.fillStyle = "rgba(230,250,255,0.5)";
+        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.3, 0, Math.PI * 2); c.fill(); }
+      }
       game.waypoints.forEach(([x, y], i) => {
         const last = i === game.waypoints.length - 1;
-        if (i === 0) { radial(x * T + 7, y * T + 13, T * 0.7, "#ffd27a", 0.9); radial(x * T + 25, y * T + 13, T * 0.7, "#ffd27a", 0.9); }
-        else if (last) radial(x * T + 16, y * T + 1, T * 0.8, "#ffd27a", 0.9);
-        else radial(x * T + 16, y * T + 18, T * 0.9, "#7fd0ff", 0.35 + pulse * 0.2);
+        if (i === 0) radial(x * T + 16, y * T + 10, T * 0.7, "#9fe8ff", 0.35 + pulse * 0.15);
+        else if (last) radial(x * T + 16, y * T - 3, T * 0.95, "#bdf2ff", 0.5 + pulse * 0.15);
+        else radial(x * T + 16, y * T + 5, T * 0.65, "#9fe8ff", 0.28 + pulse * 0.15);
       });
-      const p = pathPx[pilgrimIdx];
-      if (p) radial(p[0], p[1] - 10, T * 1.6, "#ffd68c", 0.8);
+      const p = pathPx[sparkIdx];
+      if (p) radial(p[0], p[1], T * 1.2, "#cdf6ff", 0.6);
       for (const e of effects) if (e.type === "burst") { const k = (now - e.t0) / 1000 / e.life; radial((e.x + 0.5) * T, (e.y + 0.5) * T, T * 1.5, "#ffffff", (1 - k) * 0.9); }
     }
 
@@ -700,7 +738,7 @@
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setPilgrim, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };

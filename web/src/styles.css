@@ -97,7 +97,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .board.shake { animation: shake .3s steps(2); }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .toast {
-  position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 10px);
+  position: absolute; left: 50%; bottom: 58px; transform: translate(-50%, 10px);
   background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); box-shadow: 0 0 0 2px var(--win-outer);
   color: var(--text); padding: 7px 14px; border-radius: 4px; font-size: 15px;
   opacity: 0; pointer-events: none; transition: opacity .15s steps(3), transform .15s steps(3); white-space: nowrap;
@@ -275,3 +275,5 @@ body.immersive .fs-overlay { display: block; }
 .walk-ctl #walkBtn.running { color: var(--danger); border-color: var(--danger); }
 .walk-ctl #speedBtn { min-width: 48px; justify-content: center; }
 body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }
+
+body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }

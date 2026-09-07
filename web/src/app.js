@@ -20,7 +20,7 @@
   let soundOn = store.get("sound", true);
   let fxOn = store.get("fx", true);
   const SPEEDS = [0.5, 1, 2, 3];
-  const pilgrim = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
+  const spark = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
   let immersive = store.get("immersive", false);
 
   /* ---------- sound ---------- */
@@ -84,7 +84,7 @@
         segments = M.routeWaypoints(walls, game.cols, game.rows, game.waypoints).segments;
       }
     }
-    R.setGame(game, walls, segments); pilgrimReset();
+    R.setGame(game, walls, segments); sparkReset();
     layout(true);
     $("seedTitle").textContent = seedLabel(seed);
     $("seedSub").textContent = " · " + game.biome.name + " ⛏" + game.removalCost;
@@ -140,7 +140,7 @@
       R.flashError();
       wrap.classList.remove("shake"); void wrap.offsetWidth; if (!reduced) wrap.classList.add("shake");
       buzz(40); sfx.error();
-      toast(res.reason === "energy" ? "Not enough work left" : res.reason === "blocked" ? "That would cut off the sanctuary" : res.reason === "waypoint" ? "Wayshrines can't be moved" : "Can't do that", "error");
+      toast(res.reason === "energy" ? "Not enough chalk left" : res.reason === "blocked" ? "That would cut off the beacon" : res.reason === "waypoint" ? "Anchor stones can't be moved" : "Can't do that", "error");
       return;
     }
     history.push({ walls, ap, segments, score });
@@ -148,27 +148,27 @@
     const delta = res.score - score;
     const placed = res.walls[y * game.cols + x] === 1;
     walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
-    R.setState(walls, segments); pilgrimReset();
+    R.setState(walls, segments); sparkReset();
     R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? "#fff0c8" : game.biome.zone, seed: Math.random() * 6 });
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
     const wasRock = game.natural[y * game.cols + x] === 1;
-    if (wasRock && !placed) toast("Boulder split (−" + game.removalCost + " work). Tap the rubble to rebuild it and get the work back");
-    else if (wasRock && placed) toast("Boulder rebuilt (+" + game.removalCost + " work)", "good");
+    if (wasRock && !placed) toast("Seam cut (−" + game.removalCost + " chalk). Tap the rubble to re-lay it and get the chalk back");
+    else if (wasRock && placed) toast("Seam re-laid (+" + game.removalCost + " chalk)", "good");
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
     saveProgress(); updateHud();
   }
   function undo() {
     const h = history.pop(); if (!h) return;
     walls = h.walls; ap = h.ap; segments = h.segments; score = h.score;
-    R.setState(walls, segments); pilgrimReset(); sfx.remove(); saveProgress(); updateHud();
+    R.setState(walls, segments); sparkReset(); sfx.remove(); saveProgress(); updateHud();
   }
   function reset() {
     if (M.diffMoves(game, walls).length === 0) return;
     history.push({ walls, ap, segments, score });
     walls = new Uint8Array(game.natural); ap = game.maxActionPoints; segments = game.baseSegments; score = game.baseScore;
-    R.setState(walls, segments); pilgrimReset(); saveProgress(); updateHud(); toast("Roadworks cleared");
+    R.setState(walls, segments); sparkReset(); saveProgress(); updateHud(); toast("Wards rubbed out");
   }
 
   /* ---------- view / layout ---------- */
@@ -278,25 +278,25 @@
   });
 
   /* ---------- render loop ---------- */
-  function pilgrimReset() { pilgrim.running = false; pilgrim.idx = 0; R.setPilgrim(0); walkUi(); }
+  function sparkReset() { spark.running = false; spark.idx = 0; R.setSpark(0); walkUi(); }
   function walkUi() {
-    $("walkBtn").classList.toggle("running", pilgrim.running);
-    $("walkBtn").querySelector(".ico").textContent = pilgrim.running ? "■" : "▶";
-    $("walkLabel").textContent = pilgrim.running ? "STOP" : pilgrim.idx > 0 ? "AGAIN" : "SET OUT";
-    $("speedBtn").textContent = pilgrim.speed + "×";
+    $("walkBtn").classList.toggle("running", spark.running);
+    $("walkBtn").querySelector(".ico").textContent = spark.running ? "■" : "▶";
+    $("walkLabel").textContent = spark.running ? "STOP" : spark.idx > 0 ? "AGAIN" : "RELEASE";
+    $("speedBtn").textContent = spark.speed + "×";
   }
   $("walkBtn").onclick = () => {
-    if (pilgrim.running) { pilgrim.running = false; walkUi(); return; }
-    pilgrim.running = true; pilgrim.t0 = performance.now(); pilgrim.idx = 0; R.setPilgrim(0); sfx.place(); walkUi();
+    if (spark.running) { spark.running = false; walkUi(); return; }
+    spark.running = true; spark.t0 = performance.now(); spark.idx = 0; R.setSpark(0); sfx.place(); walkUi();
   };
-  $("speedBtn").onclick = () => { pilgrim.speed = SPEEDS[(SPEEDS.indexOf(pilgrim.speed) + 1) % SPEEDS.length]; store.set("speed", pilgrim.speed); walkUi(); };
+  $("speedBtn").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
   walkUi();
   function frame(now) {
-    if (pilgrim.running) {
+    if (spark.running) {
       const len = R.pathLength();
-      pilgrim.idx = Math.floor((now - pilgrim.t0) / 1000 * 56 * pilgrim.speed);
-      if (pilgrim.idx >= len - 1) { pilgrim.idx = len - 1; pilgrim.running = false; sfx.good(); walkUi(); }
-      R.setPilgrim(pilgrim.idx);
+      spark.idx = Math.floor((now - spark.t0) / 1000 * 56 * spark.speed);
+      if (spark.idx >= len - 1) { spark.idx = len - 1; spark.running = false; sfx.good(); walkUi(); }
+      R.setSpark(spark.idx);
     }
     R.setView(view);
     R.draw(now);
@@ -414,7 +414,7 @@
       entries.slice(0, 50).forEach((e) => {
         const li = document.createElement("li");
         li.className = "lb-row" + (e.me ? " me" : "") + (e.rank <= 3 ? " top" : "");
-        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " work left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
+        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " chalk left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
         li.querySelector(".name").textContent = e.username || "Anonymous";
         list.appendChild(li);
       });
@@ -505,7 +505,7 @@
   $("nameSave").onclick = () => { const n = cleanName($("nameInput").value); if (n) { playerName = n; store.set("name", n); toast("Name saved", "good"); } };
   function cleanName(s) { return String(s || "").replace(/[^\w \-.'!?]/g, "").trim().slice(0, 16); }
   $("menuDaily").onclick = () => { closeSheets(); loadGame(M.dailySeed()); };
-  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New valley: " + game.seed); };
+  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New survey: " + game.seed); };
   $("seedGo").onclick = () => { const s = M.sanitizeSeed($("seedInput").value); if (!s) return; closeSheets(); loadGame(s); };
   $("seedInput").addEventListener("keydown", (e) => { if (e.key === "Enter") $("seedGo").click(); });
   $("menuHow").onclick = () => showSheet("sheetHow");
@@ -515,7 +515,7 @@
   sw.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); sw.setAttribute("aria-checked", String(soundOn)); if (soundOn) sfx.place(); };
   $("btnShare").onclick = async () => {
     const url = shareUrl();
-    const text = "I blessed the valley for " + fmt(score) + " on Mazer's " + seedLabel(game.seed) + " road. Beat me: seed “" + game.seed + "”";
+    const text = "I drew " + fmt(score) + " charge on Mazer's " + seedLabel(game.seed) + " survey. Beat me: seed “" + game.seed + "”";
     try {
       if (navigator.share) { await navigator.share({ title: "Mazer", text, url }); return; }
     } catch (e) { if (e && e.name === "AbortError") return; }
@@ -532,7 +532,7 @@
     const now = new Date();
     const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
     const ms = next - now.getTime(), h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
-    $("dailyCountdown").textContent = "Same valley for everyone · next one in " + h + "h " + m + "m";
+    $("dailyCountdown").textContent = "Same ground for everyone · next one in " + h + "h " + m + "m";
     $("menuSub").textContent = "Seed: " + game.seed + " · " + game.cols + "×" + game.rows + " · " + game.biome.name + " / " + game.wallStyle;
   }
 

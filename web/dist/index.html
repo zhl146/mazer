@@ -102,7 +102,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .board.shake { animation: shake .3s steps(2); }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .toast {
-  position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 10px);
+  position: absolute; left: 50%; bottom: 58px; transform: translate(-50%, 10px);
   background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); box-shadow: 0 0 0 2px var(--win-outer);
   color: var(--text); padding: 7px 14px; border-radius: 4px; font-size: 15px;
   opacity: 0; pointer-events: none; transition: opacity .15s steps(3), transform .15s steps(3); white-space: nowrap;
@@ -281,6 +281,8 @@ body.immersive .fs-overlay { display: block; }
 .walk-ctl #speedBtn { min-width: 48px; justify-content: center; }
 body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }
 
+body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
+
 </style>
 
 <div id="app">
@@ -290,17 +292,17 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot">◆</span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
     </div>
     <div class="hud-score">
-      <div class="label">Blessing</div>
+      <div class="label">Charge</div>
       <div class="score" id="score">0</div>
       <div class="best" id="best">Base <b>0</b></div>
     </div>
   </header>
-  <div class="energy" id="energy" role="progressbar" aria-label="Work remaining">
+  <div class="energy" id="energy" role="progressbar" aria-label="Chalk remaining">
     <div class="energy-fill" id="energyFill"></div>
-    <div class="energy-text"><span class="lbl">WORK</span><span id="energyText">0 / 0</span></div>
+    <div class="energy-text"><span class="lbl">CHALK</span><span id="energyText">0 / 0</span></div>
   </div>
   <main class="board" id="boardWrap">
-    <canvas id="board" aria-label="The valley. Tap a tile to raise or remove a wall."></canvas>
+    <canvas id="board" aria-label="The survey ground. Tap a tile to chalk or rub out a ward."></canvas>
     <div class="zoom-btns">
       <button id="zoomIn" aria-label="Zoom in">+</button>
       <button id="zoomOut" aria-label="Zoom out">−</button>
@@ -308,7 +310,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     </div>
     <button class="fs-btn" id="fsEnter" aria-label="Full screen" title="Full screen">⛶</button>
     <div class="walk-ctl">
-      <button id="walkBtn" aria-label="Send the pilgrim"><span class="ico">▶</span><span id="walkLabel">SET OUT</span></button>
+      <button id="walkBtn" aria-label="Release the spark"><span class="ico">▶</span><span id="walkLabel">RELEASE</span></button>
       <button id="speedBtn" aria-label="Courier speed" title="Speed">1×</button>
     </div>
     <div class="fs-overlay" id="fsOverlay">
@@ -348,15 +350,15 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   <div class="sheet-head"><div><h2>MENU</h2><div class="sub" id="menuSub"></div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="menu-list">
-      <button class="menu-btn primary" id="menuDaily"><span>Today's valley<small id="dailyCountdown">Everyone walks the same valley for 24 hours</small></span><span class="kbd">DAILY</span></button>
-      <button class="menu-btn" id="menuRandom"><span>New valley<small>Fresh land, boulders and hallowed ground. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
+      <button class="menu-btn primary" id="menuDaily"><span>Today's survey<small id="dailyCountdown">Everyone surveys the same ground for 24 hours</small></span><span class="kbd">DAILY</span></button>
+      <button class="menu-btn" id="menuRandom"><span>New survey<small>Fresh ground, iron seams and charged veins. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
     </div>
     <div class="section-label">This puzzle</div>
     <div class="menu-grid">
-      <button class="menu-btn" id="menuSubmit"><span>Submit blessing</span><span class="kbd">▲</span></button>
+      <button class="menu-btn" id="menuSubmit"><span>Submit charge</span><span class="kbd">▲</span></button>
       <button class="menu-btn" id="menuRanks"><span>Leaderboard</span><span class="kbd">#</span></button>
       <button class="menu-btn" id="menuShare"><span>Share</span><span class="kbd">→</span></button>
-      <button class="menu-btn" id="menuReset"><span>Undo all work</span><span class="kbd">↺</span></button>
+      <button class="menu-btn" id="menuReset"><span>Rub out all wards</span><span class="kbd">↺</span></button>
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
@@ -380,23 +382,23 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
 <section class="sheet" id="sheetHow" aria-label="How to play">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Make the road long. Make it holy.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Run the line long. Run it through the veins.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="how">
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>Each season a <b>pilgrim</b> walks from the <b>village</b> to the high <b>sanctuary</b>, stopping at each numbered <b>wayshrine</b> in turn. Pilgrims are footsore: they always take the <b>shortest road</b> they can find. Press <b>Set out</b> to watch.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p>You are the valley's <b>waymaker</b>. <b>Tap a tile</b> to raise a wall and push the road aside. Each wall costs <b>1 work</b>. Tap it again to take it down and get the work back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Boulders</b> were already there. Splitting one costs more work, shown on the valley chip, and leaves <b>rubble</b> behind. Tap the rubble to rebuild the boulder and get the work back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Hallowed ground</b> multiplies every step taken on it. The valley is blessed by how far the pilgrim walks and how much of it is holy, so wind the road through the gold.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>The pilgrim slips diagonally between walls that only touch at a corner, so join them edge to edge. You can never wall the road off: a move that <b>cuts off the sanctuary</b> flashes red and is undone.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your blessing. Everyone in the world walks the same <b>daily</b> valley, so bring friends.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A <b>spark</b> of drawn power runs from the <b>focus stone</b> to the <b>beacon</b>, touching each numbered <b>anchor stone</b> in turn. Current takes the <b>path of least resistance</b>, so it follows the easiest ground. Press <b>Release</b> to watch it run.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p>You are the <b>surveyor</b>. <b>Tap a tile</b> to chalk a <b>ward</b> there: the current will not cross it, so the line bends around. Each ward costs <b>1 chalk</b>. Tap it again to rub it out and get the chalk back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Iron seams</b> run through the rock and the current cannot cross them either. Cutting one costs more chalk, shown on the survey chip, and leaves <b>rubble</b> behind. Tap the rubble to re-lay the seam and get the chalk back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Charged ground</b> is thick with raw power. Every stretch the spark crosses there counts for far more. You bank charge for the distance it runs and the ground it runs through, so wind the line through the veins.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>The spark slips diagonally between wards that only touch at a corner, so join them edge to edge. You can never close the circuit off: a move that <b>cuts off the beacon</b> flashes red and is undone.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your charge. Everyone in the world surveys the same <b>daily</b> ground, so bring friends.</p></div>
     </div>
-    <button class="cta" id="howDone">Take up the work</button>
+    <button class="cta" id="howDone">Begin the survey</button>
   </div>
 </section>
 
 <section class="sheet" id="sheetAuth" aria-label="Log in">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Blessings are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Charges are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <form id="authForm" autocomplete="on">
       <div class="section-label">Username</div>
@@ -412,7 +414,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
 <section class="sheet" id="sheetName" aria-label="Choose a name">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your blessing. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your charge. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="field"><input id="nameInput2" placeholder="Name" maxlength="16" autocomplete="nickname"><button id="nameSubmit">Submit score</button></div>
   </div>
@@ -851,7 +853,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   const T = 32;       // pixels per tile
   const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
-  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the pilgrim slips through
+  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the spark slips through
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -913,15 +915,14 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     return sp;
   }
 
-  const PILGRIM_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
-  const PILGRIM_BODY = [
-    "......kkkk......", "....kkrRRRkk....", "...krRRRRRRRk...", "..kRRRRRRRRRRk..", ".kkkkkkkkkkkkkk.", "...khhhhhhhhk...", "...khsssssshk...", "...kssksskssk...",
-    "...kssssssssk...", "....kssssssk....", "...kkCCCCCCkk...", "..kCkccccccckCk.", "..kCkccccccckCk.", "..kCkbccccbbkCk.", "..kCkccccccckCk.", "..kckccccccckck.",
-    "...kkccccccckk..", "....kccccccck...", "....kkkkkkkkk..."];
+  // The spark: a mote of drawn power running the line. Two frames so it breathes.
+  const SPARK_PAL = { k: "#0a2030", c: "#3fbcd8", W: "#eafcff" };
   const ART = {
-    pilgrimA: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
-    pilgrimB: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
-    sparkle: { pal: { w: "#ffffff", W: "#fff6b0" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
+    sparkA: { pal: SPARK_PAL, rows: [
+      "...........", ".....k.....", "....kck....", "...kcWck...", "..kcWWWck..", ".kcWWWWWck.", "..kcWWWck..", "...kcWck...", "....kck....", ".....k.....", "..........."] },
+    sparkB: { pal: SPARK_PAL, rows: [
+      "...........", "...........", ".....k.....", "....kck....", "...kcWck...", "..kcWWWck..", "...kcWck...", "....kck....", ".....k.....", "...........", "..........."] },
+    sparkle: { pal: { w: "#ffffff", W: "#cdf6ff" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
   };
 
   const TREE_PALS = {
@@ -973,40 +974,54 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     tri(15, 6, 36, 6); tri(7, 16, 36, 4); tri(23, 14, 36, 4);
     return sp.outline(INK);
   }
-  function paintCottage() {
-    const sp = new Sprite(36, 40), plaster = [232, 220, 192], timber = [110, 75, 45], roof = [178, 96, 52], roofD = [130, 66, 36], roofL = [205, 128, 72];
-    sp.rect(4, 22, 28, 15, plaster);
-    for (const x of [4, 10, 18, 26, 31]) sp.rect(x, 22, 1, 15, timber);
-    sp.rect(4, 22, 28, 1, timber); sp.rect(4, 29, 28, 1, timber);
-    sp.rect(15, 27, 6, 10, [70, 45, 30]); sp.set(15, 27, plaster); sp.set(20, 27, plaster); sp.set(19, 32, [200, 170, 90]);
-    sp.rect(7, 25, 4, 4, [255, 220, 120]); sp.rect(25, 25, 4, 4, [255, 220, 120]); sp.set(9, 25, timber); sp.set(9, 27, timber); sp.set(27, 25, timber); sp.set(27, 27, timber);
-    for (let y = 5; y < 23; y++) { const hw = 6 + (y - 5) * 0.75; for (let x = Math.round(18 - hw); x <= Math.round(18 + hw); x++) { const row = (y - 5) % 3 === 2, sh = hash2(x + y * 3, y) < 0.35; sp.set(x, y, row ? roofD : sh ? roofL : roof); } }
-    sp.rect(12, 5, 12, 1, roofL);
-    sp.rect(26, 1, 4, 9, [120, 110, 105]); sp.rect(25, 1, 6, 2, [80, 72, 68]);
-    return sp.outline(INK);
+  const GRANITE = { D: [96, 92, 88], M: [150, 146, 140], L: [198, 194, 188], G: [150, 238, 255] };
+  function graniteAt(x, y, hw, left, right) { // shaded column pixel: lit on the left, dark on the right
+    const hv = hash2(x * 3 + 7, y * 5 + 3);
+    if (x < left + 2) return GRANITE.L;
+    if (x > right - 2) return GRANITE.D;
+    return hv < 0.14 ? GRANITE.D : hv > 0.87 ? GRANITE.L : GRANITE.M;
   }
-  function paintTower() {
-    const sp = new Sprite(26, 60), sL = [180, 176, 170], sM = [140, 136, 130], sD = [95, 92, 88], bL = [90, 130, 200], bM = [58, 95, 168], bD = [40, 66, 120];
-    for (let y = 22; y < 58; y++) for (let x = 4; x < 22; x++) {
-      const t = (x - 4) / 17, h = hash2(x, y);
-      let c = t < 0.2 ? sL : t < 0.6 ? sM : sD; if (t < 0.35 && h < 0.3) c = sL; if (t > 0.5 && t < 0.75 && h < 0.4) c = sD;
-      if (y % 6 === 5 || ((x + (Math.floor(y / 6) % 2) * 4) % 8 === 0 && y % 6 !== 5 && h < 0.7)) c = shade(c, -0.25);
-      sp.set(x, y, c);
+  // Start of the line: a trilithon, two uprights under a lintel, with a cut ring that still holds light.
+  function paintFocus() {
+    const sp = new Sprite(36, 40);
+    const slab = (x0, y0, w, h) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) sp.set(x, y, graniteAt(x, y, 0, x0, x0 + w - 1)); };
+    slab(4, 15, 9, 24); slab(23, 15, 9, 24);
+    slab(1, 4, 34, 12);
+    for (let y = 0; y < 40; y++) for (let x = 0; x < 36; x++) {
+      if (!sp.get(x, y)) continue;
+      const d = Math.hypot(x - 18, y - 10);
+      if (d > 2.4 && d < 4.2) sp.set(x, y, GRANITE.G);
     }
-    for (let y = 4; y < 24; y++) { const hw = 1 + (y - 4) * 0.62; for (let x = Math.round(13 - hw); x <= Math.round(13 + hw); x++) sp.set(x, y, x < 11 ? bL : x > 15 ? bD : bM); }
-    sp.rect(4, 22, 18, 2, bD);
-    sp.rect(12, 0, 1, 5, INK); sp.rect(13, 0, 5, 3, [200, 50, 60]);
-    sp.rect(11, 32, 4, 6, [255, 220, 120]); sp.set(11, 32, sD); sp.set(14, 32, sD);
-    sp.rect(10, 50, 6, 8, [60, 42, 30]); sp.set(10, 50, sM); sp.set(15, 50, sM);
     return sp.outline(INK);
   }
-  function paintWell() {
-    const sp = new Sprite(28, 30), wood = [110, 75, 45], woodL = [150, 105, 62], stone = [150, 146, 140], stoneD = [100, 96, 92];
-    for (let y = 0; y < 8; y++) { const hw = 3 + y * 1.4; for (let x = Math.round(14 - hw); x <= Math.round(14 + hw); x++) sp.set(x, y, y % 3 === 2 ? wood : woodL); }
-    sp.rect(5, 8, 2, 13, wood); sp.rect(21, 8, 2, 13, wood);
-    sp.rect(13, 8, 1, 8, INK); sp.rect(11, 15, 5, 4, wood); sp.rect(11, 15, 5, 1, woodL);
-    sp.disc(14, 23, 11, 6, stone); sp.disc(14, 25, 11, 4.5, stoneD); sp.disc(14, 22, 7, 3, [60, 90, 150]); sp.disc(13, 21.5, 3, 1.2, [120, 160, 220]);
-    for (let x = 3; x < 25; x += 4) sp.set(x, 23 + Math.round(Math.sin(x) * 1.5), stoneD);
+  // Each waypoint: a leaning standing stone with a cut rune.
+  function paintMenhir() {
+    const sp = new Sprite(28, 40);
+    for (let y = 6; y < 38; y++) {
+      const t = (y - 6) / 32, hw = 3.8 + t * 3.0, lean = (1 - t) * 1.4;
+      const l = Math.round(14 - hw + lean), r = Math.round(14 + hw + lean);
+      for (let x = l; x <= r; x++) sp.set(x, y, graniteAt(x, y, hw, l, r));
+    }
+    for (let y = 0; y < 40; y++) for (let x = 0; x < 28; x++) {
+      if (!sp.get(x, y)) continue;
+      const d = Math.hypot(x - 14, y - 21);
+      if (d > 2.0 && d < 3.5) sp.set(x, y, GRANITE.G);
+    }
+    for (let x = 7; x < 22; x++) { const h = 1 + Math.floor(hash2(x, 91) * 2); for (let j = 0; j < h; j++) sp.set(x, 38 - j, j === 0 ? GRANITE.D : GRANITE.M); }
+    return sp.outline(INK);
+  }
+  // End of the line: a stacked cairn carrying a lit crystal.
+  function paintBeacon() {
+    const sp = new Sprite(26, 60), C = [120, 230, 255], W = [235, 252, 255];
+    for (let y = 58; y > 17; y -= 5) {
+      const t = (y - 17) / 41, hw = 4.0 + t * 5.4;
+      const l = Math.round(13 - hw), r = Math.round(13 + hw);
+      for (let j = 0; j < 5 && y - j > 16; j++) for (let x = l; x <= r; x++) sp.set(x, y - j, j === 0 ? GRANITE.D : graniteAt(x, y - j, hw, l, r));
+    }
+    for (let y = 2; y < 17; y++) {
+      const w = y < 9 ? (y - 1) * 0.62 : (16 - y) * 0.78;
+      for (let x = Math.round(13 - w); x <= Math.round(13 + w); x++) sp.set(x, y, x < 13 ? W : C);
+    }
     return sp.outline(INK);
   }
   function paintGround(style, R, F, seed) {
@@ -1068,11 +1083,11 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     ash: { top: "#ffb48a", bot: "#6d5a8a", dust: "#ff7a2a", ray: "#ffc9a0", trees: ["dead"] },
     stone: { top: "#b9d6ff", bot: "#5a6aa8", dust: "#7ff0ff", ray: "#c8e6ff", trees: ["shard"] },
   };
-  const TRAIL = [[214, 190, 140], [196, 170, 120], [226, 204, 158]];
+  const CHANNEL = [[26, 38, 54], [40, 58, 78]], GROOVE = [[92, 196, 226], [150, 232, 250]];
   function palette(b) {
     const style = b.groundStyle || "grass";
     const rockBase = shade(hexToRgb(b.rock), 0.28);
-    return { ground: ramp5(b.ground[0]), rock: [shade(rockBase, -0.55), shade(rockBase, -0.25), rockBase, shade(rockBase, 0.18), shade(rockBase, 0.42)], wood: ramp5("#9a6a3c"), zone: hexToRgb(b.zone), zoneHex: b.zone, zoneLight: shade(hexToRgb(b.zone), 0.5), flower: hexToRgb(b.flower || b.path), path: b.path, style, atmos: ATMOS[style] || ATMOS.grass };
+    return { ground: ramp5(b.ground[0]), rock: [shade(rockBase, -0.55), shade(rockBase, -0.25), rockBase, shade(rockBase, 0.18), shade(rockBase, 0.42)], ward: ramp5("#b9b5ad"), zone: hexToRgb(b.zone), zoneHex: b.zone, zoneLight: shade(hexToRgb(b.zone), 0.5), flower: hexToRgb(b.flower || b.path), path: b.path, style, atmos: ATMOS[style] || ATMOS.grass };
   }
 
   function createRenderer(canvas) {
@@ -1082,12 +1097,12 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, pilgrimIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
-      pilgrimA: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal).toCanvas(), pilgrimB: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal).toCanvas(),
-      pilgrimAf: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal, true).toCanvas(), pilgrimBf: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal, true).toCanvas(),
+      sparkA: fromRows(ART.sparkA.rows, ART.sparkA.pal).toCanvas(),
+      sparkB: fromRows(ART.sparkB.rows, ART.sparkB.pal).toCanvas(),
       sparkle: fromRows(ART.sparkle.rows, ART.sparkle.pal).toCanvas(),
     };
     let props = null; // per-biome painted sprites
@@ -1117,7 +1132,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const A = pal.atmos;
       props = {
         trees: A.trees.map((k, i) => (k === "dead" ? paintDead(i) : k === "cactus" ? paintCactus() : k === "shard" ? paintShard() : paintTree(k, i + 1))),
-        cottage: paintCottage(), tower: paintTower(), well: paintWell(),
+        focus: paintFocus(), beacon: paintBeacon(), menhir: paintMenhir(),
         ground: Array.from({ length: 10 }, (_, i) => paintGround(pal.style, pal.ground, pal.flower, i + 1)),
       };
     }
@@ -1127,7 +1142,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     function setHover(t) { hover = t; }
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
-    function setPilgrim(i) { pilgrimIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setSpark(i) { sparkIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -1182,7 +1197,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const img = new ImageData(W, Hh), d = img.data;
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
-      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the pilgrim)
+      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the spark)
       const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
       const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
@@ -1212,14 +1227,17 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) if (b.top[y * T + x]) solid[(b.oy + y - H) * W + b.ox + x] = 1;
         if (!sh.s) for (let x = 0; x < T; x++) { const br = b.bottomRow[x]; if (br < 0) continue; const fh = H - (hash2(tx * T + x, 99) < 0.35 ? 1 : 0); for (let k = 1; k <= fh; k++) solid[(b.oy - H + br + k) * W + b.ox + x] = 1; }
       }
-      // dirt trail along the bent route: a thin core that always connects, plus a wider band that keeps clear of blocks
-      const trail = new Uint8Array(W * Hh);
+      // the ley channel: ground scorched dark where the current runs, with a lit groove down the middle
+      const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
       const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
-      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); }
+      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 2); }
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
         const i = y * W + x;
         if (!trail[i] || solid[i]) continue;
-        const h = hash2(x * 3, y * 7); set(x, y, h < 0.15 ? TRAIL[1] : h < 0.22 ? TRAIL[2] : TRAIL[0], 5);
+        const h = hash2(x * 3, y * 7);
+        blend(x, y, h < 0.2 ? CHANNEL[1] : CHANNEL[0], 0.62);
+        if (core[i]) blend(x, y, h < 0.3 ? GROOVE[1] : GROOVE[0], 0.62);
+        cat[i] = 5;
       }
       // rubble where a natural rock was cleared: a scar of disturbed earth with outlined rock chunks (tap to restore for a refund)
       for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
@@ -1249,7 +1267,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       }
       // block faces and tops (row order so lower blocks cover the faces above)
       for (const b of blocks) {
-        const R = b.nat ? P.rock : P.wood;
+        const R = b.nat ? P.rock : P.ward;
         if (!b.s) for (let x = 0; x < T; x++) { // cliff face: extruded down from the plateau's (wobbly) bottom edge
           const br = b.bottomRow[x]; if (br < 0) continue;
           const fh = H - (hash2(b.tx * T + x, 99) < 0.35 ? 1 : 0);
@@ -1281,9 +1299,15 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
             if (P.style === "snow" && n1 > 0.45 && rocky <= 0.62) c = mix(c, [240, 244, 250], 0.8);
             if (P.style === "ash" && n2 > 0.8 && rocky <= 0.62) c = mix(c, [255, 110, 50], 0.6);
             if (lit) c = mix(c, [255, 250, 232], 0.22);
-          } else { // log ends
-            const lx = x % 8 - 4, ly = y % 8 - 4, rr = lx * lx + ly * ly;
-            c = rr <= 3 ? R[3] : rr <= 7 ? R[1] : rr <= 11 ? R[2] : R[0]; if (rr <= 1) c = R[4];
+          } else { // a chalked ward stone: pale kerb carrying a sigil that links to its neighbours
+            const hv = hash2(b.tx * 32 + x + 5, b.ty * 32 + y + 9);
+            c = hv < 0.16 ? R[1] : hv > 0.86 ? R[4] : R[2];
+            if (lit) c = mix(c, [255, 253, 245], 0.3);
+            const dx = x - 16, dy = y - 16, d = Math.hypot(dx, dy);
+            const ring = d > 4.2 && d < 6.0;
+            const spoke = (b.n && Math.abs(dx) < 1.6 && dy < 0) || (b.s && Math.abs(dx) < 1.6 && dy > 0)
+              || (b.w && Math.abs(dy) < 1.6 && dx < 0) || (b.e && Math.abs(dy) < 1.6 && dx > 0);
+            if (ring || spoke) c = [232, 250, 255];
           }
           set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3, b.ty);
         }
@@ -1328,9 +1352,9 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       }
       game.waypoints.forEach(([x, y], i) => {
         const ox = PAD + x * T, oy = PAD + y * T, last = i === game.waypoints.length - 1;
-        if (i === 0) { propShadow(ox + 18, oy + 22, 17, 5); blit(props.cottage, ox - 2, oy - 14, 6, y); }
-        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.tower, ox + 3, oy - 34, 6, y); }
-        else { propShadow(ox + 16, oy + 22, 12, 4); blit(props.well, ox + 2, oy - 4, 6, y); }
+        if (i === 0) { propShadow(ox + 16, oy + 24, 17, 5); blit(props.focus, ox - 2, oy - 16, 6, y); }
+        else if (last) { propShadow(ox + 16, oy + 22, 11, 4); blit(props.beacon, ox + 3, oy - 34, 6, y); }
+        else { propShadow(ox + 16, oy + 24, 10, 4); blit(props.menhir, ox + 2, oy - 14, 6, y); }
       });
       // zone badges
       const plotBuf = (x, y, w, h, c) => { for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) set(x + xx, y + yy, c); };
@@ -1345,7 +1369,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
-      // per-row overlays of block/prop pixels, drawn in front of the pilgrim when he stands above that row
+      // per-row overlays of block/prop pixels, drawn in front of the spark when he stands above that row
       rowOverlays = [];
       for (let r = 0; r < rows; r++) {
         const y0 = Math.max(0, PAD + r * T - 36), y1 = Math.min(Hh, PAD + (r + 1) * T);
@@ -1411,7 +1435,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         if (last && last[0] === x && last[1] === y) continue;
         pathPx.push([x, y, dir]);
       }
-      pilgrimIdx = Math.min(pilgrimIdx, Math.max(0, pathPx.length - 1));
+      sparkIdx = Math.min(sparkIdx, Math.max(0, pathPx.length - 1));
     }
 
     /* ---------- scene ---------- */
@@ -1432,20 +1456,27 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const corner = (cx, cy, dx, dy) => { rect(cx, cy, 7 * dx, 2 * dy, "#fff"); rect(cx, cy, 2 * dx, 7 * dy, "#fff"); };
         c.save(); c.translate(hx, hy); corner(0, 0, 1, 1); c.translate(T, 0); corner(0, 0, -1, 1); c.translate(0, T); corner(0, 0, -1, -1); c.translate(-T, 0); corner(0, 0, 1, -1); c.restore();
       }
-      if (now < errorUntil) for (let i = 0; i < pathPx.length; i += 2) { const p = pathPx[i]; rect(p[0] - 2, p[1] - 2, 4, 4, ((i >> 3) & 1) ? "#ff3b5c" : "#ffd0d8"); }
+      // the current: a steady thread with bright pulses running toward the beacon
+      const err = now < errorUntil;
+      for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ff3b5c" : "#8ff0ff"); }
+      const flow = reduced ? 0 : Math.floor(now / 22);
+      for (let i = 0; i < pathPx.length; i++) {
+        if (((i - flow) % 30 + 30) % 30 > 3) continue;
+        const p = pathPx[i]; rect(p[0] - 2, p[1] - 2, 4, 4, err ? "#ffd0d8" : "#ffffff");
+      }
       game.waypoints.forEach(([x, y], i) => {
         if (i === 0 || i === game.waypoints.length - 1) return;
         const txt = String(i), tw = textWidth(txt, 2);
         pixelText(rect, txt, x * T + 16 - Math.floor(tw / 2), y * T - 16, 2, "#fff", "#1e1710");
       });
-      const p = pathPx[pilgrimIdx];
+      const p = pathPx[sparkIdx];
       if (p) {
-        const walking = pilgrimIdx > 0 && pilgrimIdx < pathPx.length - 1;
-        const frame = walking ? Math.floor(now / 140) % 2 : 0, left = p[2] < 0;
-        const sp = frame ? (left ? sprites.pilgrimBf : sprites.pilgrimB) : (left ? sprites.pilgrimAf : sprites.pilgrimA);
-        c.fillStyle = "rgba(30,23,16,0.35)"; c.fillRect(p[0] - 5, p[1] - 2, 10, 3);
-        c.drawImage(sp, p[0] - 8, p[1] - 23);
-        // blocks and props whose footprint is below the pilgrim stand in front of him
+        for (let k = 10; k > 0; k--) { // the tail it drags behind
+          const q = pathPx[sparkIdx - k * 2];
+          if (q) rect(q[0] - 1, q[1] - 1, 2, 2, "rgba(190,244,255," + (0.5 - k * 0.045).toFixed(2) + ")");
+        }
+        c.drawImage(Math.floor(now / 180) % 2 ? sprites.sparkB : sprites.sparkA, p[0] - 5, p[1] - 5);
+        // blocks and props whose footprint is below the spark stand in front of it
         const cr = Math.floor(p[1] / T);
         for (let r = cr + 1; r < Math.min(game.rows, cr + 3); r++) { const o = rowOverlays[r]; if (o) c.drawImage(o.cv, -PAD, o.y0 - PAD); }
       }
@@ -1470,14 +1501,23 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const pulse = reduced ? 0.5 : (Math.sin(now / 600) + 1) / 2;
       const radial = (x, y, r, col, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); };
       for (const z of game.zones) radial((z.x + 0.5) * T, (z.y + 0.5) * T, (z.r + 1) * T, pal.zoneHex, 0.45 + pulse * 0.2);
+      if (!(now < errorUntil)) { // the current glows along its whole length
+        c.strokeStyle = rgba("#7fe4ff", 0.24); c.lineWidth = 3; c.lineJoin = "round"; c.lineCap = "round";
+        c.beginPath();
+        for (let i = 0; i < pathPx.length; i += 3) { const q = pathPx[i]; i === 0 ? c.moveTo(q[0], q[1]) : c.lineTo(q[0], q[1]); }
+        c.stroke();
+        const flow = reduced ? 0 : Math.floor(now / 22);
+        c.fillStyle = "rgba(230,250,255,0.5)";
+        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.3, 0, Math.PI * 2); c.fill(); }
+      }
       game.waypoints.forEach(([x, y], i) => {
         const last = i === game.waypoints.length - 1;
-        if (i === 0) { radial(x * T + 7, y * T + 13, T * 0.7, "#ffd27a", 0.9); radial(x * T + 25, y * T + 13, T * 0.7, "#ffd27a", 0.9); }
-        else if (last) radial(x * T + 16, y * T + 1, T * 0.8, "#ffd27a", 0.9);
-        else radial(x * T + 16, y * T + 18, T * 0.9, "#7fd0ff", 0.35 + pulse * 0.2);
+        if (i === 0) radial(x * T + 16, y * T + 10, T * 0.7, "#9fe8ff", 0.35 + pulse * 0.15);
+        else if (last) radial(x * T + 16, y * T - 3, T * 0.95, "#bdf2ff", 0.5 + pulse * 0.15);
+        else radial(x * T + 16, y * T + 5, T * 0.65, "#9fe8ff", 0.28 + pulse * 0.15);
       });
-      const p = pathPx[pilgrimIdx];
-      if (p) radial(p[0], p[1] - 10, T * 1.6, "#ffd68c", 0.8);
+      const p = pathPx[sparkIdx];
+      if (p) radial(p[0], p[1], T * 1.2, "#cdf6ff", 0.6);
       for (const e of effects) if (e.type === "burst") { const k = (now - e.t0) / 1000 / e.life; radial((e.x + 0.5) * T, (e.y + 0.5) * T, T * 1.5, "#ffffff", (1 - k) * 0.9); }
     }
 
@@ -1544,7 +1584,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setPilgrim, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
@@ -1577,7 +1617,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   let soundOn = store.get("sound", true);
   let fxOn = store.get("fx", true);
   const SPEEDS = [0.5, 1, 2, 3];
-  const pilgrim = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
+  const spark = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
   let immersive = store.get("immersive", false);
 
   /* ---------- sound ---------- */
@@ -1641,7 +1681,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
         segments = M.routeWaypoints(walls, game.cols, game.rows, game.waypoints).segments;
       }
     }
-    R.setGame(game, walls, segments); pilgrimReset();
+    R.setGame(game, walls, segments); sparkReset();
     layout(true);
     $("seedTitle").textContent = seedLabel(seed);
     $("seedSub").textContent = " · " + game.biome.name + " ⛏" + game.removalCost;
@@ -1697,7 +1737,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
       R.flashError();
       wrap.classList.remove("shake"); void wrap.offsetWidth; if (!reduced) wrap.classList.add("shake");
       buzz(40); sfx.error();
-      toast(res.reason === "energy" ? "Not enough work left" : res.reason === "blocked" ? "That would cut off the sanctuary" : res.reason === "waypoint" ? "Wayshrines can't be moved" : "Can't do that", "error");
+      toast(res.reason === "energy" ? "Not enough chalk left" : res.reason === "blocked" ? "That would cut off the beacon" : res.reason === "waypoint" ? "Anchor stones can't be moved" : "Can't do that", "error");
       return;
     }
     history.push({ walls, ap, segments, score });
@@ -1705,27 +1745,27 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
     const delta = res.score - score;
     const placed = res.walls[y * game.cols + x] === 1;
     walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
-    R.setState(walls, segments); pilgrimReset();
+    R.setState(walls, segments); sparkReset();
     R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? "#fff0c8" : game.biome.zone, seed: Math.random() * 6 });
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
     const wasRock = game.natural[y * game.cols + x] === 1;
-    if (wasRock && !placed) toast("Boulder split (−" + game.removalCost + " work). Tap the rubble to rebuild it and get the work back");
-    else if (wasRock && placed) toast("Boulder rebuilt (+" + game.removalCost + " work)", "good");
+    if (wasRock && !placed) toast("Seam cut (−" + game.removalCost + " chalk). Tap the rubble to re-lay it and get the chalk back");
+    else if (wasRock && placed) toast("Seam re-laid (+" + game.removalCost + " chalk)", "good");
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
     saveProgress(); updateHud();
   }
   function undo() {
     const h = history.pop(); if (!h) return;
     walls = h.walls; ap = h.ap; segments = h.segments; score = h.score;
-    R.setState(walls, segments); pilgrimReset(); sfx.remove(); saveProgress(); updateHud();
+    R.setState(walls, segments); sparkReset(); sfx.remove(); saveProgress(); updateHud();
   }
   function reset() {
     if (M.diffMoves(game, walls).length === 0) return;
     history.push({ walls, ap, segments, score });
     walls = new Uint8Array(game.natural); ap = game.maxActionPoints; segments = game.baseSegments; score = game.baseScore;
-    R.setState(walls, segments); pilgrimReset(); saveProgress(); updateHud(); toast("Roadworks cleared");
+    R.setState(walls, segments); sparkReset(); saveProgress(); updateHud(); toast("Wards rubbed out");
   }
 
   /* ---------- view / layout ---------- */
@@ -1835,25 +1875,25 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   });
 
   /* ---------- render loop ---------- */
-  function pilgrimReset() { pilgrim.running = false; pilgrim.idx = 0; R.setPilgrim(0); walkUi(); }
+  function sparkReset() { spark.running = false; spark.idx = 0; R.setSpark(0); walkUi(); }
   function walkUi() {
-    $("walkBtn").classList.toggle("running", pilgrim.running);
-    $("walkBtn").querySelector(".ico").textContent = pilgrim.running ? "■" : "▶";
-    $("walkLabel").textContent = pilgrim.running ? "STOP" : pilgrim.idx > 0 ? "AGAIN" : "SET OUT";
-    $("speedBtn").textContent = pilgrim.speed + "×";
+    $("walkBtn").classList.toggle("running", spark.running);
+    $("walkBtn").querySelector(".ico").textContent = spark.running ? "■" : "▶";
+    $("walkLabel").textContent = spark.running ? "STOP" : spark.idx > 0 ? "AGAIN" : "RELEASE";
+    $("speedBtn").textContent = spark.speed + "×";
   }
   $("walkBtn").onclick = () => {
-    if (pilgrim.running) { pilgrim.running = false; walkUi(); return; }
-    pilgrim.running = true; pilgrim.t0 = performance.now(); pilgrim.idx = 0; R.setPilgrim(0); sfx.place(); walkUi();
+    if (spark.running) { spark.running = false; walkUi(); return; }
+    spark.running = true; spark.t0 = performance.now(); spark.idx = 0; R.setSpark(0); sfx.place(); walkUi();
   };
-  $("speedBtn").onclick = () => { pilgrim.speed = SPEEDS[(SPEEDS.indexOf(pilgrim.speed) + 1) % SPEEDS.length]; store.set("speed", pilgrim.speed); walkUi(); };
+  $("speedBtn").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
   walkUi();
   function frame(now) {
-    if (pilgrim.running) {
+    if (spark.running) {
       const len = R.pathLength();
-      pilgrim.idx = Math.floor((now - pilgrim.t0) / 1000 * 56 * pilgrim.speed);
-      if (pilgrim.idx >= len - 1) { pilgrim.idx = len - 1; pilgrim.running = false; sfx.good(); walkUi(); }
-      R.setPilgrim(pilgrim.idx);
+      spark.idx = Math.floor((now - spark.t0) / 1000 * 56 * spark.speed);
+      if (spark.idx >= len - 1) { spark.idx = len - 1; spark.running = false; sfx.good(); walkUi(); }
+      R.setSpark(spark.idx);
     }
     R.setView(view);
     R.draw(now);
@@ -1971,7 +2011,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
       entries.slice(0, 50).forEach((e) => {
         const li = document.createElement("li");
         li.className = "lb-row" + (e.me ? " me" : "") + (e.rank <= 3 ? " top" : "");
-        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " work left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
+        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " chalk left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
         li.querySelector(".name").textContent = e.username || "Anonymous";
         list.appendChild(li);
       });
@@ -2062,7 +2102,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   $("nameSave").onclick = () => { const n = cleanName($("nameInput").value); if (n) { playerName = n; store.set("name", n); toast("Name saved", "good"); } };
   function cleanName(s) { return String(s || "").replace(/[^\w \-.'!?]/g, "").trim().slice(0, 16); }
   $("menuDaily").onclick = () => { closeSheets(); loadGame(M.dailySeed()); };
-  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New valley: " + game.seed); };
+  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New survey: " + game.seed); };
   $("seedGo").onclick = () => { const s = M.sanitizeSeed($("seedInput").value); if (!s) return; closeSheets(); loadGame(s); };
   $("seedInput").addEventListener("keydown", (e) => { if (e.key === "Enter") $("seedGo").click(); });
   $("menuHow").onclick = () => showSheet("sheetHow");
@@ -2072,7 +2112,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   sw.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); sw.setAttribute("aria-checked", String(soundOn)); if (soundOn) sfx.place(); };
   $("btnShare").onclick = async () => {
     const url = shareUrl();
-    const text = "I blessed the valley for " + fmt(score) + " on Mazer's " + seedLabel(game.seed) + " road. Beat me: seed “" + game.seed + "”";
+    const text = "I drew " + fmt(score) + " charge on Mazer's " + seedLabel(game.seed) + " survey. Beat me: seed “" + game.seed + "”";
     try {
       if (navigator.share) { await navigator.share({ title: "Mazer", text, url }); return; }
     } catch (e) { if (e && e.name === "AbortError") return; }
@@ -2089,7 +2129,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
     const now = new Date();
     const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
     const ms = next - now.getTime(), h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
-    $("dailyCountdown").textContent = "Same valley for everyone · next one in " + h + "h " + m + "m";
+    $("dailyCountdown").textContent = "Same ground for everyone · next one in " + h + "h " + m + "m";
     $("menuSub").textContent = "Seed: " + game.seed + " · " + game.cols + "×" + game.rows + " · " + game.biome.name + " / " + game.wallStyle;
   }
 

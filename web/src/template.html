@@ -13,17 +13,17 @@
       <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot">◆</span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
     </div>
     <div class="hud-score">
-      <div class="label">Blessing</div>
+      <div class="label">Charge</div>
       <div class="score" id="score">0</div>
       <div class="best" id="best">Base <b>0</b></div>
     </div>
   </header>
-  <div class="energy" id="energy" role="progressbar" aria-label="Work remaining">
+  <div class="energy" id="energy" role="progressbar" aria-label="Chalk remaining">
     <div class="energy-fill" id="energyFill"></div>
-    <div class="energy-text"><span class="lbl">WORK</span><span id="energyText">0 / 0</span></div>
+    <div class="energy-text"><span class="lbl">CHALK</span><span id="energyText">0 / 0</span></div>
   </div>
   <main class="board" id="boardWrap">
-    <canvas id="board" aria-label="The valley. Tap a tile to raise or remove a wall."></canvas>
+    <canvas id="board" aria-label="The survey ground. Tap a tile to chalk or rub out a ward."></canvas>
     <div class="zoom-btns">
       <button id="zoomIn" aria-label="Zoom in">+</button>
       <button id="zoomOut" aria-label="Zoom out">−</button>
@@ -31,7 +31,7 @@
     </div>
     <button class="fs-btn" id="fsEnter" aria-label="Full screen" title="Full screen">⛶</button>
     <div class="walk-ctl">
-      <button id="walkBtn" aria-label="Send the pilgrim"><span class="ico">▶</span><span id="walkLabel">SET OUT</span></button>
+      <button id="walkBtn" aria-label="Release the spark"><span class="ico">▶</span><span id="walkLabel">RELEASE</span></button>
       <button id="speedBtn" aria-label="Courier speed" title="Speed">1×</button>
     </div>
     <div class="fs-overlay" id="fsOverlay">
@@ -71,15 +71,15 @@
   <div class="sheet-head"><div><h2>MENU</h2><div class="sub" id="menuSub"></div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="menu-list">
-      <button class="menu-btn primary" id="menuDaily"><span>Today's valley<small id="dailyCountdown">Everyone walks the same valley for 24 hours</small></span><span class="kbd">DAILY</span></button>
-      <button class="menu-btn" id="menuRandom"><span>New valley<small>Fresh land, boulders and hallowed ground. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
+      <button class="menu-btn primary" id="menuDaily"><span>Today's survey<small id="dailyCountdown">Everyone surveys the same ground for 24 hours</small></span><span class="kbd">DAILY</span></button>
+      <button class="menu-btn" id="menuRandom"><span>New survey<small>Fresh ground, iron seams and charged veins. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
     </div>
     <div class="section-label">This puzzle</div>
     <div class="menu-grid">
-      <button class="menu-btn" id="menuSubmit"><span>Submit blessing</span><span class="kbd">▲</span></button>
+      <button class="menu-btn" id="menuSubmit"><span>Submit charge</span><span class="kbd">▲</span></button>
       <button class="menu-btn" id="menuRanks"><span>Leaderboard</span><span class="kbd">#</span></button>
       <button class="menu-btn" id="menuShare"><span>Share</span><span class="kbd">→</span></button>
-      <button class="menu-btn" id="menuReset"><span>Undo all work</span><span class="kbd">↺</span></button>
+      <button class="menu-btn" id="menuReset"><span>Rub out all wards</span><span class="kbd">↺</span></button>
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
@@ -103,23 +103,23 @@
 
 <section class="sheet" id="sheetHow" aria-label="How to play">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Make the road long. Make it holy.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Run the line long. Run it through the veins.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="how">
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>Each season a <b>pilgrim</b> walks from the <b>village</b> to the high <b>sanctuary</b>, stopping at each numbered <b>wayshrine</b> in turn. Pilgrims are footsore: they always take the <b>shortest road</b> they can find. Press <b>Set out</b> to watch.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p>You are the valley's <b>waymaker</b>. <b>Tap a tile</b> to raise a wall and push the road aside. Each wall costs <b>1 work</b>. Tap it again to take it down and get the work back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Boulders</b> were already there. Splitting one costs more work, shown on the valley chip, and leaves <b>rubble</b> behind. Tap the rubble to rebuild the boulder and get the work back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Hallowed ground</b> multiplies every step taken on it. The valley is blessed by how far the pilgrim walks and how much of it is holy, so wind the road through the gold.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>The pilgrim slips diagonally between walls that only touch at a corner, so join them edge to edge. You can never wall the road off: a move that <b>cuts off the sanctuary</b> flashes red and is undone.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your blessing. Everyone in the world walks the same <b>daily</b> valley, so bring friends.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A <b>spark</b> of drawn power runs from the <b>focus stone</b> to the <b>beacon</b>, touching each numbered <b>anchor stone</b> in turn. Current takes the <b>path of least resistance</b>, so it follows the easiest ground. Press <b>Release</b> to watch it run.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p>You are the <b>surveyor</b>. <b>Tap a tile</b> to chalk a <b>ward</b> there: the current will not cross it, so the line bends around. Each ward costs <b>1 chalk</b>. Tap it again to rub it out and get the chalk back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Iron seams</b> run through the rock and the current cannot cross them either. Cutting one costs more chalk, shown on the survey chip, and leaves <b>rubble</b> behind. Tap the rubble to re-lay the seam and get the chalk back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Charged ground</b> is thick with raw power. Every stretch the spark crosses there counts for far more. You bank charge for the distance it runs and the ground it runs through, so wind the line through the veins.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>The spark slips diagonally between wards that only touch at a corner, so join them edge to edge. You can never close the circuit off: a move that <b>cuts off the beacon</b> flashes red and is undone.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your charge. Everyone in the world surveys the same <b>daily</b> ground, so bring friends.</p></div>
     </div>
-    <button class="cta" id="howDone">Take up the work</button>
+    <button class="cta" id="howDone">Begin the survey</button>
   </div>
 </section>
 
 <section class="sheet" id="sheetAuth" aria-label="Log in">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Blessings are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Charges are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <form id="authForm" autocomplete="on">
       <div class="section-label">Username</div>
@@ -135,7 +135,7 @@
 
 <section class="sheet" id="sheetName" aria-label="Choose a name">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your blessing. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your charge. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="field"><input id="nameInput2" placeholder="Name" maxlength="16" autocomplete="nickname"><button id="nameSubmit">Submit score</button></div>
   </div>
