@@ -30,12 +30,8 @@
       <button id="zoomFit" aria-label="Reset zoom" title="Reset zoom">⤢</button>
     </div>
     <button class="fs-btn" id="fsEnter" aria-label="Full screen" title="Full screen">⛶</button>
-    <div class="walk-ctl">
-      <button id="walkBtn" aria-label="Release the spark"><span class="ico">▶</span><span id="walkLabel">RELEASE</span></button>
-      <button id="speedBtn" aria-label="Courier speed" title="Speed">1×</button>
-    </div>
     <div class="fs-overlay" id="fsOverlay">
-      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">WORK</span> <span id="fsMp">0/0</span></span></div>
+      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">CHALK</span> <span id="fsMp">0/0</span></span></div>
       <div class="fs-actions">
         <button id="fsUndo" aria-label="Undo" title="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
         <button id="fsMenu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -80,6 +76,11 @@
       <button class="menu-btn" id="menuRanks"><span>Leaderboard</span><span class="kbd">#</span></button>
       <button class="menu-btn" id="menuShare"><span>Share</span><span class="kbd">→</span></button>
       <button class="menu-btn" id="menuReset"><span>Rub out all wards</span><span class="kbd">↺</span></button>
+    </div>
+    <div class="section-label">The spark</div>
+    <div class="menu-grid">
+      <button class="menu-btn" id="menuWalk"><span><span id="walkLabel">Release the spark</span><small class="hint">Or press space</small></span><span class="kbd" id="walkIco">▶</span></button>
+      <button class="menu-btn" id="menuSpeed"><span>Speed<small class="hint">How fast it runs</small></span><span class="kbd" id="speedLabel">1×</span></button>
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>

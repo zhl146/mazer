@@ -97,7 +97,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .board.shake { animation: shake .3s steps(2); }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .toast {
-  position: absolute; left: 50%; bottom: 58px; transform: translate(-50%, 10px);
+  position: absolute; left: 50%; bottom: 56px; transform: translate(-50%, 10px);
   background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); box-shadow: 0 0 0 2px var(--win-outer);
   color: var(--text); padding: 7px 14px; border-radius: 4px; font-size: 15px;
   opacity: 0; pointer-events: none; transition: opacity .15s steps(3), transform .15s steps(3); white-space: nowrap;
@@ -263,17 +263,8 @@ body.immersive .fs-overlay { display: block; }
 .menu-grid .menu-btn { padding-left: 22px; font-size: 15px; }
 .hint { display: block; color: var(--muted); font-weight: 600; font-size: 12px; margin-top: 2px; }
 
-/* courier controls */
-.walk-ctl { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; }
-.walk-ctl button {
-  height: 40px; padding: 0 14px; border-radius: 4px; background: linear-gradient(180deg, rgba(43,47,168,.94), rgba(14,17,80,.94));
-  border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); color: var(--text);
-  font-family: var(--font-display); font-size: 9px; display: flex; align-items: center; gap: 8px;
-}
-.walk-ctl #walkBtn { color: var(--gold); border-color: var(--gold); }
-.walk-ctl #walkBtn .ico { font-size: 11px; }
-.walk-ctl #walkBtn.running { color: var(--danger); border-color: var(--danger); }
-.walk-ctl #speedBtn { min-width: 48px; justify-content: center; }
-body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }
+/* the spark is released from the menu; highlight the entry while it runs */
+#menuWalk.running { border-color: var(--danger); color: var(--danger); }
+#menuWalk.running .kbd { color: var(--danger); }
 
-body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
+body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }

@@ -21,7 +21,7 @@
   let fxOn = store.get("fx", true);
   const SPEEDS = [0.5, 1, 2, 3];
   const spark = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
-  let immersive = store.get("immersive", false);
+  let immersive = store.get("immersive", true);
 
   /* ---------- sound ---------- */
   let actx = null;
@@ -275,21 +275,24 @@
     if ((e.ctrlKey || e.metaKey) && e.key === "z") { undo(); e.preventDefault(); }
     if (e.key === "Escape") { if (openSheet) closeSheets(); else if (immersive) setImmersive(false); }
     if (e.key === "f" || e.key === "F") setImmersive(!immersive);
+    if (e.key === " ") { toggleWalk(); e.preventDefault(); }
   });
 
   /* ---------- render loop ---------- */
   function sparkReset() { spark.running = false; spark.idx = 0; R.setSpark(0); walkUi(); }
   function walkUi() {
-    $("walkBtn").classList.toggle("running", spark.running);
-    $("walkBtn").querySelector(".ico").textContent = spark.running ? "■" : "▶";
-    $("walkLabel").textContent = spark.running ? "STOP" : spark.idx > 0 ? "AGAIN" : "RELEASE";
-    $("speedBtn").textContent = spark.speed + "×";
+    $("menuWalk").classList.toggle("running", spark.running);
+    $("walkIco").textContent = spark.running ? "■" : "▶";
+    $("walkLabel").textContent = spark.running ? "Stop the spark" : spark.idx > 0 ? "Release it again" : "Release the spark";
+    $("speedLabel").textContent = spark.speed + "×";
+    R.setRunning(spark.running);
   }
-  $("walkBtn").onclick = () => {
+  function toggleWalk() {
     if (spark.running) { spark.running = false; walkUi(); return; }
     spark.running = true; spark.t0 = performance.now(); spark.idx = 0; R.setSpark(0); sfx.place(); walkUi();
-  };
-  $("speedBtn").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
+  }
+  $("menuWalk").onclick = () => { closeSheets(); toggleWalk(); }; // close up so the run is visible
+  $("menuSpeed").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
   walkUi();
   function frame(now) {
     if (spark.running) {

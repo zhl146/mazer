@@ -102,7 +102,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outl
 .board.shake { animation: shake .3s steps(2); }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .toast {
-  position: absolute; left: 50%; bottom: 58px; transform: translate(-50%, 10px);
+  position: absolute; left: 50%; bottom: 56px; transform: translate(-50%, 10px);
   background: linear-gradient(180deg, var(--win-top), var(--win-bot)); border: 2px solid var(--win-border); box-shadow: 0 0 0 2px var(--win-outer);
   color: var(--text); padding: 7px 14px; border-radius: 4px; font-size: 15px;
   opacity: 0; pointer-events: none; transition: opacity .15s steps(3), transform .15s steps(3); white-space: nowrap;
@@ -268,20 +268,11 @@ body.immersive .fs-overlay { display: block; }
 .menu-grid .menu-btn { padding-left: 22px; font-size: 15px; }
 .hint { display: block; color: var(--muted); font-weight: 600; font-size: 12px; margin-top: 2px; }
 
-/* courier controls */
-.walk-ctl { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; }
-.walk-ctl button {
-  height: 40px; padding: 0 14px; border-radius: 4px; background: linear-gradient(180deg, rgba(43,47,168,.94), rgba(14,17,80,.94));
-  border: 2px solid var(--win-border); box-shadow: 0 0 0 1px var(--win-outer); color: var(--text);
-  font-family: var(--font-display); font-size: 9px; display: flex; align-items: center; gap: 8px;
-}
-.walk-ctl #walkBtn { color: var(--gold); border-color: var(--gold); }
-.walk-ctl #walkBtn .ico { font-size: 11px; }
-.walk-ctl #walkBtn.running { color: var(--danger); border-color: var(--danger); }
-.walk-ctl #speedBtn { min-width: 48px; justify-content: center; }
-body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); }
+/* the spark is released from the menu; highlight the entry while it runs */
+#menuWalk.running { border-color: var(--danger); color: var(--danger); }
+#menuWalk.running .kbd { color: var(--danger); }
 
-body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
+body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
 
 </style>
 
@@ -309,12 +300,8 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       <button id="zoomFit" aria-label="Reset zoom" title="Reset zoom">⤢</button>
     </div>
     <button class="fs-btn" id="fsEnter" aria-label="Full screen" title="Full screen">⛶</button>
-    <div class="walk-ctl">
-      <button id="walkBtn" aria-label="Release the spark"><span class="ico">▶</span><span id="walkLabel">RELEASE</span></button>
-      <button id="speedBtn" aria-label="Courier speed" title="Speed">1×</button>
-    </div>
     <div class="fs-overlay" id="fsOverlay">
-      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">WORK</span> <span id="fsMp">0/0</span></span></div>
+      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">CHALK</span> <span id="fsMp">0/0</span></span></div>
       <div class="fs-actions">
         <button id="fsUndo" aria-label="Undo" title="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
         <button id="fsMenu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -359,6 +346,11 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       <button class="menu-btn" id="menuRanks"><span>Leaderboard</span><span class="kbd">#</span></button>
       <button class="menu-btn" id="menuShare"><span>Share</span><span class="kbd">→</span></button>
       <button class="menu-btn" id="menuReset"><span>Rub out all wards</span><span class="kbd">↺</span></button>
+    </div>
+    <div class="section-label">The spark</div>
+    <div class="menu-grid">
+      <button class="menu-btn" id="menuWalk"><span><span id="walkLabel">Release the spark</span><small class="hint">Or press space</small></span><span class="kbd" id="walkIco">▶</span></button>
+      <button class="menu-btn" id="menuSpeed"><span>Speed<small class="hint">How fast it runs</small></span><span class="kbd" id="speedLabel">1×</span></button>
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
@@ -1097,7 +1089,7 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0, running = false;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
@@ -1143,6 +1135,7 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
     function setSpark(i) { sparkIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setRunning(v) { running = !!v; } // the travelling pulses give way to the spark itself
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -1459,10 +1452,12 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       // the current: a steady thread with bright pulses running toward the beacon
       const err = now < errorUntil;
       for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0], p[1], 1, 1, err ? "#ff3b5c" : "#8ff0ff"); }
-      const flow = reduced ? 0 : Math.floor(now / 22);
-      for (let i = 0; i < pathPx.length; i++) {
-        if (((i - flow) % 30 + 30) % 30 > 3) continue;
-        const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ffd0d8" : "#ffffff");
+      if (!running) {
+        const flow = reduced ? 0 : Math.floor(now / 22);
+        for (let i = 0; i < pathPx.length; i++) {
+          if (((i - flow) % 30 + 30) % 30 > 3) continue;
+          const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ffd0d8" : "#ffffff");
+        }
       }
       game.waypoints.forEach(([x, y], i) => {
         if (i === 0 || i === game.waypoints.length - 1) return;
@@ -1506,9 +1501,11 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
         c.beginPath();
         for (let i = 0; i < pathPx.length; i += 3) { const q = pathPx[i]; i === 0 ? c.moveTo(q[0], q[1]) : c.lineTo(q[0], q[1]); }
         c.stroke();
-        const flow = reduced ? 0 : Math.floor(now / 22);
-        c.fillStyle = "rgba(230,250,255,0.5)";
-        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.15, 0, Math.PI * 2); c.fill(); }
+        if (!running) {
+          const flow = reduced ? 0 : Math.floor(now / 22);
+          c.fillStyle = "rgba(230,250,255,0.5)";
+          for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.15, 0, Math.PI * 2); c.fill(); }
+        }
       }
       game.waypoints.forEach(([x, y], i) => {
         const last = i === game.waypoints.length - 1;
@@ -1584,7 +1581,7 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, setRunning, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
@@ -1618,7 +1615,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   let fxOn = store.get("fx", true);
   const SPEEDS = [0.5, 1, 2, 3];
   const spark = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
-  let immersive = store.get("immersive", false);
+  let immersive = store.get("immersive", true);
 
   /* ---------- sound ---------- */
   let actx = null;
@@ -1872,21 +1869,24 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
     if ((e.ctrlKey || e.metaKey) && e.key === "z") { undo(); e.preventDefault(); }
     if (e.key === "Escape") { if (openSheet) closeSheets(); else if (immersive) setImmersive(false); }
     if (e.key === "f" || e.key === "F") setImmersive(!immersive);
+    if (e.key === " ") { toggleWalk(); e.preventDefault(); }
   });
 
   /* ---------- render loop ---------- */
   function sparkReset() { spark.running = false; spark.idx = 0; R.setSpark(0); walkUi(); }
   function walkUi() {
-    $("walkBtn").classList.toggle("running", spark.running);
-    $("walkBtn").querySelector(".ico").textContent = spark.running ? "■" : "▶";
-    $("walkLabel").textContent = spark.running ? "STOP" : spark.idx > 0 ? "AGAIN" : "RELEASE";
-    $("speedBtn").textContent = spark.speed + "×";
+    $("menuWalk").classList.toggle("running", spark.running);
+    $("walkIco").textContent = spark.running ? "■" : "▶";
+    $("walkLabel").textContent = spark.running ? "Stop the spark" : spark.idx > 0 ? "Release it again" : "Release the spark";
+    $("speedLabel").textContent = spark.speed + "×";
+    R.setRunning(spark.running);
   }
-  $("walkBtn").onclick = () => {
+  function toggleWalk() {
     if (spark.running) { spark.running = false; walkUi(); return; }
     spark.running = true; spark.t0 = performance.now(); spark.idx = 0; R.setSpark(0); sfx.place(); walkUi();
-  };
-  $("speedBtn").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
+  }
+  $("menuWalk").onclick = () => { closeSheets(); toggleWalk(); }; // close up so the run is visible
+  $("menuSpeed").onclick = () => { spark.speed = SPEEDS[(SPEEDS.indexOf(spark.speed) + 1) % SPEEDS.length]; store.set("speed", spark.speed); walkUi(); };
   walkUi();
   function frame(now) {
     if (spark.running) {

@@ -251,7 +251,7 @@
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0, running = false;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
@@ -297,6 +297,7 @@
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
     function setSpark(i) { sparkIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setRunning(v) { running = !!v; } // the travelling pulses give way to the spark itself
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -613,10 +614,12 @@
       // the current: a steady thread with bright pulses running toward the beacon
       const err = now < errorUntil;
       for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0], p[1], 1, 1, err ? "#ff3b5c" : "#8ff0ff"); }
-      const flow = reduced ? 0 : Math.floor(now / 22);
-      for (let i = 0; i < pathPx.length; i++) {
-        if (((i - flow) % 30 + 30) % 30 > 3) continue;
-        const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ffd0d8" : "#ffffff");
+      if (!running) {
+        const flow = reduced ? 0 : Math.floor(now / 22);
+        for (let i = 0; i < pathPx.length; i++) {
+          if (((i - flow) % 30 + 30) % 30 > 3) continue;
+          const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ffd0d8" : "#ffffff");
+        }
       }
       game.waypoints.forEach(([x, y], i) => {
         if (i === 0 || i === game.waypoints.length - 1) return;
@@ -660,9 +663,11 @@
         c.beginPath();
         for (let i = 0; i < pathPx.length; i += 3) { const q = pathPx[i]; i === 0 ? c.moveTo(q[0], q[1]) : c.lineTo(q[0], q[1]); }
         c.stroke();
-        const flow = reduced ? 0 : Math.floor(now / 22);
-        c.fillStyle = "rgba(230,250,255,0.5)";
-        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.15, 0, Math.PI * 2); c.fill(); }
+        if (!running) {
+          const flow = reduced ? 0 : Math.floor(now / 22);
+          c.fillStyle = "rgba(230,250,255,0.5)";
+          for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.15, 0, Math.PI * 2); c.fill(); }
+        }
       }
       game.waypoints.forEach(([x, y], i) => {
         const last = i === game.waypoints.length - 1;
@@ -738,7 +743,7 @@
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, setRunning, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
