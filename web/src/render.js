@@ -7,7 +7,7 @@
   const T = 32;       // pixels per tile
   const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
-  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the courier slips through
+  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the pilgrim slips through
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -69,14 +69,14 @@
     return sp;
   }
 
-  const COURIER_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
-  const COURIER_BODY = [
+  const PILGRIM_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
+  const PILGRIM_BODY = [
     "......kkkk......", "....kkrRRRkk....", "...krRRRRRRRk...", "..kRRRRRRRRRRk..", ".kkkkkkkkkkkkkk.", "...khhhhhhhhk...", "...khsssssshk...", "...kssksskssk...",
     "...kssssssssk...", "....kssssssk....", "...kkCCCCCCkk...", "..kCkccccccckCk.", "..kCkccccccckCk.", "..kCkbccccbbkCk.", "..kCkccccccckCk.", "..kckccccccckck.",
     "...kkccccccckk..", "....kccccccck...", "....kkkkkkkkk..."];
   const ART = {
-    courierA: { pal: COURIER_PAL, rows: COURIER_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
-    courierB: { pal: COURIER_PAL, rows: COURIER_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
+    pilgrimA: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
+    pilgrimB: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
     sparkle: { pal: { w: "#ffffff", W: "#fff6b0" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
   };
 
@@ -238,12 +238,12 @@
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, courierIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, pilgrimIdx = 0;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
-      courierA: fromRows(ART.courierA.rows, ART.courierA.pal).toCanvas(), courierB: fromRows(ART.courierB.rows, ART.courierB.pal).toCanvas(),
-      courierAf: fromRows(ART.courierA.rows, ART.courierA.pal, true).toCanvas(), courierBf: fromRows(ART.courierB.rows, ART.courierB.pal, true).toCanvas(),
+      pilgrimA: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal).toCanvas(), pilgrimB: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal).toCanvas(),
+      pilgrimAf: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal, true).toCanvas(), pilgrimBf: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal, true).toCanvas(),
       sparkle: fromRows(ART.sparkle.rows, ART.sparkle.pal).toCanvas(),
     };
     let props = null; // per-biome painted sprites
@@ -283,7 +283,7 @@
     function setHover(t) { hover = t; }
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
-    function setCourier(i) { courierIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setPilgrim(i) { pilgrimIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -338,7 +338,7 @@
       const img = new ImageData(W, Hh), d = img.data;
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
-      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the courier)
+      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the pilgrim)
       const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
       const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
@@ -501,7 +501,7 @@
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
-      // per-row overlays of block/prop pixels, drawn in front of the courier when he stands above that row
+      // per-row overlays of block/prop pixels, drawn in front of the pilgrim when he stands above that row
       rowOverlays = [];
       for (let r = 0; r < rows; r++) {
         const y0 = Math.max(0, PAD + r * T - 36), y1 = Math.min(Hh, PAD + (r + 1) * T);
@@ -567,7 +567,7 @@
         if (last && last[0] === x && last[1] === y) continue;
         pathPx.push([x, y, dir]);
       }
-      courierIdx = Math.min(courierIdx, Math.max(0, pathPx.length - 1));
+      pilgrimIdx = Math.min(pilgrimIdx, Math.max(0, pathPx.length - 1));
     }
 
     /* ---------- scene ---------- */
@@ -594,14 +594,14 @@
         const txt = String(i), tw = textWidth(txt, 2);
         pixelText(rect, txt, x * T + 16 - Math.floor(tw / 2), y * T - 16, 2, "#fff", "#1e1710");
       });
-      const p = pathPx[courierIdx];
+      const p = pathPx[pilgrimIdx];
       if (p) {
-        const walking = courierIdx > 0 && courierIdx < pathPx.length - 1;
+        const walking = pilgrimIdx > 0 && pilgrimIdx < pathPx.length - 1;
         const frame = walking ? Math.floor(now / 140) % 2 : 0, left = p[2] < 0;
-        const sp = frame ? (left ? sprites.courierBf : sprites.courierB) : (left ? sprites.courierAf : sprites.courierA);
+        const sp = frame ? (left ? sprites.pilgrimBf : sprites.pilgrimB) : (left ? sprites.pilgrimAf : sprites.pilgrimA);
         c.fillStyle = "rgba(30,23,16,0.35)"; c.fillRect(p[0] - 5, p[1] - 2, 10, 3);
         c.drawImage(sp, p[0] - 8, p[1] - 23);
-        // blocks and props whose footprint is below the courier stand in front of him
+        // blocks and props whose footprint is below the pilgrim stand in front of him
         const cr = Math.floor(p[1] / T);
         for (let r = cr + 1; r < Math.min(game.rows, cr + 3); r++) { const o = rowOverlays[r]; if (o) c.drawImage(o.cv, -PAD, o.y0 - PAD); }
       }
@@ -632,7 +632,7 @@
         else if (last) radial(x * T + 16, y * T + 1, T * 0.8, "#ffd27a", 0.9);
         else radial(x * T + 16, y * T + 18, T * 0.9, "#7fd0ff", 0.35 + pulse * 0.2);
       });
-      const p = pathPx[courierIdx];
+      const p = pathPx[pilgrimIdx];
       if (p) radial(p[0], p[1] - 10, T * 1.6, "#ffd68c", 0.8);
       for (const e of effects) if (e.type === "burst") { const k = (now - e.t0) / 1000 / e.life; radial((e.x + 0.5) * T, (e.y + 0.5) * T, T * 1.5, "#ffffff", (1 - k) * 0.9); }
     }
@@ -700,7 +700,7 @@
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setPilgrim, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };

@@ -4,9 +4,13 @@ Mobile-first rebuild of Mazer as a single self-contained HTML page. No framework
 
 **Play it:** https://mazer-game.fly.dev
 
+## The premise
+
+**The Pilgrim's Road.** Once a season a pilgrim walks from the village to the high sanctuary, stopping at each wayshrine in turn. Pilgrims are footsore, so they always take the shortest road they can find. You are the valley's waymaker: before they set out you raise walls and split boulders to reshape the land. The valley's blessing is measured by how far the pilgrim walks and how much hallowed ground they cross. Make the road long, wind it through the gold, but it must always reach the sanctuary.
+
 ## How the game works
 
-A courier always takes the shortest route from the cottage to the tower, visiting numbered wells in order. He can move diagonally and slips between two blocks that only touch at a corner; only edge-joined walls form a barrier. Press Walk to watch him go, with a speed control. You spend a limited energy budget placing walls (1 energy) or clearing natural rocks (2–5 energy, shown on the puzzle chip) to force the courier onto the longest, most valuable route. Gold zones multiply every step inside them. A move that would trap the courier is rejected. Score = Σ (average zone multiplier × step length) × 100, exactly as in the original.
+The pilgrim always takes the shortest route from the village to the sanctuary, visiting numbered wayshrines in order. They move diagonally and slip between two blocks that only touch at a corner; only edge-joined walls form a barrier. Press Set out to watch, with a speed control. You spend a limited work budget raising walls (1 work) or splitting boulders (2–5 work, shown on the valley chip) to push the road onto the longest, most hallowed route. Hallowed ground multiplies every step taken on it. A move that would cut the sanctuary off is rejected. Blessing = Σ (average ground multiplier × step length) × 100, the same scoring as the original game.
 
 ## Layout
 

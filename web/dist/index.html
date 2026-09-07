@@ -290,17 +290,17 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       <button class="chip" id="seedChip" title="Puzzle details"><span class="dot" id="seedDot">◆</span><b id="seedTitle">Daily</b><span id="seedSub"></span></button>
     </div>
     <div class="hud-score">
-      <div class="label">Score</div>
+      <div class="label">Blessing</div>
       <div class="score" id="score">0</div>
       <div class="best" id="best">Base <b>0</b></div>
     </div>
   </header>
-  <div class="energy" id="energy" role="progressbar" aria-label="Energy remaining">
+  <div class="energy" id="energy" role="progressbar" aria-label="Work remaining">
     <div class="energy-fill" id="energyFill"></div>
-    <div class="energy-text"><span class="lbl">MP</span><span id="energyText">0 / 0</span></div>
+    <div class="energy-text"><span class="lbl">WORK</span><span id="energyText">0 / 0</span></div>
   </div>
   <main class="board" id="boardWrap">
-    <canvas id="board" aria-label="Maze board. Tap a tile to place or remove a wall."></canvas>
+    <canvas id="board" aria-label="The valley. Tap a tile to raise or remove a wall."></canvas>
     <div class="zoom-btns">
       <button id="zoomIn" aria-label="Zoom in">+</button>
       <button id="zoomOut" aria-label="Zoom out">−</button>
@@ -308,11 +308,11 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     </div>
     <button class="fs-btn" id="fsEnter" aria-label="Full screen" title="Full screen">⛶</button>
     <div class="walk-ctl">
-      <button id="walkBtn" aria-label="Send the courier"><span class="ico">▶</span><span id="walkLabel">WALK</span></button>
+      <button id="walkBtn" aria-label="Send the pilgrim"><span class="ico">▶</span><span id="walkLabel">SET OUT</span></button>
       <button id="speedBtn" aria-label="Courier speed" title="Speed">1×</button>
     </div>
     <div class="fs-overlay" id="fsOverlay">
-      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">MP</span> <span id="fsMp">0/0</span></span></div>
+      <div class="fs-status"><span class="fs-score" id="fsScore">0</span><span class="fs-mp"><span class="lbl">WORK</span> <span id="fsMp">0/0</span></span></div>
       <div class="fs-actions">
         <button id="fsUndo" aria-label="Undo" title="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
         <button id="fsMenu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -348,15 +348,15 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   <div class="sheet-head"><div><h2>MENU</h2><div class="sub" id="menuSub"></div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="menu-list">
-      <button class="menu-btn primary" id="menuDaily"><span>Today's puzzle<small id="dailyCountdown">Everyone gets the same maze for 24 hours</small></span><span class="kbd">DAILY</span></button>
-      <button class="menu-btn" id="menuRandom"><span>New random maze<small>Fresh biome, walls and zones. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
+      <button class="menu-btn primary" id="menuDaily"><span>Today's valley<small id="dailyCountdown">Everyone walks the same valley for 24 hours</small></span><span class="kbd">DAILY</span></button>
+      <button class="menu-btn" id="menuRandom"><span>New valley<small>Fresh land, boulders and hallowed ground. Share the seed with friends.</small></span><span class="kbd">NEW</span></button>
     </div>
     <div class="section-label">This puzzle</div>
     <div class="menu-grid">
-      <button class="menu-btn" id="menuSubmit"><span>Submit score</span><span class="kbd">▲</span></button>
+      <button class="menu-btn" id="menuSubmit"><span>Submit blessing</span><span class="kbd">▲</span></button>
       <button class="menu-btn" id="menuRanks"><span>Leaderboard</span><span class="kbd">#</span></button>
       <button class="menu-btn" id="menuShare"><span>Share</span><span class="kbd">→</span></button>
-      <button class="menu-btn" id="menuReset"><span>Reset board</span><span class="kbd">↺</span></button>
+      <button class="menu-btn" id="menuReset"><span>Undo all work</span><span class="kbd">↺</span></button>
     </div>
     <div class="section-label">Play a seed</div>
     <div class="field"><input id="seedInput" placeholder="e.g. amber-fox-vale" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"><button id="seedGo">Go</button></div>
@@ -380,23 +380,23 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
 <section class="sheet" id="sheetHow" aria-label="How to play">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Build the maze. Make the courier walk.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>HOW TO PLAY</h2><div class="sub">Make the road long. Make it holy.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="how">
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>A courier always takes the <b>shortest route</b> from the <b>cottage</b> to the <b>tower</b>, visiting numbered wells in order. Longer route, bigger score. Press <b>Walk</b> to watch him go.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p><b>Tap a tile</b> to build a wall. Each wall costs <b>1 energy</b>. Tap it again to take it back and get the energy back.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Rocks</b> are natural walls. Clearing one costs more MP, shown on the puzzle chip. It leaves <b>rubble</b> behind: tap the rubble to put the rock back and get the MP refunded.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Gold zones</b> multiply every step taken inside them. Bend the route through them.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>He slips diagonally between blocks that only touch at a corner, so join walls edge to edge. You can never seal him in: a move that <b>blocks the route</b> flashes red and is undone.</p></div>
-      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your score. Everyone in the world gets the same <b>daily</b> maze, so bring friends.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="8" cy="32" r="5" fill="#3ddc84"/><circle cx="32" cy="8" r="5" fill="#ff4d6d"/><path d="M8 32 20 20 32 8" stroke="#ff7a45" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/></svg></div><p>Each season a <b>pilgrim</b> walks from the <b>village</b> to the high <b>sanctuary</b>, stopping at each numbered <b>wayshrine</b> in turn. Pilgrims are footsore: they always take the <b>shortest road</b> they can find. Press <b>Set out</b> to watch.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" rx="4" fill="#f0e8d6"/><rect x="6" y="24" width="28" height="8" rx="3" fill="#b9ad93"/><path d="M20 4v10M15 9l5 5 5-5" stroke="#5aa9ff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div><p>You are the valley's <b>waymaker</b>. <b>Tap a tile</b> to raise a wall and push the road aside. Each wall costs <b>1 work</b>. Tap it again to take it down and get the work back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M8 30 Q10 14 20 12 Q30 14 32 30 Z" fill="#8e9287"/><ellipse cx="18" cy="20" rx="3" ry="2" fill="#5f635a"/><path d="M28 6 l6 6-4 4-6-6z" fill="#ffb347"/></svg></div><p><b>Boulders</b> were already there. Splitting one costs more work, shown on the valley chip, and leaves <b>rubble</b> behind. Tap the rubble to rebuild the boulder and get the work back.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#f2c94c" opacity=".35"/><circle cx="20" cy="20" r="9" fill="#f2c94c" opacity=".7"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#2a1a05">×4</text></svg></div><p><b>Hallowed ground</b> multiplies every step taken on it. The valley is blessed by how far the pilgrim walks and how much of it is holy, so wind the road through the gold.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M6 8h28M6 20h28M6 32h28" stroke="#ff5470" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="7" fill="#0f1219" stroke="#ff5470" stroke-width="3"/><path d="M15 15l10 10" stroke="#ff5470" stroke-width="3"/></svg></div><p>The pilgrim slips diagonally between walls that only touch at a corner, so join them edge to edge. You can never wall the road off: a move that <b>cuts off the sanctuary</b> flashes red and is undone.</p></div>
+      <div class="how-item"><div class="ico"><svg viewBox="0 0 40 40"><path d="M12 34h16M20 28v6M10 6h20v8a10 10 0 0 1-20 0z" fill="#ffb347"/></svg></div><p>Hit <b>Submit</b> to post your blessing. Everyone in the world walks the same <b>daily</b> valley, so bring friends.</p></div>
     </div>
-    <button class="cta" id="howDone">Let's build</button>
+    <button class="cta" id="howDone">Take up the work</button>
   </div>
 </section>
 
 <section class="sheet" id="sheetAuth" aria-label="Log in">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Scores are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2 id="authTitle">LOG IN</h2><div class="sub" id="authSub">Blessings are posted under your username.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <form id="authForm" autocomplete="on">
       <div class="section-label">Username</div>
@@ -412,7 +412,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
 <section class="sheet" id="sheetName" aria-label="Choose a name">
   <div class="grab"></div>
-  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your score. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
+  <div class="sheet-head"><div><h2>YOUR NAME</h2><div class="sub">Shown next to your blessing. You can change it later in the menu.</div></div><button class="sheet-close" data-close>✕</button></div>
   <div class="sheet-body">
     <div class="field"><input id="nameInput2" placeholder="Name" maxlength="16" autocomplete="nickname"><button id="nameSubmit">Submit score</button></div>
   </div>
@@ -851,7 +851,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
   const T = 32;       // pixels per tile
   const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
-  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the courier slips through
+  const CH = 12;      // chamfer on convex corners: shows the diagonal gap the pilgrim slips through
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -913,14 +913,14 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     return sp;
   }
 
-  const COURIER_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
-  const COURIER_BODY = [
+  const PILGRIM_PAL = { k: "#1e1710", R: "#b8323c", r: "#e05a62", h: "#5a3a1e", s: "#f0c8a0", C: "#5a7fd6", c: "#2f4fa8", b: "#c9a06a", p: "#4a3a5a", o: "#3b2a1a" };
+  const PILGRIM_BODY = [
     "......kkkk......", "....kkrRRRkk....", "...krRRRRRRRk...", "..kRRRRRRRRRRk..", ".kkkkkkkkkkkkkk.", "...khhhhhhhhk...", "...khsssssshk...", "...kssksskssk...",
     "...kssssssssk...", "....kssssssk....", "...kkCCCCCCkk...", "..kCkccccccckCk.", "..kCkccccccckCk.", "..kCkbccccbbkCk.", "..kCkccccccckCk.", "..kckccccccckck.",
     "...kkccccccckk..", "....kccccccck...", "....kkkkkkkkk..."];
   const ART = {
-    courierA: { pal: COURIER_PAL, rows: COURIER_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
-    courierB: { pal: COURIER_PAL, rows: COURIER_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
+    pilgrimA: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat([".....kppkppk....", ".....kppkppk....", ".....kppkppk....", ".....kookook....", ".....kkk.kkk...."]) },
+    pilgrimB: { pal: PILGRIM_PAL, rows: PILGRIM_BODY.concat(["....kpk...kpk...", "....kpk...kpk...", "...kpk.....kpk..", "...kok.....kok..", "...kkk.....kkk.."]) },
     sparkle: { pal: { w: "#ffffff", W: "#fff6b0" }, rows: ["...w...", "...w...", "...W...", "wwWWWww", "...W...", "...w...", "...w..."] },
   };
 
@@ -1082,12 +1082,12 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     let view = { scale: 1, ox: 0, oy: 0 };
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
-    let hover = null, errorUntil = 0, reduced = false, fx = true, courierIdx = 0;
+    let hover = null, errorUntil = 0, reduced = false, fx = true, pilgrimIdx = 0;
     let pathPx = [], rowOverlays = [];
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
-      courierA: fromRows(ART.courierA.rows, ART.courierA.pal).toCanvas(), courierB: fromRows(ART.courierB.rows, ART.courierB.pal).toCanvas(),
-      courierAf: fromRows(ART.courierA.rows, ART.courierA.pal, true).toCanvas(), courierBf: fromRows(ART.courierB.rows, ART.courierB.pal, true).toCanvas(),
+      pilgrimA: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal).toCanvas(), pilgrimB: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal).toCanvas(),
+      pilgrimAf: fromRows(ART.pilgrimA.rows, ART.pilgrimA.pal, true).toCanvas(), pilgrimBf: fromRows(ART.pilgrimB.rows, ART.pilgrimB.pal, true).toCanvas(),
       sparkle: fromRows(ART.sparkle.rows, ART.sparkle.pal).toCanvas(),
     };
     let props = null; // per-biome painted sprites
@@ -1127,7 +1127,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
     function setHover(t) { hover = t; }
     function setReducedMotion(v) { reduced = v; }
     function setFx(v) { fx = !!v; }
-    function setCourier(i) { courierIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
+    function setPilgrim(i) { pilgrimIdx = Math.max(0, Math.min(pathPx.length - 1, i | 0)); }
     function pathLength() { return pathPx.length; }
     function flashError() { errorUntil = performance.now() + 450; }
     function addEffect(e) { effects.push(Object.assign({ t0: performance.now() }, e)); }
@@ -1182,7 +1182,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const img = new ImageData(W, Hh), d = img.data;
       const cat = new Uint8Array(W * Hh); // 1 rock top, 2 rock face, 3 wood top, 4 wood face, 5 trail, 6 prop
       const solid = new Uint8Array(W * Hh); // block silhouettes, for shadows
-      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the courier)
+      const owner = new Int16Array(W * Hh).fill(-1); // tile row that owns a block/prop pixel (for depth against the pilgrim)
       const set = (x, y, c, k, o) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = y * W + x; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; if (k !== undefined) cat[i] = k; if (o !== undefined) owner[i] = o; };
       const blend = (x, y, c, a) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= W || y >= Hh) return; const i = (y * W + x) * 4; if (!d[i + 3]) return; d[i] += (c[0] - d[i]) * a; d[i + 1] += (c[1] - d[i + 1]) * a; d[i + 2] += (c[2] - d[i + 2]) * a; };
       const blit = (sp, ox, oy, k, o) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c, k, o); } };
@@ -1345,7 +1345,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
-      // per-row overlays of block/prop pixels, drawn in front of the courier when he stands above that row
+      // per-row overlays of block/prop pixels, drawn in front of the pilgrim when he stands above that row
       rowOverlays = [];
       for (let r = 0; r < rows; r++) {
         const y0 = Math.max(0, PAD + r * T - 36), y1 = Math.min(Hh, PAD + (r + 1) * T);
@@ -1411,7 +1411,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         if (last && last[0] === x && last[1] === y) continue;
         pathPx.push([x, y, dir]);
       }
-      courierIdx = Math.min(courierIdx, Math.max(0, pathPx.length - 1));
+      pilgrimIdx = Math.min(pilgrimIdx, Math.max(0, pathPx.length - 1));
     }
 
     /* ---------- scene ---------- */
@@ -1438,14 +1438,14 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         const txt = String(i), tw = textWidth(txt, 2);
         pixelText(rect, txt, x * T + 16 - Math.floor(tw / 2), y * T - 16, 2, "#fff", "#1e1710");
       });
-      const p = pathPx[courierIdx];
+      const p = pathPx[pilgrimIdx];
       if (p) {
-        const walking = courierIdx > 0 && courierIdx < pathPx.length - 1;
+        const walking = pilgrimIdx > 0 && pilgrimIdx < pathPx.length - 1;
         const frame = walking ? Math.floor(now / 140) % 2 : 0, left = p[2] < 0;
-        const sp = frame ? (left ? sprites.courierBf : sprites.courierB) : (left ? sprites.courierAf : sprites.courierA);
+        const sp = frame ? (left ? sprites.pilgrimBf : sprites.pilgrimB) : (left ? sprites.pilgrimAf : sprites.pilgrimA);
         c.fillStyle = "rgba(30,23,16,0.35)"; c.fillRect(p[0] - 5, p[1] - 2, 10, 3);
         c.drawImage(sp, p[0] - 8, p[1] - 23);
-        // blocks and props whose footprint is below the courier stand in front of him
+        // blocks and props whose footprint is below the pilgrim stand in front of him
         const cr = Math.floor(p[1] / T);
         for (let r = cr + 1; r < Math.min(game.rows, cr + 3); r++) { const o = rowOverlays[r]; if (o) c.drawImage(o.cv, -PAD, o.y0 - PAD); }
       }
@@ -1476,7 +1476,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
         else if (last) radial(x * T + 16, y * T + 1, T * 0.8, "#ffd27a", 0.9);
         else radial(x * T + 16, y * T + 18, T * 0.9, "#7fd0ff", 0.35 + pulse * 0.2);
       });
-      const p = pathPx[courierIdx];
+      const p = pathPx[pilgrimIdx];
       if (p) radial(p[0], p[1] - 10, T * 1.6, "#ffd68c", 0.8);
       for (const e of effects) if (e.type === "burst") { const k = (now - e.t0) / 1000 / e.life; radial((e.x + 0.5) * T, (e.y + 0.5) * T, T * 1.5, "#ffffff", (1 - k) * 0.9); }
     }
@@ -1544,7 +1544,7 @@ body.immersive .walk-ctl { bottom: calc(12px + env(safe-area-inset-bottom, 0)); 
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setCourier, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setPilgrim, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
@@ -1577,7 +1577,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   let soundOn = store.get("sound", true);
   let fxOn = store.get("fx", true);
   const SPEEDS = [0.5, 1, 2, 3];
-  const courier = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
+  const pilgrim = { running: false, t0: 0, idx: 0, speed: store.get("speed", 1) };
   let immersive = store.get("immersive", false);
 
   /* ---------- sound ---------- */
@@ -1641,7 +1641,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
         segments = M.routeWaypoints(walls, game.cols, game.rows, game.waypoints).segments;
       }
     }
-    R.setGame(game, walls, segments); courierReset();
+    R.setGame(game, walls, segments); pilgrimReset();
     layout(true);
     $("seedTitle").textContent = seedLabel(seed);
     $("seedSub").textContent = " · " + game.biome.name + " ⛏" + game.removalCost;
@@ -1697,7 +1697,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
       R.flashError();
       wrap.classList.remove("shake"); void wrap.offsetWidth; if (!reduced) wrap.classList.add("shake");
       buzz(40); sfx.error();
-      toast(res.reason === "energy" ? "Not enough MP" : res.reason === "blocked" ? "That would trap the courier" : res.reason === "waypoint" ? "Stops can't be moved" : "Can't do that", "error");
+      toast(res.reason === "energy" ? "Not enough work left" : res.reason === "blocked" ? "That would cut off the sanctuary" : res.reason === "waypoint" ? "Wayshrines can't be moved" : "Can't do that", "error");
       return;
     }
     history.push({ walls, ap, segments, score });
@@ -1705,27 +1705,27 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
     const delta = res.score - score;
     const placed = res.walls[y * game.cols + x] === 1;
     walls = res.walls; ap = res.ap; segments = res.segments; score = res.score;
-    R.setState(walls, segments); courierReset();
+    R.setState(walls, segments); pilgrimReset();
     R.addEffect({ type: "burst", x, y, life: 0.45, color: placed ? "#fff0c8" : game.biome.zone, seed: Math.random() * 6 });
     if (delta !== 0) R.addEffect({ type: "text", x, y, life: 0.9, text: (delta > 0 ? "+" : "-") + Math.abs(delta), color: delta > 0 ? "#7cff9e" : "#ff6b7d" });
     placed ? sfx.place() : sfx.remove();
     buzz(10);
     const wasRock = game.natural[y * game.cols + x] === 1;
-    if (wasRock && !placed) toast("Rock cleared (−" + game.removalCost + " MP). Tap the rubble to put it back and get it refunded");
-    else if (wasRock && placed) toast("Rock restored (+" + game.removalCost + " MP)", "good");
+    if (wasRock && !placed) toast("Boulder split (−" + game.removalCost + " work). Tap the rubble to rebuild it and get the work back");
+    else if (wasRock && placed) toast("Boulder rebuilt (+" + game.removalCost + " work)", "good");
     if (score > store.get("best." + game.seed, 0)) store.set("best." + game.seed, score);
     saveProgress(); updateHud();
   }
   function undo() {
     const h = history.pop(); if (!h) return;
     walls = h.walls; ap = h.ap; segments = h.segments; score = h.score;
-    R.setState(walls, segments); courierReset(); sfx.remove(); saveProgress(); updateHud();
+    R.setState(walls, segments); pilgrimReset(); sfx.remove(); saveProgress(); updateHud();
   }
   function reset() {
     if (M.diffMoves(game, walls).length === 0) return;
     history.push({ walls, ap, segments, score });
     walls = new Uint8Array(game.natural); ap = game.maxActionPoints; segments = game.baseSegments; score = game.baseScore;
-    R.setState(walls, segments); courierReset(); saveProgress(); updateHud(); toast("Board reset");
+    R.setState(walls, segments); pilgrimReset(); saveProgress(); updateHud(); toast("Roadworks cleared");
   }
 
   /* ---------- view / layout ---------- */
@@ -1835,25 +1835,25 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   });
 
   /* ---------- render loop ---------- */
-  function courierReset() { courier.running = false; courier.idx = 0; R.setCourier(0); walkUi(); }
+  function pilgrimReset() { pilgrim.running = false; pilgrim.idx = 0; R.setPilgrim(0); walkUi(); }
   function walkUi() {
-    $("walkBtn").classList.toggle("running", courier.running);
-    $("walkBtn").querySelector(".ico").textContent = courier.running ? "■" : "▶";
-    $("walkLabel").textContent = courier.running ? "STOP" : courier.idx > 0 ? "AGAIN" : "WALK";
-    $("speedBtn").textContent = courier.speed + "×";
+    $("walkBtn").classList.toggle("running", pilgrim.running);
+    $("walkBtn").querySelector(".ico").textContent = pilgrim.running ? "■" : "▶";
+    $("walkLabel").textContent = pilgrim.running ? "STOP" : pilgrim.idx > 0 ? "AGAIN" : "SET OUT";
+    $("speedBtn").textContent = pilgrim.speed + "×";
   }
   $("walkBtn").onclick = () => {
-    if (courier.running) { courier.running = false; walkUi(); return; }
-    courier.running = true; courier.t0 = performance.now(); courier.idx = 0; R.setCourier(0); sfx.place(); walkUi();
+    if (pilgrim.running) { pilgrim.running = false; walkUi(); return; }
+    pilgrim.running = true; pilgrim.t0 = performance.now(); pilgrim.idx = 0; R.setPilgrim(0); sfx.place(); walkUi();
   };
-  $("speedBtn").onclick = () => { courier.speed = SPEEDS[(SPEEDS.indexOf(courier.speed) + 1) % SPEEDS.length]; store.set("speed", courier.speed); walkUi(); };
+  $("speedBtn").onclick = () => { pilgrim.speed = SPEEDS[(SPEEDS.indexOf(pilgrim.speed) + 1) % SPEEDS.length]; store.set("speed", pilgrim.speed); walkUi(); };
   walkUi();
   function frame(now) {
-    if (courier.running) {
+    if (pilgrim.running) {
       const len = R.pathLength();
-      courier.idx = Math.floor((now - courier.t0) / 1000 * 56 * courier.speed);
-      if (courier.idx >= len - 1) { courier.idx = len - 1; courier.running = false; sfx.good(); walkUi(); }
-      R.setCourier(courier.idx);
+      pilgrim.idx = Math.floor((now - pilgrim.t0) / 1000 * 56 * pilgrim.speed);
+      if (pilgrim.idx >= len - 1) { pilgrim.idx = len - 1; pilgrim.running = false; sfx.good(); walkUi(); }
+      R.setPilgrim(pilgrim.idx);
     }
     R.setView(view);
     R.draw(now);
@@ -1971,7 +1971,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
       entries.slice(0, 50).forEach((e) => {
         const li = document.createElement("li");
         li.className = "lb-row" + (e.me ? " me" : "") + (e.rank <= 3 ? " top" : "");
-        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " MP left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
+        li.innerHTML = '<div class="rank">' + e.rank + '</div><div><div class="name"></div><div class="meta">' + e.ap + " work left</div></div><div class=\"pts\">" + fmt(e.score) + "</div>";
         li.querySelector(".name").textContent = e.username || "Anonymous";
         list.appendChild(li);
       });
@@ -2062,7 +2062,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   $("nameSave").onclick = () => { const n = cleanName($("nameInput").value); if (n) { playerName = n; store.set("name", n); toast("Name saved", "good"); } };
   function cleanName(s) { return String(s || "").replace(/[^\w \-.'!?]/g, "").trim().slice(0, 16); }
   $("menuDaily").onclick = () => { closeSheets(); loadGame(M.dailySeed()); };
-  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New maze: " + game.seed); };
+  $("menuRandom").onclick = () => { closeSheets(); loadGame(M.randomSeed()); toast("New valley: " + game.seed); };
   $("seedGo").onclick = () => { const s = M.sanitizeSeed($("seedInput").value); if (!s) return; closeSheets(); loadGame(s); };
   $("seedInput").addEventListener("keydown", (e) => { if (e.key === "Enter") $("seedGo").click(); });
   $("menuHow").onclick = () => showSheet("sheetHow");
@@ -2072,7 +2072,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
   sw.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); sw.setAttribute("aria-checked", String(soundOn)); if (soundOn) sfx.place(); };
   $("btnShare").onclick = async () => {
     const url = shareUrl();
-    const text = "I scored " + fmt(score) + " on Mazer (" + seedLabel(game.seed) + "). Beat me: seed “" + game.seed + "”";
+    const text = "I blessed the valley for " + fmt(score) + " on Mazer's " + seedLabel(game.seed) + " road. Beat me: seed “" + game.seed + "”";
     try {
       if (navigator.share) { await navigator.share({ title: "Mazer", text, url }); return; }
     } catch (e) { if (e && e.name === "AbortError") return; }
@@ -2089,7 +2089,7 @@ window.MAZER_CONFIG = {"api":null,"shareUrl":"https://mazer-game.fly.dev","mode"
     const now = new Date();
     const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
     const ms = next - now.getTime(), h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
-    $("dailyCountdown").textContent = "Same maze for everyone · next one in " + h + "h " + m + "m";
+    $("dailyCountdown").textContent = "Same valley for everyone · next one in " + h + "h " + m + "m";
     $("menuSub").textContent = "Seed: " + game.seed + " · " + game.cols + "×" + game.rows + " · " + game.biome.name + " / " + game.wallStyle;
   }
 
