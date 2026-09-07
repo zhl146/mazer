@@ -32,8 +32,14 @@ jobs:
 
       - name: Check the token is set
         run: |
-          if [ -z "$FLY_API_TOKEN" ]; then
-            echo "::error::No FLY_API_TOKEN secret. Add one under Settings -> Secrets and variables -> Actions, then re-run this workflow."
+          N=${#FLY_API_TOKEN}
+          echo "FLY_API_TOKEN length: $N characters (a full Fly token is roughly 700-900)"
+          if [ "$N" -eq 0 ]; then
+            echo "::error::The repository has no Actions secret named FLY_API_TOKEN visible to this run. Check https://github.com/$GITHUB_REPOSITORY/settings/secrets/actions - the name must be exactly FLY_API_TOKEN and it must be listed under 'Repository secrets', not Dependabot or Codespaces."
+            exit 1
+          fi
+          if [ "$N" -lt 200 ]; then
+            echo "::error::FLY_API_TOKEN is only $N characters, so it looks truncated. Re-copy the whole token, including the part after the comma."
             exit 1
           fi
 
