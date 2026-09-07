@@ -1230,7 +1230,7 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       // the ley channel: ground scorched dark where the current runs, with a lit groove down the middle
       const trail = new Uint8Array(W * Hh), core = new Uint8Array(W * Hh);
       const stampDisc = (mask, cx, cy, r) => { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r) { const px = cx + x, py = cy + y; if (px >= 0 && py >= 0 && px < W && py < Hh) mask[py * W + px] = 1; } };
-      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 6 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 2); }
+      for (let i = 0; i < pathPx.length; i += 2) { const [x, y] = pathPx[i]; stampDisc(trail, PAD + x, PAD + y, 3 + (hash2(x, y) < 0.4 ? 1 : 0)); stampDisc(core, PAD + x, PAD + y, 1); }
       for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
         const i = y * W + x;
         if (!trail[i] || solid[i]) continue;
@@ -1458,11 +1458,11 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       }
       // the current: a steady thread with bright pulses running toward the beacon
       const err = now < errorUntil;
-      for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ff3b5c" : "#8ff0ff"); }
+      for (let i = 0; i < pathPx.length; i++) { const p = pathPx[i]; rect(p[0], p[1], 1, 1, err ? "#ff3b5c" : "#8ff0ff"); }
       const flow = reduced ? 0 : Math.floor(now / 22);
       for (let i = 0; i < pathPx.length; i++) {
         if (((i - flow) % 30 + 30) % 30 > 3) continue;
-        const p = pathPx[i]; rect(p[0] - 2, p[1] - 2, 4, 4, err ? "#ffd0d8" : "#ffffff");
+        const p = pathPx[i]; rect(p[0] - 1, p[1] - 1, 2, 2, err ? "#ffd0d8" : "#ffffff");
       }
       game.waypoints.forEach(([x, y], i) => {
         if (i === 0 || i === game.waypoints.length - 1) return;
@@ -1473,7 +1473,7 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       if (p) {
         for (let k = 10; k > 0; k--) { // the tail it drags behind
           const q = pathPx[sparkIdx - k * 2];
-          if (q) rect(q[0] - 1, q[1] - 1, 2, 2, "rgba(190,244,255," + (0.5 - k * 0.045).toFixed(2) + ")");
+          if (q) rect(q[0], q[1], 1, 1, "rgba(190,244,255," + (0.5 - k * 0.045).toFixed(2) + ")");
         }
         c.drawImage(Math.floor(now / 180) % 2 ? sprites.sparkB : sprites.sparkA, p[0] - 5, p[1] - 5);
         // blocks and props whose footprint is below the spark stand in front of it
@@ -1502,13 +1502,13 @@ body.immersive .toast { bottom: calc(60px + env(safe-area-inset-bottom, 0)); }
       const radial = (x, y, r, col, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); };
       for (const z of game.zones) radial((z.x + 0.5) * T, (z.y + 0.5) * T, (z.r + 1) * T, pal.zoneHex, 0.45 + pulse * 0.2);
       if (!(now < errorUntil)) { // the current glows along its whole length
-        c.strokeStyle = rgba("#7fe4ff", 0.24); c.lineWidth = 3; c.lineJoin = "round"; c.lineCap = "round";
+        c.strokeStyle = rgba("#7fe4ff", 0.24); c.lineWidth = 1.5; c.lineJoin = "round"; c.lineCap = "round";
         c.beginPath();
         for (let i = 0; i < pathPx.length; i += 3) { const q = pathPx[i]; i === 0 ? c.moveTo(q[0], q[1]) : c.lineTo(q[0], q[1]); }
         c.stroke();
         const flow = reduced ? 0 : Math.floor(now / 22);
         c.fillStyle = "rgba(230,250,255,0.5)";
-        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.3, 0, Math.PI * 2); c.fill(); }
+        for (let i = 0; i < pathPx.length; i++) { if (((i - flow) % 30 + 30) % 30 > 3) continue; const q = pathPx[i]; c.beginPath(); c.arc(q[0], q[1], T * 0.15, 0, Math.PI * 2); c.fill(); }
       }
       game.waypoints.forEach(([x, y], i) => {
         const last = i === game.waypoints.length - 1;
