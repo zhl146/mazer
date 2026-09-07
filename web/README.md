@@ -2,7 +2,7 @@
 
 Mobile-first rebuild of Mazer as a single self-contained HTML page. No framework, no build dependencies beyond node.
 
-**Play it:** https://claude.ai/code/artifact/4f85ce17-09de-4f3a-8456-70e7b5bbceec
+**Play it:** https://mazer-game.fly.dev
 
 ## How the game works
 

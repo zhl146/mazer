@@ -6,7 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const src = (f) => fs.readFileSync(path.join(__dirname, "src", f), "utf8");
 
-const ARTIFACT_URL = "https://claude.ai/code/artifact/4f85ce17-09de-4f3a-8456-70e7b5bbceec";
+// Where the Share button sends people. The artifact build is a local-only demo, so it points at the
+// live site; the served build passes "" and shares its own address.
+const LIVE_URL = "https://mazer-game.fly.dev";
 
 function assemble(config) {
   return src("template.html")
@@ -20,7 +22,7 @@ function assemble(config) {
 const out = path.join(__dirname, "dist");
 fs.mkdirSync(out, { recursive: true });
 
-const fragment = assemble({ api: null, shareUrl: ARTIFACT_URL, mode: "artifact" });
+const fragment = assemble({ api: null, shareUrl: LIVE_URL, mode: "artifact" });
 fs.writeFileSync(path.join(out, "index.html"), fragment);
 
 const body = assemble({ api: "/api", shareUrl: "", mode: "server" });
