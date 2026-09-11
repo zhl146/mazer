@@ -1097,7 +1097,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
     let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0, running = false;
-    let pathPx = [], rowOverlays = [];
+    let pathPx = [], rowOverlays = [], zoneFx = null;
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
       sparkA: fromRows(ART.sparkA.rows, ART.sparkA.pal).toCanvas(),
@@ -1358,10 +1358,49 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
       });
       // zone badges
       const plotBuf = (x, y, w, h, c) => { for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) set(x + xx, y + yy, c); };
-      for (const z of game.zones) {
-        const m = Math.round(game.scoreMod[z.y * cols + z.x]), txt = "x" + m, tw = textWidth(txt, 2);
-        const bx = PAD + z.x * T + 16 - Math.floor(tw / 2), by = PAD + z.y * T + 11;
+      const badged = new Set();
+      for (const z of game.zones) { // a ring's centre tile is a hole, so badge the strongest charged tile instead
+        let best = null, bestM = 1, bestD = Infinity;
+        for (let ty = Math.max(0, z.y - z.r); ty <= Math.min(rows - 1, z.y + z.r); ty++)
+          for (let tx = Math.max(0, z.x - z.r); tx <= Math.min(cols - 1, z.x + z.r); tx++) {
+            const m = game.scoreMod[ty * cols + tx]; if (m <= 1) continue;
+            const dx = tx - z.x, dy = ty - z.y, d = dx * dx + dy * dy;
+            if (m > bestM || (m === bestM && d < bestD)) { bestM = m; bestD = d; best = [tx, ty]; }
+          }
+        if (!best) continue;
+        const key = best[1] * cols + best[0]; if (badged.has(key)) continue;
+        badged.add(key);
+        const m = Math.round(bestM), txt = "x" + m, tw = textWidth(txt, 2);
+        const bx = PAD + best[0] * T + 16 - Math.floor(tw / 2), by = PAD + best[1] * T + 11;
         plotBuf(bx - 3, by - 3, tw + 6, 16, INK); pixelText(plotBuf, txt, bx, by, 2, [255, 240, 200], null);
+      }
+      // charged ground: a breathing tint plus a lit border, so the bonus area reads at a glance
+      zoneFx = null;
+      {
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        const charged = (tx, ty) => tx >= 0 && ty >= 0 && tx < cols && ty < rows && game.scoreMod[ty * cols + tx] > 1;
+        for (let ty = 0; ty < rows; ty++) for (let tx = 0; tx < cols; tx++) {
+          if (!charged(tx, ty)) continue;
+          if (tx < x0) x0 = tx; if (ty < y0) y0 = ty; if (tx > x1) x1 = tx; if (ty > y1) y1 = ty;
+        }
+        if (x0 <= x1) {
+          const fw = (x1 - x0 + 1) * T, fh = (y1 - y0 + 1) * T;
+          const fill = new ImageData(fw, fh), edge = new ImageData(fw, fh);
+          const put = (img, i, c) => { img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = 255; };
+          for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+            if (!charged(tx, ty)) continue;
+            const oN = !charged(tx, ty - 1), oS = !charged(tx, ty + 1), oW = !charged(tx - 1, ty), oE = !charged(tx + 1, ty);
+            for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
+              if (solid[(PAD + ty * T + y) * W + PAD + tx * T + x]) continue; // blocks stand clear of the wash
+              const i = (((ty - y0) * T + y) * fw + (tx - x0) * T + x) * 4;
+              put(fill, i, P.zone);
+              let d = 99; if (oN) d = Math.min(d, y); if (oS) d = Math.min(d, T - 1 - y); if (oW) d = Math.min(d, x); if (oE) d = Math.min(d, T - 1 - x);
+              if (d < 2) put(edge, i, P.zoneLight);
+            }
+          }
+          const mk = (img) => { const cv = document.createElement("canvas"); cv.width = fw; cv.height = fh; cv.getContext("2d").putImageData(img, 0, 0); return cv; };
+          zoneFx = { x: x0 * T, y: y0 * T, fill: mk(fill), edge: mk(edge) };
+        }
       }
       // board edge
       for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
@@ -1439,16 +1478,30 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
     }
 
     /* ---------- scene ---------- */
+    // nothing belongs outside the board's ink frame: overhanging props, labels, glow and motes all stop here
+    function clipBoard(c, m) { c.save(); c.beginPath(); c.rect(-m, -m, game.cols * T + m * 2, game.rows * T + m * 2); c.clip(); }
     function worldTransform(c, scale) {
       c.setTransform(dpr / scale, 0, 0, dpr / scale, 0, 0);
       c.translate(Math.round(view.ox * dpr) / dpr, Math.round(view.oy * dpr) / dpr);
       c.scale(view.scale, view.scale);
     }
     function drawScene(c, now) {
+      c.setTransform(1, 0, 0, 1, 0, 0); // clear in device space: under the world transform this misses everything above and left of the board
       c.clearRect(0, 0, scene.width, scene.height);
       worldTransform(c, 1);
       c.imageSmoothingEnabled = false;
+      clipBoard(c, PAD); // overhanging canopies and beacons live in the padding
       c.drawImage(cache, -PAD, -PAD);
+      if (zoneFx) { // the charged ground pulses; its border counter-pulses so the extent is always readable
+        const p = reduced ? 0.5 : (Math.sin(now / 600) + 1) / 2;
+        c.save();
+        c.globalCompositeOperation = "lighter";
+        c.globalAlpha = 0.06 + 0.11 * p;
+        c.drawImage(zoneFx.fill, zoneFx.x, zoneFx.y);
+        c.globalAlpha = 0.22 + 0.38 * (1 - p);
+        c.drawImage(zoneFx.edge, zoneFx.x, zoneFx.y);
+        c.restore();
+      }
       const rect = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
       if (hover) {
         const hx = hover[0] * T, hy = hover[1] * T;
@@ -1496,10 +1549,12 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
           c.globalAlpha = 1;
         }
       }
+      c.restore();
     }
     function drawGlow(c, now) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, glow.width, glow.height);
       worldTransform(c, LOW);
+      clipBoard(c, PAD);
       const pulse = reduced ? 0.5 : (Math.sin(now / 600) + 1) / 2;
       const radial = (x, y, r, col, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); };
       for (const z of game.zones) radial((z.x + 0.5) * T, (z.y + 0.5) * T, (z.r + 1) * T, pal.zoneHex, 0.45 + pulse * 0.2);
@@ -1523,6 +1578,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
       const p = pathPx[sparkIdx];
       if (p) radial(p[0], p[1], T * 1.2, "#cdf6ff", 0.6);
       for (const e of effects) if (e.type === "burst") { const k = (now - e.t0) / 1000 / e.life; radial((e.x + 0.5) * T, (e.y + 0.5) * T, T * 1.5, "#ffffff", (1 - k) * 0.9); }
+      c.restore();
     }
 
     /* ---------- frame ---------- */
@@ -1558,6 +1614,10 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
       ctx.globalCompositeOperation = "multiply"; ctx.drawImage(grade, 0, 0);
       const A = pal.atmos;
       ctx.globalCompositeOperation = "lighter";
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(view.ox * dpr, view.oy * dpr, game.cols * T * view.scale * dpr, game.rows * T * view.scale * dpr);
+      ctx.clip();
       if (!reduced) {
         ctx.save(); ctx.translate(W * 0.5, 0); ctx.rotate(-0.42);
         for (let i = 0; i < 4; i++) {
@@ -1574,6 +1634,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
         const g = ctx.createRadialGradient(px, py, 0, px, py, r * 3); g.addColorStop(0, rgba(A.dust, p.a)); g.addColorStop(1, rgba(A.dust, 0));
         ctx.fillStyle = g; ctx.fillRect(px - r * 3, py - r * 3, r * 6, r * 6);
       }
+      ctx.restore();
       ctx.globalCompositeOperation = "source-over";
     }
 
