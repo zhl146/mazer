@@ -249,6 +249,7 @@
     if (gesture && gesture.type === "tap" && pointers.size === 1 && pointers.has(e.pointerId) && performance.now() - gesture.t0 < 500 && e.type === "pointerup") {
       const t = R.worldToTile(e.clientX - rect.left, e.clientY - rect.top);
       if (t) toggleTile(t[0], t[1]);
+      else if (R.pointZone(e.clientX - rect.left, e.clientY - rect.top) === "apron") toast("Outside the survey — no chalk beyond the line", "error");
     }
     const wasZoomGesture = gesture && (gesture.type === "pinch" || gesture.type === "done");
     pointers.delete(e.pointerId);

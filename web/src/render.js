@@ -8,6 +8,7 @@
   const H = 8;        // block height in pixels
   const PAD = 40;     // world padding (room for the tower roof and canopies)
   const CH = 12;      // chamfer on convex corners: shows the diagonal gap the spark slips through
+  const APRON = 3;    // tiles of scenery outside the board, blurred, to give depth without touching the play area
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -252,7 +253,7 @@
     let dpr = 1, cssW = 0, cssH = 0;
     const effects = [];
     let hover = null, errorUntil = 0, reduced = false, fx = true, sparkIdx = 0, running = false;
-    let pathPx = [], rowOverlays = [], zoneFx = null;
+    let pathPx = [], rowOverlays = [], zoneFx = null, apron = null;
     const hasFilter = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const sprites = {
       sparkA: fromRows(ART.sparkA.rows, ART.sparkA.pal).toCanvas(),
@@ -261,8 +262,6 @@
     };
     let props = null; // per-biome painted sprites
     const scene = document.createElement("canvas"), sctx = scene.getContext("2d");
-    const low = document.createElement("canvas"), lctx = low.getContext("2d");
-    const low2 = document.createElement("canvas"), l2ctx = low2.getContext("2d");
     const glow = document.createElement("canvas"), gctx = glow.getContext("2d");
     const glow2 = document.createElement("canvas"), g2ctx = glow2.getContext("2d");
     const grade = document.createElement("canvas"), grctx = grade.getContext("2d");
@@ -276,7 +275,7 @@
       const W = Math.round(w * ratio), Hh = Math.round(h * ratio);
       canvas.width = W; canvas.height = Hh; canvas.style.width = w + "px"; canvas.style.height = h + "px";
       scene.width = W; scene.height = Hh;
-      low.width = low2.width = glow.width = glow2.width = Math.max(1, Math.ceil(W / LOW)); low.height = low2.height = glow.height = glow2.height = Math.max(1, Math.ceil(Hh / LOW));
+      glow.width = glow2.width = Math.max(1, Math.ceil(W / LOW)); glow.height = glow2.height = Math.max(1, Math.ceil(Hh / LOW));
       grade.width = W; grade.height = Hh; gradeStyle = null;
       particles = [];
       const n = Math.round((cssW * cssH) / 14000);
@@ -290,7 +289,51 @@
         ground: Array.from({ length: 10 }, (_, i) => paintGround(pal.style, pal.ground, pal.flower, i + 1)),
       };
     }
-    function setGame(g, w, segs) { game = g; walls = w; pal = palette(g.biome); gradeStyle = null; buildProps(); setState(w, segs); }
+    function setGame(g, w, segs) { game = g; walls = w; pal = palette(g.biome); gradeStyle = null; buildProps(); buildApron(); setState(w, segs); }
+
+    /* ---------- the apron: out-of-play scenery, softened and sinking into the dark ---------- */
+    function buildApron() {
+      const cols = game.cols, rows = game.rows, P = pal, off = APRON * T;
+      const AW = (cols + APRON * 2) * T, AH = (rows + APRON * 2) * T;
+      const img = new ImageData(AW, AH), d = img.data;
+      const set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= AW || y >= AH) return; const i = (y * AW + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
+      const blit = (sp, ox, oy) => { for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++) { const c = sp.c[y * sp.w + x]; if (c) set(ox + x, oy + y, c); } };
+      const ring = (tx, ty) => tx < 0 || ty < 0 || tx >= cols || ty >= rows;
+      for (let ty = -APRON; ty < rows + APRON; ty++) for (let tx = -APRON; tx < cols + APRON; tx++) {
+        if (!ring(tx, ty)) continue; // the board itself is painted by the cache on top
+        blit(props.ground[Math.floor(hash2(tx + 101, ty + 57) * props.ground.length)], off + tx * T, off + ty * T);
+      }
+      for (let ty = -APRON; ty < rows + APRON; ty++) for (let tx = -APRON; tx < cols + APRON; tx++) {
+        if (!ring(tx, ty)) continue;
+        const h = hash2(tx * 29 + 7, ty * 37 + 13);
+        if (h < 0.08) blit(props.trees[Math.floor(hash2(tx + 3, ty + 8) * props.trees.length)], off + tx * T + 1, off + ty * T - 16);
+        else if (h > 0.92) { // a boulder
+          const R = P.rock, cx = off + tx * T + 16, cy = off + ty * T + 18, rx = 4 + Math.floor(hash2(tx, ty) * 3), ry = 3 + Math.floor(hash2(ty, tx) * 2);
+          for (let y = -ry - 1; y <= ry + 1; y++) for (let x = -rx - 1; x <= rx + 1; x++) {
+            const inner = (x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1, outer = (x * x) / ((rx + 1) * (rx + 1)) + (y * y) / ((ry + 1) * (ry + 1)) <= 1;
+            if (outer) set(cx + x, cy + y, !inner ? INK : x < 0 && y < 0 ? R[3] : y > 0 ? R[1] : R[2]);
+          }
+        }
+      }
+      // sink it into the dark the further it is from the board, and dissolve at the outer rim
+      const bx0 = off, by0 = off, bx1 = off + cols * T - 1, by1 = off + rows * T - 1;
+      for (let y = 0; y < AH; y++) for (let x = 0; x < AW; x++) {
+        const i = (y * AW + x) * 4; if (!d[i + 3]) continue;
+        const dx = Math.max(bx0 - x, x - bx1, 0), dy = Math.max(by0 - y, y - by1, 0);
+        const t = Math.min(1, Math.hypot(dx, dy) / off);
+        const k = t * t * (3 - 2 * t);          // smooth falloff
+        const dark = 0.45 + 0.5 * k;            // out of play reads dimmer than the board even where they meet
+        d[i] += (12 - d[i]) * dark; d[i + 1] += (12 - d[i + 1]) * dark; d[i + 2] += (30 - d[i + 2]) * dark;
+        d[i + 3] = Math.round(255 * (1 - k));
+      }
+      const raw = document.createElement("canvas"); raw.width = AW; raw.height = AH;
+      raw.getContext("2d").putImageData(img, 0, 0);
+      const cv = document.createElement("canvas"); cv.width = AW; cv.height = AH;
+      const c = cv.getContext("2d");
+      if (hasFilter) c.filter = "blur(3px)"; // the only depth of field left, and it never touches the board
+      c.drawImage(raw, 0, 0);
+      apron = { cv, x: -off, y: -off };
+    }
     function setState(w, segs) { walls = w; segments = segs; cacheDirty = true; shapeCache.clear(); buildPathPixels(); }
     function setView(v) { view = v; }
     function setHover(t) { hover = t; }
@@ -557,9 +600,11 @@
           zoneFx = { x: x0 * T, y: y0 * T, fill: mk(fill), edge: mk(edge) };
         }
       }
-      // board edge
+      // board edge: an ink frame with a chalk-lit rim inside it, marking where the survey ground ends
       for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
       for (let y = -2; y <= rows * T + 1; y++) for (let k = 0; k < 2; k++) { set(PAD - 1 - k, PAD + y, INK); set(PAD + cols * T + k, PAD + y, INK); }
+      for (let x = 0; x < cols * T; x++) { blend(PAD + x, PAD, [255, 252, 240], 0.5); blend(PAD + x, PAD + rows * T - 1, [255, 252, 240], 0.5); }
+      for (let y = 0; y < rows * T; y++) { blend(PAD, PAD + y, [255, 252, 240], 0.5); blend(PAD + cols * T - 1, PAD + y, [255, 252, 240], 0.5); }
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
@@ -645,7 +690,8 @@
       c.clearRect(0, 0, scene.width, scene.height);
       worldTransform(c, 1);
       c.imageSmoothingEnabled = false;
-      clipBoard(c, PAD); // overhanging canopies and beacons live in the padding
+      clipBoard(c, APRON * T); // the apron and any overhanging canopies live out here
+      if (apron) c.drawImage(apron.cv, apron.x, apron.y);
       c.drawImage(cache, -PAD, -PAD);
       if (zoneFx) { // the charged ground pulses; its border counter-pulses so the extent is always readable
         const p = reduced ? 0.5 : (Math.sin(now / 600) + 1) / 2;
@@ -744,21 +790,8 @@
       drawScene(sctx, now);
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
       if (!fx) { ctx.imageSmoothingEnabled = false; ctx.fillStyle = "#08081c"; ctx.fillRect(0, 0, W, Hh); ctx.drawImage(scene, 0, 0); return; }
-      lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.imageSmoothingEnabled = true; lctx.clearRect(0, 0, low.width, low.height); lctx.drawImage(scene, 0, 0, low.width, low.height);
-      l2ctx.setTransform(1, 0, 0, 1, 0, 0); l2ctx.clearRect(0, 0, low2.width, low2.height);
-      if (hasFilter) l2ctx.filter = "blur(1.6px)";
-      l2ctx.drawImage(low, 0, 0);
-      if (hasFilter) l2ctx.filter = "none";
       ctx.imageSmoothingEnabled = false; ctx.fillStyle = "#08081c"; ctx.fillRect(0, 0, W, Hh); ctx.drawImage(scene, 0, 0);
       ctx.imageSmoothingEnabled = true;
-      const STRIPS = 8, bandH = Hh * 0.3, sh = bandH / STRIPS, k = low2.height / Hh;
-      for (let i = 0; i < STRIPS; i++) {
-        ctx.globalAlpha = Math.pow(1 - i / STRIPS, 1.6);
-        const yTop = i * sh, yBot = Hh - (i + 1) * sh;
-        ctx.drawImage(low2, 0, yTop * k, low2.width, sh * k, 0, yTop, W, sh);
-        ctx.drawImage(low2, 0, yBot * k, low2.width, sh * k, 0, yBot, W, sh);
-      }
-      ctx.globalAlpha = 1;
       drawGlow(gctx, now);
       g2ctx.setTransform(1, 0, 0, 1, 0, 0); g2ctx.clearRect(0, 0, glow2.width, glow2.height);
       if (hasFilter) g2ctx.filter = "blur(2.5px)";
@@ -771,7 +804,8 @@
       ctx.globalCompositeOperation = "lighter";
       ctx.save();
       ctx.beginPath();
-      ctx.rect(view.ox * dpr, view.oy * dpr, game.cols * T * view.scale * dpr, game.rows * T * view.scale * dpr);
+      const am = APRON * T * view.scale * dpr;
+      ctx.rect(view.ox * dpr - am, view.oy * dpr - am, game.cols * T * view.scale * dpr + am * 2, game.rows * T * view.scale * dpr + am * 2);
       ctx.clip();
       if (!reduced) {
         ctx.save(); ctx.translate(W * 0.5, 0); ctx.rotate(-0.42);
@@ -799,12 +833,20 @@
       if (!game || x < 0 || y < 0 || x >= game.cols || y >= game.rows) return null;
       return [x, y];
     }
+    function pointZone(sx, sy) { // "board" is playable, "apron" is the scenery ring, "void" is beyond
+      if (!game) return "void";
+      const wx = (sx - view.ox) / view.scale, wy = (sy - view.oy) / view.scale;
+      const x = Math.floor(wx / T), y = Math.floor(wy / T);
+      if (x >= 0 && y >= 0 && x < game.cols && y < game.rows) return "board";
+      if (x >= -APRON && y >= -APRON && x < game.cols + APRON && y < game.rows + APRON) return "apron";
+      return "void";
+    }
     function fitView(w, h, margin) {
       const bw = game.cols * T, bh = game.rows * T + H;
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
       return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
     }
-    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, setRunning, pathLength, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
+    return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, setRunning, pathLength, pointZone, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
 
   root.MazerRender = { createRenderer, T };
