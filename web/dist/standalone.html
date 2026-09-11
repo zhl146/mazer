@@ -854,6 +854,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
   const PAD = 40;     // world padding (room for the tower roof and canopies)
   const CH = 12;      // chamfer on convex corners: shows the diagonal gap the spark slips through
   const APRON = 3;    // tiles of scenery outside the board, blurred, to give depth without touching the play area
+  const RISE = 40;    // how far beacons, canopies and waypoint labels reach above the board's top row
   const INK = [30, 23, 16];
 
   /* ---------- colour helpers ---------- */
@@ -1385,6 +1386,11 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
         const k = cat2[y * W + x]; if (!k) continue;
         if (cat2[y * W + x - 1] !== k || cat2[y * W + x + 1] !== k || cat2[(y - 1) * W + x] !== k || cat2[(y + 1) * W + x] !== k) set(x, y, INK, k);
       }
+      // board edge: an ink frame with a chalk-lit rim inside it, marking where the survey ground ends
+      for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
+      for (let y = -2; y <= rows * T + 1; y++) for (let k = 0; k < 2; k++) { set(PAD - 1 - k, PAD + y, INK); set(PAD + cols * T + k, PAD + y, INK); }
+      for (let x = 0; x < cols * T; x++) { blend(PAD + x, PAD, [255, 252, 240], 0.5); blend(PAD + x, PAD + rows * T - 1, [255, 252, 240], 0.5); }
+      for (let y = 0; y < rows * T; y++) { blend(PAD, PAD + y, [255, 252, 240], 0.5); blend(PAD + cols * T - 1, PAD + y, [255, 252, 240], 0.5); }
       // props: trees on interior plateaus, buildings on the stops
       const propShadow = (cx, cy, rx, ry) => { for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++) if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) blend(cx + x, cy + y, INK, 0.28); };
       for (const b of blocks) {
@@ -1445,11 +1451,6 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
           zoneFx = { x: x0 * T, y: y0 * T, fill: mk(fill), edge: mk(edge) };
         }
       }
-      // board edge: an ink frame with a chalk-lit rim inside it, marking where the survey ground ends
-      for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
-      for (let y = -2; y <= rows * T + 1; y++) for (let k = 0; k < 2; k++) { set(PAD - 1 - k, PAD + y, INK); set(PAD + cols * T + k, PAD + y, INK); }
-      for (let x = 0; x < cols * T; x++) { blend(PAD + x, PAD, [255, 252, 240], 0.5); blend(PAD + x, PAD + rows * T - 1, [255, 252, 240], 0.5); }
-      for (let y = 0; y < rows * T; y++) { blend(PAD, PAD + y, [255, 252, 240], 0.5); blend(PAD + cols * T - 1, PAD + y, [255, 252, 240], 0.5); }
 
       cache = document.createElement("canvas"); cache.width = W; cache.height = Hh;
       cache.getContext("2d").putImageData(img, 0, 0);
@@ -1687,9 +1688,9 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
       return "void";
     }
     function fitView(w, h, margin) {
-      const bw = game.cols * T, bh = game.rows * T + H;
+      const bw = game.cols * T, bh = game.rows * T + RISE;
       const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
-      return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + H * scale };
+      return { scale, ox: (w - bw * scale) / 2, oy: (h - bh * scale) / 2 + RISE * scale };
     }
     return { T, resize, setGame, setState, setView, setHover, setReducedMotion, setFx, setSpark, setRunning, pathLength, pointZone, flashError, addEffect, draw, worldToTile, fitView, get view() { return view; }, cacheCanvas: () => cache, boardSize: () => ({ w: game.cols * T, h: game.rows * T }) };
   }
