@@ -1307,6 +1307,11 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
         const a = [0.26, 0.15, 0.07][ring], o = 4 + ring * 3;
         for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) { if (solid[y * W + x]) continue; const sx = x - o, sy = y - o; if (sx >= 0 && sy >= 0 && solid[sy * W + sx]) blend(x, y, INK, a); }
       }
+      // board edge: an ink frame with a chalk-lit rim inside it, laid before the blocks so raised ground stands proud of it
+      for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
+      for (let y = -2; y <= rows * T + 1; y++) for (let k = 0; k < 2; k++) { set(PAD - 1 - k, PAD + y, INK); set(PAD + cols * T + k, PAD + y, INK); }
+      for (let x = 0; x < cols * T; x++) { blend(PAD + x, PAD, [255, 252, 240], 0.5); blend(PAD + x, PAD + rows * T - 1, [255, 252, 240], 0.5); }
+      for (let y = 0; y < rows * T; y++) { blend(PAD, PAD + y, [255, 252, 240], 0.5); blend(PAD + cols * T - 1, PAD + y, [255, 252, 240], 0.5); }
       // block faces and tops (row order so lower blocks cover the faces above)
       for (const b of blocks) {
         const R = b.nat ? P.rock : P.ward;
@@ -1322,7 +1327,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
               if (k >= fh - 1) c = R[0];
             }
             else { const q = x % 6; c = q === 0 ? R[0] : q === 2 ? R[3] : R[2]; if (k >= fh - 1) c = R[0]; }
-            if (b.oy - H + y >= PAD) set(b.ox + x, b.oy - H + y, c, b.nat ? 2 : 4, b.ty); // the frame bounds the ground plane
+            set(b.ox + x, b.oy - H + y, c, b.nat ? 2 : 4, b.ty);
           }
         }
         for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
@@ -1351,7 +1356,7 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
               || (b.w && Math.abs(dy) < 1.6 && dx < 0) || (b.e && Math.abs(dy) < 1.6 && dx > 0);
             if (ring || spoke) c = [232, 250, 255];
           }
-          if (b.oy + y - H >= PAD) set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3, b.ty);
+          set(b.ox + x, b.oy + y - H, c, b.nat ? 1 : 3, b.ty);
         }
       }
       // small boulders and shrubs scattered on the plateaus (per block, hashed, away from the chamfered edges)
@@ -1366,16 +1371,16 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
             const inner = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1, outer = (dx * dx) / ((rx + 1) * (rx + 1)) + (dy * dy) / ((ry + 1) * (ry + 1)) <= 1;
             if (!outer) continue;
             const c = !inner ? INK : dx < 0 && dy < 0 ? R[3] : dy > 0 ? R[1] : R[2];
-            if (py + dy >= PAD) set(px + dx, py + dy, c, 1, b.ty);
+            set(px + dx, py + dy, c, 1, b.ty);
           }
         } else if (h1 > 0.72 && shrubCol) { // shrub
           for (let dy = -3; dy <= 3; dy++) for (let dx = -4; dx <= 4; dx++) {
             const d = (dx * dx) / 16 + (dy * dy) / 9; if (d > 1.35) continue;
             const c = d > 0.95 ? INK : hash2(px + dx, py + dy) < 0.22 ? shrubCol[1] : shrubCol[0];
-            if (py + dy >= PAD) set(px + dx, py + dy, c, 1, b.ty);
+            set(px + dx, py + dy, c, 1, b.ty);
           }
         } else if (h1 > 0.45 && h2 > 0.5 && P.style === "grass") { // tall grass tuft
-          for (let k = 0; k < 3; k++) { const hh = 2 + Math.floor(hash2(px + k, py) * 3); for (let j = 0; j <= hh; j++) if (py - j >= PAD) set(px + k * 2 - 2, py - j, j === hh ? P.ground[3] : P.ground[1], 1, b.ty); }
+          for (let k = 0; k < 3; k++) { const hh = 2 + Math.floor(hash2(px + k, py) * 3); for (let j = 0; j <= hh; j++) set(px + k * 2 - 2, py - j, j === hh ? P.ground[3] : P.ground[1], 1, b.ty); }
         }
       }
       // outline pass: dark edge wherever a category meets a different one (joined blocks merge, chamfers show gaps)
@@ -1384,11 +1389,6 @@ body.immersive .toast { bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
         const k = cat2[y * W + x]; if (!k) continue;
         if (cat2[y * W + x - 1] !== k || cat2[y * W + x + 1] !== k || cat2[(y - 1) * W + x] !== k || cat2[(y + 1) * W + x] !== k) set(x, y, INK, k);
       }
-      // board edge: an ink frame with a chalk-lit rim inside it, marking where the survey ground ends
-      for (let x = -2; x <= cols * T + 1; x++) for (let k = 0; k < 2; k++) { set(PAD + x, PAD - 1 - k, INK); set(PAD + x, PAD + rows * T + k, INK); }
-      for (let y = -2; y <= rows * T + 1; y++) for (let k = 0; k < 2; k++) { set(PAD - 1 - k, PAD + y, INK); set(PAD + cols * T + k, PAD + y, INK); }
-      for (let x = 0; x < cols * T; x++) { blend(PAD + x, PAD, [255, 252, 240], 0.5); blend(PAD + x, PAD + rows * T - 1, [255, 252, 240], 0.5); }
-      for (let y = 0; y < rows * T; y++) { blend(PAD, PAD + y, [255, 252, 240], 0.5); blend(PAD + cols * T - 1, PAD + y, [255, 252, 240], 0.5); }
       // props: trees on interior plateaus, buildings on the stops
       const propShadow = (cx, cy, rx, ry) => { for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++) if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) blend(cx + x, cy + y, INK, 0.28); };
       for (const b of blocks) {
